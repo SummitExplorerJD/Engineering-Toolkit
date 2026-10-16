@@ -34,6 +34,9 @@ that root is acceptable only when the release is explicitly manual-update-only.
 
 ## Candidate build
 
+- [ ] Name prerelease candidates `vMAJOR.MINOR.PATCH-rc.N`, starting with
+      `rc.1` and incrementing `N` for every replacement candidate. Rebuild
+      approved final artifacts with the stable `vMAJOR.MINOR.PATCH` version.
 - [ ] Run the manual `Release candidate` workflow from an approved commit.
 - [ ] Confirm tests, vet, `govulncheck`, and the TUF rehearsal pass.
 - [ ] Download the candidate artifact and verify `SHA256SUMS` independently.
