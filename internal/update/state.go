@@ -4,6 +4,7 @@ import (
 	"errors"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 type StatePaths struct {
@@ -26,8 +27,8 @@ func StatePathsFor(goos, home, localAppData, xdgState, xdgCache string) (StatePa
 		if localAppData == "" {
 			return StatePaths{}, errors.New("LOCALAPPDATA is required")
 		}
-		stateRoot = filepath.Join(localAppData, "EngineeringToolkit")
-		cacheRoot = stateRoot
+		stateRoot = joinWindowsPath(localAppData, "EngineeringToolkit")
+		return statePathsWindows(stateRoot, stateRoot)
 	case "darwin":
 		if home == "" {
 			return StatePaths{}, errors.New("home directory is required")
@@ -51,7 +52,6 @@ func StatePathsFor(goos, home, localAppData, xdgState, xdgCache string) (StatePa
 	default:
 		return StatePaths{}, errors.New("unsupported operating system")
 	}
-	return statePaths(stateRoot, cacheRoot)
 }
 
 func statePathsSlash(stateRoot, cacheRoot string) (StatePaths, error) {
@@ -62,6 +62,48 @@ func statePathsSlash(stateRoot, cacheRoot string) (StatePaths, error) {
 		MetadataDir: path.Join(stateRoot, "update", "metadata"),
 		TargetCache: path.Join(cacheRoot, "update", "targets"),
 	}, nil
+}
+
+func statePathsWindows(stateRoot, cacheRoot string) (StatePaths, error) {
+	if !isWindowsAbs(stateRoot) || !isWindowsAbs(cacheRoot) {
+		return StatePaths{}, errors.New("state and cache roots must be absolute")
+	}
+	return StatePaths{
+		MetadataDir: joinWindowsPath(stateRoot, "update", "metadata"),
+		TargetCache: joinWindowsPath(cacheRoot, "update", "targets"),
+	}, nil
+}
+
+func isWindowsAbs(value string) bool {
+	if len(value) >= 3 && isASCIILetter(value[0]) && value[1] == ':' && isWindowsSeparator(value[2]) {
+		return true
+	}
+	if len(value) < 5 || !isWindowsSeparator(value[0]) || !isWindowsSeparator(value[1]) {
+		return false
+	}
+	parts := strings.FieldsFunc(value[2:], func(r rune) bool {
+		return r == '\\' || r == '/'
+	})
+	return len(parts) >= 2
+}
+
+func joinWindowsPath(root string, elements ...string) string {
+	joined := strings.TrimRight(strings.ReplaceAll(root, "/", `\`), `\`)
+	for _, element := range elements {
+		element = strings.Trim(strings.ReplaceAll(element, "/", `\`), `\`)
+		if element != "" {
+			joined += `\` + element
+		}
+	}
+	return joined
+}
+
+func isASCIILetter(value byte) bool {
+	return value >= 'A' && value <= 'Z' || value >= 'a' && value <= 'z'
+}
+
+func isWindowsSeparator(value byte) bool {
+	return value == '\\' || value == '/'
 }
 
 func statePaths(stateRoot, cacheRoot string) (StatePaths, error) {
