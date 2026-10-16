@@ -17,7 +17,7 @@ concurrency:
 jobs:
   validate:
     name: Validate
-    runs-on: windows-2025
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - name: Check out source
@@ -32,21 +32,16 @@ jobs:
           cache: true
 
       - name: Confirm module files are tidy
-        shell: pwsh
         run: go mod tidy -diff
 
       - name: Run tests
-        shell: pwsh
         run: go test ./...
 
       - name: Run static analysis
-        shell: pwsh
         run: go vet ./...
 
       - name: Run vulnerability analysis
-        shell: pwsh
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
 
       - name: Check patch whitespace
-        shell: pwsh
         run: git diff --check
