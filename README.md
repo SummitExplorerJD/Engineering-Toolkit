@@ -5,16 +5,17 @@ Engineering Toolkit is a planned cross-platform command-line application for cre
 ## Status
 
 Milestones 1 through 4 and the internal Milestone 5A verified-download core are
-implemented locally. Milestone 5B production activation planning is prepared
-but blocked pending an approved bootstrap root, repository endpoints, and
-hosting controls. Milestone 6A release-candidate tooling is prepared locally,
-but no commit, tag, workflow run, or release is approved. The CLI can inspect and
+implemented. Milestone 5B production activation planning is prepared but
+blocked pending an approved bootstrap root, repository endpoints, and hosting
+controls. CI and the Milestone 6A release workflow validate six targets across
+Windows, Linux, and macOS on `amd64` and `arm64`. The CLI can inspect and
 initialize workspace state, rebuild the optional context index, describe
 supported agent capabilities, and prepare non-executable Spec Kit plans.
 Official Spec Kit `v1.2.0` is installed for Codex; its generated workflows have
 not been executed. The update core is not exposed through the CLI and has no
-production trust root or endpoint. No release keys, CI, installer,
-self-replacement, or publication path has been implemented.
+production trust root or endpoint, so `v0.1.0` is a manual-update-only release.
+Production TUF activation, Windows Authenticode signing, macOS signing and
+notarization, installers, and self-replacement are deferred.
 
 ## Design principles
 

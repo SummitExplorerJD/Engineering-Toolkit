@@ -5,12 +5,7 @@ The project follows Semantic Versioning while the public surface evolves.
 
 ## [Unreleased]
 
-### Added
-
-- Manual release-candidate build and validation workflow.
-- Reproducible six-platform build script and checksum manifest.
-
-## [0.1.0] - Unreleased
+## [0.1.0] - 2026-10-16
 
 ### Added
 
@@ -20,6 +15,8 @@ The project follows Semantic Versioning while the public surface evolves.
 - Optional rebuildable SQLite context index.
 - Selective coding-agent capability inspection and Spec Kit planning.
 - Internal TUF verified-download core and local staging rehearsal.
+- Manual release-candidate build and validation workflow.
+- Reproducible six-platform build script and checksum manifest.
 
 ### Security
 
