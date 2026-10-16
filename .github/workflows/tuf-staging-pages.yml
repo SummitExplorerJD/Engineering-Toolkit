@@ -1,0 +1,86 @@
+name: TUF staging Pages
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Staging release version
+        required: true
+        default: v0.1.0
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tuf-staging-pages
+  cancel-in-progress: false
+
+jobs:
+  assemble:
+    name: Verify and assemble staging repository
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install Go from go.mod
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Verify no private keys are present
+        shell: pwsh
+        run: |
+          $privateKeys = @(Get-ChildItem -Recurse -File -Filter '*.private.pem')
+          if ($privateKeys.Count -ne 0) {
+            throw 'Private key material must never enter the GitHub checkout.'
+          }
+
+      - name: Run tests
+        shell: pwsh
+        run: go test ./... -count=1
+
+      - name: Build release candidate
+        shell: pwsh
+        run: ./scripts/build-release.ps1 -Version '${{ inputs.version }}'
+
+      - name: Assemble authenticated Pages site
+        shell: pwsh
+        run: |
+          ./scripts/assemble-tuf-staging-pages.ps1 `
+            -Version '${{ inputs.version }}' `
+            -MetadataRoot 'tuf/staging/metadata' `
+            -BuildRoot "dist/${{ inputs.version }}" `
+            -OutputRoot '.pages-tuf-staging'
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: .pages-tuf-staging
+          retention-days: 1
+          include-hidden-files: true
+
+  deploy:
+    name: Deploy staging repository
+    needs: assemble
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - name: Deploy Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

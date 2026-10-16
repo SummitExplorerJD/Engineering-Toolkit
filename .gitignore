@@ -25,3 +25,15 @@
 go.work
 
 # End of https://www.toptal.com/developers/gitignore/api/go
+
+# Local sandbox build scratch
+.engkit-test-temp/
+
+# Local release candidates
+dist/
+
+# Local private key material and signing custody
+.engkit-private/
+
+# Local GitHub Pages assembly preview
+.pages-tuf-staging/

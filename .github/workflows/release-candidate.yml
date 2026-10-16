@@ -1,0 +1,64 @@
+name: Release candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Stable semantic version such as v0.1.0
+        required: true
+        default: v0.1.0
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-candidate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Validate and build
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      RELEASE_VERSION: ${{ inputs.version }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install Go from go.mod
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run tests
+        shell: pwsh
+        run: go test ./...
+
+      - name: Run static analysis
+        shell: pwsh
+        run: go vet ./...
+
+      - name: Run vulnerability analysis
+        shell: pwsh
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
+
+      - name: Exercise the TUF staging rehearsal
+        shell: pwsh
+        run: go test -v ./internal/update/tufclient -run '^TestStagingRehearsal$' -count=1
+
+      - name: Build release candidate
+        shell: pwsh
+        run: ./scripts/build-release.ps1 -Version $env:RELEASE_VERSION
+
+      - name: Upload candidate artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: engkit-${{ inputs.version }}-candidate
+          path: dist/${{ inputs.version }}/
+          if-no-files-found: error
+          retention-days: 14

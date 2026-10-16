@@ -1,0 +1,45 @@
+{
+  "environment": "staging",
+  "production_approved": false,
+  "version": "v0.1.0",
+  "created_at": "2026-10-16T20:19:14Z",
+  "root_sha256": "fcf3e5845b0efcaed371ccf84569db8dfaa1c0d2cfa9613001f3cc24ec3926a1",
+  "roles": {
+    "root": {
+      "threshold": 2,
+      "key_ids": [
+        "a865e83abc1928358ff7a58fae602814e1888b2512bec4aeed23bbbbc4040751",
+        "1c68f117992aaf3e0ac22e81319ba37ca65068ac0519d1a8fa98aae4d96b0177",
+        "711f93d691f95a118865f386cff9ebd1a0f3b277298f7e885f212648d8a98800"
+      ]
+    },
+    "snapshot": {
+      "threshold": 1,
+      "key_ids": [
+        "a17490f042e9ffa82fe6b1b6721e1d75595172479dd28d7cd4963583f1d91632"
+      ]
+    },
+    "targets": {
+      "threshold": 2,
+      "key_ids": [
+        "bc17399f91879a5d9ad726692c3c4cfb4aff3591c79361dac8a3f7196c24f8cc",
+        "f326698d5b5a1ed4c330ff631d70ff3718938b20148d0ce828a1eb41f61f2704",
+        "8ac97ca999dd57078578a94c7694e9a54727a1186daa7668941badc988a60bfc"
+      ]
+    },
+    "timestamp": {
+      "threshold": 1,
+      "key_ids": [
+        "0fc26389f20b311b6e5fb35c89dfe044fb1a0c2b86a692b8357a1d2296983af1"
+      ]
+    }
+  },
+  "targets": [
+    "releases/stable/v0.1.0/windows-amd64/engkit.exe",
+    "releases/stable/v0.1.0/windows-arm64/engkit.exe",
+    "releases/stable/v0.1.0/linux-amd64/engkit",
+    "releases/stable/v0.1.0/linux-arm64/engkit",
+    "releases/stable/v0.1.0/darwin-amd64/engkit",
+    "releases/stable/v0.1.0/darwin-arm64/engkit"
+  ]
+}
