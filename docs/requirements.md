@@ -86,6 +86,13 @@ shall be previewable, deterministic, and separately approved before mutation.
 Unsupported or lossy provider mappings shall be reported rather than silently
 discarded.
 
+A canonical skill shall be explicitly identified by a versioned Engineering
+Toolkit manifest rather than inferred from a provider-native file or directory
+name. Discovery and validation shall distinguish managed canonical packages,
+provider-native packages, generated outputs, conflicts, and invalid packages.
+Read-only skill operations shall not execute package resources, contact remote
+services, access credentials, or adopt external ownership.
+
 ### FR-015: Project creation and composition
 
 The system shall distinguish initializing an existing workspace from creating a
@@ -126,6 +133,12 @@ metadata sizes; reject traversal and ambiguous target paths; preserve the last
 known-good trust state after failure; and provide no normal-mode bypass for
 invalid signatures, expired metadata, or rollback detection.
 
+Skill validation shall reject absolute or escaping resource paths, ambiguous or
+duplicate canonical identities, unsupported schema versions, undeclared managed
+resources, integrity mismatches, and symlinks that escape the permitted package
+or workspace boundary. Declared permissions describe requested capabilities and
+shall not authorize execution by themselves.
+
 ### NFR-007: Performance
 
 Common local inspection commands should complete interactively on typical repositories. Optional indexing shall improve discovery without being required for correctness.
@@ -159,4 +172,15 @@ Errors shall distinguish user input, policy refusal, environmental failure, inte
 - Approval boundaries are consistent across repository instructions and workflows.
 - Spec Kit initialization remains unexecuted pending separate approval.
 - No executable code, dependency, Git state, or existing file is changed.
+
+## 7. `v0.2.0A` skill-contract acceptance criteria
+
+- The canonical package location and ownership marker are unambiguous.
+- Existing Spec Kit and provider-native skills remain external and unchanged.
+- Structured metadata and provider-neutral instructions have separate owners.
+- Discovery, inspection, and validation are read-only and non-executing.
+- Creation, update, and removal remain bound to plans, explicit approvals,
+  journals, checkpoints, and separately approved implementation slices.
+- Provider synchronization, remote installation, imports, and script execution
+  remain outside the approved design milestone.
 

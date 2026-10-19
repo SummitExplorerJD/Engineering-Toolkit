@@ -13,7 +13,7 @@ ADRs, and approved implementation plans.
 - **Open decision:** requires analysis and an accepted ADR or implementation
   approval before it becomes a contract.
 
-## 2. Current baseline (`v0.1.0`)
+## 2. Current baseline (`v0.1.1`)
 
 ### Implemented workspace initialization
 
@@ -47,6 +47,8 @@ Kit.
 - Non-executable, version-pinned Spec Kit preparation plans.
 - Plans, approval binding, journals, and checkpoints for implemented mutations.
 - Manual cross-platform release distribution.
+- User-scoped PowerShell and POSIX bootstrap installation with exact-version,
+  checksum, explicit-upgrade, PATH, and recovery controls.
 
 ## 3. Planned release sequence
 
@@ -55,12 +57,12 @@ slice requires its own approval.
 
 ### `v0.1.1`: installation safety and hardening
 
-**Status:** Implementation in progress; cross-platform CI evidence pending.
+**Status:** Implemented and published on October 19, 2026.
 
 The patch release improves distribution and installation without adding a new
 public workspace or skill lifecycle.
 
-Planned scope:
+Delivered scope:
 
 - User-scoped PowerShell installation for Windows.
 - User-scoped POSIX shell installation for Linux and macOS.
@@ -83,6 +85,8 @@ Not included:
 - New project-generation or skill-management commands.
 
 ### `v0.2.0`: skill authoring and lifecycle
+
+**Status:** Canonical package design accepted; implementation not started.
 
 This release is intended to establish the canonical, provider-neutral skill
 model and safe local lifecycle.
@@ -117,14 +121,22 @@ Every mutation will follow the established lifecycle:
 request -> JSON plan -> review -> approval -> execution -> JSONL journal -> JSON checkpoint
 ```
 
-Open decisions for this release include:
+Accepted design decisions:
 
-- `SKILL.md` with structured frontmatter versus `skill.yaml` plus
-  `instructions.md`.
-- Canonical schema identifiers and compatibility rules.
-- Whether canonical skills live under `.agents/skills/` or another versioned
-  workspace-owned location.
-- Trust and permission UX for scripts and other executable resources.
+- Canonical skills live under `.agents/skills/SKILL_ID/`.
+- `skill.yaml` with schema `engkit.skill/v1alpha1` is the explicit ownership
+  marker, and `instructions.md` contains provider-neutral instructions.
+- Provider-native and Spec Kit directories without the canonical manifest are
+  external state and remain unchanged by default.
+- Read-only discovery, inspection, and validation do not execute resources,
+  contact networks, access credentials, or mutate the workspace.
+
+Remaining decisions for separately approved implementation slices include:
+
+- The complete `v1alpha1` field schema, canonical serialization, diagnostics,
+  and compatibility rules.
+- Mutation-plan payloads and recovery details for create, update, and remove.
+- Future runtime trust and permission UX for executable resources.
 - Import, export, and migration behavior for existing provider-native skills.
 
 No provider's current format will become the canonical model merely by being

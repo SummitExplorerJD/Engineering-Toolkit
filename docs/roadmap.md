@@ -250,7 +250,7 @@ public release URL completed successfully.
 
 ### `v0.2.0`: skill authoring and lifecycle
 
-**Status:** Planned; canonical format is an open decision
+**Status:** Canonical package design accepted; implementation not started
 
 - Define the provider-neutral skill contract and ownership model.
 - Add read-only discovery, inspection, and validation first.
@@ -258,6 +258,19 @@ public release URL completed successfully.
 - Record skill mutations through plans, journals, and checkpoints.
 - Do not silently execute scripts, install remote skills, or select one provider
   format as canonical without an accepted decision.
+
+Planned implementation gates:
+
+1. **`v0.2.0A` — canonical design:** accepted in ADR 0007. Canonical packages
+   use `.agents/skills/SKILL_ID/skill.yaml` plus `instructions.md`; existing
+   Spec Kit and provider-native directories remain external.
+2. **`v0.2.0B` — schema and read-only operations:** approve the complete
+   `engkit.skill/v1alpha1` schema, then implement deterministic discovery,
+   inspection, and validation without execution or mutation.
+3. **`v0.2.0C` — mutation planning:** define immutable plan contracts for local
+   create, update, and remove operations without applying them.
+4. **`v0.2.0D` — approved local lifecycle:** apply approved mutations with
+   ownership checks, journals, checkpoints, verification, and recovery.
 
 ### `v0.2.1`: selective provider synchronization
 

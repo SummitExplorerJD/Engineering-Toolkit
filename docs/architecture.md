@@ -49,6 +49,8 @@ Expected dependency flow:
 | Journal | JSONL | Append-only | Execution history and evidence pointers |
 | Checkpoint | JSON | Atomically replaced | Resume state for an active workflow |
 | Context index | SQLite | Rebuildable | Search and derived relationships |
+| Skill manifest | YAML | User-edited | Canonical identity, contract, ownership, and declared resources |
+| Skill instructions | Markdown | User-edited | Provider-neutral instructional content |
 | Trust metadata | TUF JSON | Signed and versioned | Distribution trust decisions |
 
 Every persisted artifact includes a schema version. Canonical serialization rules will be defined before signing or stable machine-output commitments.
@@ -119,9 +121,9 @@ The exact filenames, schemas, ignore policy, and privacy defaults remain decisio
 - Acceptance and exact version of the proposed go-tuf v2 dependency.
 - Locking and crash-consistency strategy per operating system.
 - Installer and self-replacement strategy per operating system.
-- Canonical skill representation and compatibility policy.
 - Project-creation command shape and versioned profile format.
-- Trust and permission model for executable skill resources.
+- Exact skill-schema fields, canonical serialization, and migration policy.
+- Runtime trust and permission UX for executable skill resources.
 
 Each dependency choice requires a separate approval because it modifies `go.mod` and long-term compatibility.
 
@@ -147,4 +149,26 @@ These scripts do not activate the internal TUF client and are not an
 implementation of a future `engkit update install` operation. An
 application-managed installer remains downstream of TUF verification and the
 plan, approval, journal, and checkpoint lifecycle.
+
+## 13. Canonical skill boundary
+
+Canonical skill packages live at `.agents/skills/SKILL_ID/` and are identified
+only by a valid `skill.yaml` using an Engineering Toolkit schema. The initial
+schema identifier is `engkit.skill/v1alpha1`; `instructions.md` owns the
+provider-neutral instructional prose. Declared optional resources remain under
+`references/`, `scripts/`, `templates/`, and `assets/` within the package.
+
+Directories without the canonical manifest are external even when they reside
+under `.agents/skills/`. This includes the current official Spec Kit
+Codex-facing skills. Read-only discovery may classify and report those
+directories but must not adopt or modify them. A later provider adapter may
+render derived files only with explicit per-file ownership, prior-content
+digests, conflict detection, and an approved plan.
+
+The `skills` domain owns package identity, validation, compatibility,
+provenance, and lifecycle planning. It does not execute scripts or own provider
+storage semantics. Initial list, inspect, and validate operations perform no
+network access, credential access, process execution, or workspace mutation.
+Mutation follows the standard plan, approval, execution, journal, and
+checkpoint lifecycle.
 

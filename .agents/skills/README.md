@@ -1,6 +1,14 @@
 # Repository Skills
 
-No repository-specific agent skill is installed yet.
+This directory contains official Spec Kit Codex-facing skills. They are
+provider-native external assets, not Engineering Toolkit canonical packages,
+because they do not contain an `engkit.skill/v1alpha1` `skill.yaml` manifest.
+Engineering Toolkit may discover and report them but must not adopt, edit, or
+remove them implicitly.
+
+Future canonical packages use `.agents/skills/SKILL_ID/skill.yaml` plus
+`instructions.md`. Provider-facing generated files remain derived output and
+require separate ownership and conflict controls.
 
 Add a skill only when a repeatable workflow has demonstrated value beyond repository instructions or a short prompt. Each skill must have a distinct trigger, narrow scope, explicit non-goals, required references, validation, and ownership. It must not silently authorize application changes, Git operations, external writes, credential access, or progression to another milestone.
 
