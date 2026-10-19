@@ -66,8 +66,12 @@ The system shall bootstrap from an application-bundled trusted root, verify the
 complete metadata chain, select only an exact supported channel and platform
 target, enforce target length and cryptographic hashes, and keep writable
 metadata state outside project workspaces. Verified download and installation
-shall be separate operations. Installation shall require its own immutable plan
-and approval and shall never be implied by a metadata refresh.
+shall be separate operations. Application-managed installation shall require
+its own immutable plan and approval and shall never be implied by a metadata
+refresh. A standalone bootstrap installer may operate before the CLI is
+available, but it shall require an exact version, verify the selected
+executable, require explicit replacement intent, and use a recoverable
+user-scoped transaction.
 
 ### FR-013: Extensibility
 

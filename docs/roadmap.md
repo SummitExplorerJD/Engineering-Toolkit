@@ -230,7 +230,7 @@ between implemented, planned, deferred, and open work.
 
 ### `v0.1.1`: installation safety and hardening
 
-**Status:** Planned
+**Status:** Implementation in progress; cross-platform CI evidence pending
 
 - Add user-scoped PowerShell and POSIX installation helpers.
 - Require exact versions and SHA-256 verification.
@@ -239,6 +239,12 @@ between implemented, planned, deferred, and open work.
 - Test all six supported operating-system and architecture targets.
 - Keep new workspace, skill, self-update, signing, package-manager, and
   production TUF behavior outside this patch release.
+
+**Implemented locally:** PowerShell and POSIX bootstrap helpers, release
+packaging, additive manifest metadata, and six-target installer transaction
+tests. The Windows AMD64 local transaction test passes. Linux, macOS, Windows
+ARM64, commit, push, workflow execution, candidate publication, and release
+publication remain separate gates.
 
 ### `v0.2.0`: skill authoring and lifecycle
 

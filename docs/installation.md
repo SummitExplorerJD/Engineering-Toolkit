@@ -1,10 +1,81 @@
 # Installation
 
-Engineering Toolkit `v0.1.0` is distributed as raw executables. It does not
-yet include an installer, package-manager package, automatic updater, or
-self-replacement mechanism. Download release assets only from the official
+Engineering Toolkit `v0.1.0` is distributed as raw executables. Starting with
+`v0.1.1`, each release also includes user-scoped PowerShell and POSIX bootstrap
+installers. Package-manager distribution, automatic updates, self-replacement,
+and production TUF activation are not included. Download release assets only
+from the official
 [GitHub Releases](https://github.com/SummitExplorerJD/Engineering-Toolkit/releases)
-page and verify the checksum before installation.
+page and verify the selected release identity.
+
+## Bootstrap installers (`v0.1.1` and later)
+
+The bootstrap scripts require an exact version and never resolve `latest`.
+They detect the operating system and architecture, download the matching
+executable and `SHA256SUMS`, require exactly one checksum entry, verify SHA-256,
+confirm the staged executable's version, and publish it through a recoverable
+user-scoped transaction.
+
+For Windows, download `install.ps1` from the exact release and run:
+
+```powershell
+$version = 'v0.1.1'
+Invoke-WebRequest -UseBasicParsing `
+    -Uri "https://github.com/SummitExplorerJD/Engineering-Toolkit/releases/download/$version/install.ps1" `
+    -OutFile '.\install.ps1'
+.\install.ps1 -Version $version -AddToPath
+```
+
+The default destination is
+`%LOCALAPPDATA%\Programs\engkit\engkit.exe`. Close and reopen the terminal after
+changing the user `PATH`.
+
+For Linux or macOS, download `install.sh` from the exact release and run:
+
+```sh
+version=v0.1.1
+curl --fail --location --proto '=https' --tlsv1.2 \
+  --output install.sh \
+  "https://github.com/SummitExplorerJD/Engineering-Toolkit/releases/download/${version}/install.sh"
+sh install.sh --version "$version" --add-to-path
+```
+
+The default destination is `$HOME/.local/bin/engkit`. With `--add-to-path`, the
+script adds one marked entry to `$HOME/.zprofile` for zsh or `$HOME/.profile`
+for other shells. The change is idempotent and takes effect in a new shell.
+
+An existing executable is never replaced implicitly. Upgrade with:
+
+```powershell
+.\install.ps1 -Version v0.1.1 -Upgrade
+```
+
+```sh
+sh install.sh --version v0.1.1 --upgrade
+```
+
+Use `-AddToPath` or `--add-to-path` during an upgrade only when the installer
+should also ensure its directory is present in the user environment.
+
+To install from a previously downloaded and reviewed release directory that
+contains the platform executables and `SHA256SUMS`, use:
+
+```powershell
+.\install.ps1 -Version v0.1.1 -AssetDirectory 'C:\path\to\release'
+```
+
+```sh
+sh install.sh --version v0.1.1 --asset-directory /path/to/release
+```
+
+A local checksum detects corruption but does not independently prove who
+created the local files. Preserve and verify the origin of offline assets.
+
+The network installer uses a fixed GitHub Releases URL. In `v0.1.1`, HTTPS and
+GitHub repository controls authenticate the bootstrap download; the checksum
+from the same release is an integrity check, not an independent signature.
+
+## Manual installation (`v0.1.0` and fallback)
 
 ## Choose an architecture
 
@@ -120,7 +191,7 @@ checksum and release origin, and use the standard macOS security settings when
 the operating system requests approval. Do not disable system-wide security
 controls.
 
-## Upgrade
+## Manual upgrade
 
 Until production update support is activated, upgrades are manual: download
 the newer executable, verify its checksum, and replace the installed

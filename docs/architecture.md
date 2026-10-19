@@ -30,6 +30,7 @@ Engineering Toolkit is a modular monolith: one versioned CLI executable with coh
 | `update` domain | Release channel, version, platform, and installation policy | TUF wire formats or network clients |
 | TUF adapter | Metadata refresh and verified target download | Channel policy, installation, signing, or publication |
 | `platform` | Filesystem, locking, process, and OS abstractions | Business decisions |
+| release scripts | User-scoped bootstrap installation and release packaging | Application-managed updates or workspace mutation |
 
 ## 4. Dependency direction
 
@@ -133,4 +134,17 @@ entry. Application state uses platform-specific user state and cache locations,
 not workspace `.engkit`. A later installer consumes an immutable approved plan
 that binds the verified digest and destination. Repository authoring, keys,
 signing, CI, and publication remain outside the runtime dependency graph.
+
+## 12. Bootstrap installation boundary
+
+The standalone `install.ps1` and `install.sh` release helpers are outside the
+runtime dependency graph. They support first installation before the CLI is
+available and explicit manual upgrades. They require an exact version, verify
+the selected executable, stage within the destination filesystem, and preserve
+an existing executable on failure.
+
+These scripts do not activate the internal TUF client and are not an
+implementation of a future `engkit update install` operation. An
+application-managed installer remains downstream of TUF verification and the
+plan, approval, journal, and checkpoint lifecycle.
 

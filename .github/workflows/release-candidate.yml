@@ -114,3 +114,7 @@ jobs:
         run: |
           $binary = Join-Path candidate "engkit-$env:RELEASE_VERSION-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.extension }}"
           ./scripts/test-release-binary.ps1 -BinaryPath $binary -Version $env:RELEASE_VERSION
+
+      - name: Test installation transaction
+        shell: pwsh
+        run: ./scripts/test-installer.ps1 -CandidateDirectory candidate -Version $env:RELEASE_VERSION -OS ${{ matrix.os }} -Arch ${{ matrix.arch }}

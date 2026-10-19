@@ -5,6 +5,18 @@ The project follows Semantic Versioning while the public surface evolves.
 
 ## [Unreleased]
 
+### Added
+
+- User-scoped PowerShell and POSIX bootstrap installers with exact-version,
+  architecture, local-asset, upgrade, and opt-in PATH handling.
+- Release packaging and six-platform CI coverage for installation transactions.
+
+### Security
+
+- Mandatory SHA-256 and staged-binary version verification before publication.
+- Same-filesystem installation with explicit replacement intent and restoration
+  of an existing executable after a failed upgrade.
+
 ## [0.1.0] - 2026-10-16
 
 ### Added

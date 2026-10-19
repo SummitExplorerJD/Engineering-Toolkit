@@ -55,8 +55,10 @@ slice requires its own approval.
 
 ### `v0.1.1`: installation safety and hardening
 
-The intended patch release improves distribution and installation without
-adding a new public workspace or skill lifecycle.
+**Status:** Implementation in progress; cross-platform CI evidence pending.
+
+The patch release improves distribution and installation without adding a new
+public workspace or skill lifecycle.
 
 Planned scope:
 

@@ -76,6 +76,22 @@ try {
 
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'LICENSE') -Destination (Join-Path $outputDirectory 'LICENSE')
 
+$powerShellInstaller = Join-Path $outputDirectory 'install.ps1'
+Copy-Item -LiteralPath (Join-Path $repositoryRoot 'scripts\install.ps1') -Destination $powerShellInstaller
+
+$shellInstaller = Join-Path $outputDirectory 'install.sh'
+$shellInstallerContents = (Get-Content -Raw -LiteralPath (Join-Path $repositoryRoot 'scripts\install.sh')) -replace "`r`n", "`n"
+[System.IO.File]::WriteAllText($shellInstaller, $shellInstallerContents, [System.Text.UTF8Encoding]::new($false))
+
+$installers = foreach ($installer in @($powerShellInstaller, $shellInstaller)) {
+    $file = Get-Item -LiteralPath $installer
+    [ordered]@{
+        filename = $file.Name
+        size     = $file.Length
+        sha256   = (Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName).Hash.ToLowerInvariant()
+    }
+}
+
 $goVersion = (& go version).Trim()
 $manifest = [ordered]@{
     schema_version = 'engkit.release-manifest/v1alpha1'
@@ -83,6 +99,7 @@ $manifest = [ordered]@{
     go_version     = $goVersion
     cgo_enabled    = $false
     artifacts      = $artifacts
+    installers     = $installers
 }
 $manifestPath = Join-Path $outputDirectory 'release-manifest.json'
 $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $manifestPath -Encoding utf8NoBOM

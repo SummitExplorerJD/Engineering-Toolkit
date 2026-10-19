@@ -14,8 +14,11 @@ supported agent capabilities, and prepare non-executable Spec Kit plans.
 Official Spec Kit `v1.2.0` is installed for Codex; its generated workflows have
 not been executed. The update core is not exposed through the CLI and has no
 production trust root or endpoint, so `v0.1.0` is a manual-update-only release.
-Production TUF activation, Windows Authenticode signing, macOS signing and
-notarization, installers, and self-replacement are deferred.
+Development toward `v0.1.1` adds user-scoped bootstrap installers with exact
+versions, mandatory checksums, explicit upgrades, recoverable replacement, and
+opt-in PATH changes. Production TUF activation, platform signing,
+package-manager distribution, automatic updates, and self-replacement remain
+deferred.
 
 ## Design principles
 
@@ -44,6 +47,7 @@ notarization, installers, and self-replacement are deferred.
 - [Installation](docs/installation.md)
 - [First release checklist](docs/release-checklist.md)
 - [v0.1.0 release notes](docs/release-notes/v0.1.0.md)
+- [v0.1.1 draft release notes](docs/release-notes/v0.1.1.md)
 - [Security policy](SECURITY.md)
 - [Architecture decisions](docs/adr/)
 - [Agent conventions](.agents/conventions/)

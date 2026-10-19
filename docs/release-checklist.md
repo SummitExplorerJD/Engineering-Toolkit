@@ -73,3 +73,22 @@ reuse a failed candidate. After an immutable release is public, publish a new
 patch version rather than replacing an asset or moving the tag. TUF metadata
 recovery, if enabled, follows the secure distribution plan and never disables
 expiration, signatures, hashes, or rollback protection.
+
+## `v0.1.1` bootstrap installer gate
+
+This additive gate applies to `v0.1.1`; it does not retroactively change the
+published `v0.1.0` asset set.
+
+- [ ] Confirm `install.ps1` and `install.sh` are included in the candidate,
+      `release-manifest.json`, and `SHA256SUMS`.
+- [ ] Confirm the packaged `install.sh` uses LF line endings and both scripts
+      accept the exact candidate version.
+- [ ] Pass fresh-install, checksum-failure, replacement-refusal, rollback,
+      explicit-upgrade, PATH-idempotence, and version checks on all six runners.
+- [ ] Review the fixed GitHub Releases URL and confirm no network-source override
+      was introduced.
+- [ ] Test installation from the published `v0.1.1-rc.1` assets on physical or
+      representative Windows, Linux, and macOS systems.
+- [ ] Confirm the scripts install without administrator or root privileges.
+- [ ] Record that HTTPS plus GitHub repository controls, not production TUF or
+      platform signing, authenticate this bootstrap release.

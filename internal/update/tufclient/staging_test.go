@@ -18,7 +18,7 @@ import (
 // disposable keys and targets. It never contacts a production repository and
 // never persists private key material outside the test process.
 func TestStagingRehearsal(t *testing.T) {
-	now := time.Date(2026, 10, 16, 12, 0, 0, 0, time.UTC)
+	now := time.Now().UTC()
 
 	t.Run("supported target inventory", func(t *testing.T) {
 		tests := []struct {
