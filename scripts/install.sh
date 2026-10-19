@@ -130,7 +130,21 @@ else
     curl --fail --location --proto '=https' --tlsv1.2 --output "$staged_checksums" "$base_url/SHA256SUMS"
 fi
 
-checksum_entries=$(awk -v wanted="$filename" '$2 == wanted && length($1) == 64 && $1 ~ /^[0-9a-fA-F]+$/ { count++; hash=tolower($1) } END { if (count == 1) print hash }' "$staged_checksums")
+checksum_entries=$(
+    awk -v wanted="$filename" '
+        {
+            name = $2
+            sub(/\r$/, "", name)
+        }
+        name == wanted && length($1) == 64 && $1 ~ /^[0-9a-fA-F]+$/ {
+            count++
+            hash = tolower($1)
+        }
+        END {
+            if (count == 1) print hash
+        }
+    ' "$staged_checksums"
+)
 [ -n "$checksum_entries" ] || {
     echo "SHA256SUMS must contain exactly one entry for $filename" >&2
     exit 1

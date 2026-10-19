@@ -111,7 +111,9 @@ $checksumLines = foreach ($file in $checksumFiles) {
     $digest = (Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName).Hash.ToLowerInvariant()
     "$digest  $($file.Name)"
 }
-$checksumLines | Set-Content -LiteralPath (Join-Path $outputDirectory 'SHA256SUMS') -Encoding ascii
+$checksumPath = Join-Path $outputDirectory 'SHA256SUMS'
+$checksumContent = ($checksumLines -join "`n") + "`n"
+[System.IO.File]::WriteAllText($checksumPath, $checksumContent, [System.Text.Encoding]::ASCII)
 
 if ($IsWindows -and $env:PROCESSOR_ARCHITECTURE -eq 'AMD64') {
     $smokeBinary = Join-Path $outputDirectory "engkit-$Version-windows-amd64.exe"

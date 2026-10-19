@@ -24,6 +24,7 @@ $testRoot = Join-Path $repositoryRoot ('.engkit-test-temp\installer-' + [guid]::
 $installDirectory = Join-Path $testRoot 'bin'
 $tamperedAssets = Join-Path $testRoot 'tampered'
 $wrongVersionAssets = Join-Path $testRoot 'wrong-version'
+$crlfAssets = Join-Path $testRoot 'crlf-checksums'
 $originalHome = $env:HOME
 $originalFailure = $env:ENGKIT_INSTALL_TEST_FAIL_AFTER_BACKUP
 $originalPathFile = $env:ENGKIT_INSTALL_TEST_USER_PATH_FILE
@@ -68,9 +69,14 @@ function Invoke-Installer {
     if (-not $ExpectFailure -and $failed) { throw "Installer failed with exit code $LASTEXITCODE" }
 }
 
-New-Item -ItemType Directory -Path $testRoot, $tamperedAssets, $wrongVersionAssets -Force | Out-Null
+New-Item -ItemType Directory -Path $testRoot, $tamperedAssets, $wrongVersionAssets, $crlfAssets -Force | Out-Null
 try {
-    Copy-Item -LiteralPath (Join-Path $candidate 'SHA256SUMS') -Destination $tamperedAssets
+    $candidateChecksums = Join-Path $candidate 'SHA256SUMS'
+    $checksumBytes = [System.IO.File]::ReadAllBytes($candidateChecksums)
+    if ($checksumBytes -contains 13) {
+        throw 'SHA256SUMS must use LF line endings for cross-platform compatibility'
+    }
+    Copy-Item -LiteralPath $candidateChecksums -Destination $tamperedAssets
     $extension = if ($OS -eq 'windows') { '.exe' } else { '' }
     $expectedBinaryName = "engkit-$Version-$OS-$Arch$extension"
     $platformBinary = @(Get-ChildItem -LiteralPath $candidate -File | Where-Object {
@@ -104,7 +110,18 @@ try {
         throw 'Version failure left an installed executable'
     }
 
-    Invoke-Installer -Assets $candidate
+    $installationAssets = $candidate
+    if ($OS -ne 'windows') {
+        Copy-Item -LiteralPath $platformBinary[0].FullName -Destination $crlfAssets
+        $crlfChecksumContent = ([System.IO.File]::ReadAllText($candidateChecksums) -replace "`r?`n", "`r`n")
+        [System.IO.File]::WriteAllText(
+            (Join-Path $crlfAssets 'SHA256SUMS'),
+            $crlfChecksumContent,
+            [System.Text.Encoding]::ASCII
+        )
+        $installationAssets = $crlfAssets
+    }
+    Invoke-Installer -Assets $installationAssets
     $installed = Join-Path $installDirectory ($(if ($OS -eq 'windows') { 'engkit.exe' } else { 'engkit' }))
     $installedHash = (Get-FileHash -LiteralPath $installed -Algorithm SHA256).Hash
 
