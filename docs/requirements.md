@@ -73,6 +73,24 @@ and approval and shall never be implied by a metadata refresh.
 
 The system shall allow new workspace capabilities and agent adapters to be added through internal interfaces without splitting the initial product into separately deployed services.
 
+### FR-014: Skill lifecycle
+
+The system shall support a provider-neutral, versioned skill model with explicit
+identity, capabilities, inputs, outputs, permissions, compatibility, ownership,
+and provenance. Skill creation, update, removal, and provider synchronization
+shall be previewable, deterministic, and separately approved before mutation.
+Unsupported or lossy provider mappings shall be reported rather than silently
+discarded.
+
+### FR-015: Project creation and composition
+
+The system shall distinguish initializing an existing workspace from creating a
+new project. Future project creation shall use an explicitly selected,
+versioned profile; inspect ecosystem compatibility before choosing a source
+layout; preview all generated paths; and compose workspace conventions, skills,
+workflows, provider integrations, and optional Spec Kit assets without silently
+replacing existing files.
+
 ## 4. Non-functional requirements
 
 ### NFR-001: Portability

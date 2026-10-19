@@ -33,6 +33,7 @@ notarization, installers, and self-replacement are deferred.
 - [Requirements](docs/requirements.md)
 - [Architecture](docs/architecture.md)
 - [Roadmap](docs/roadmap.md)
+- [Future capabilities](docs/future-capabilities.md)
 - [Agent adapter matrix](docs/agent-adapters.md)
 - [Spec Kit adoption](docs/spec-kit-adoption.md)
 - [Spec Kit v1.2.0 Codex inventory](docs/spec-kit-v1.2.0-codex-inventory.md)

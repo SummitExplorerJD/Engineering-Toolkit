@@ -221,3 +221,54 @@ push. After the reviewed commit reaches GitHub, separately approve enabling
 Pages and running the manual staging deployment before recording its URL and
 published root digest.
 
+## Planned post-`v0.1.0` releases
+
+These release scopes are directional and remain subject to independent design,
+implementation, Git, and publication approvals. See
+[`future-capabilities.md`](future-capabilities.md) for the consolidated boundary
+between implemented, planned, deferred, and open work.
+
+### `v0.1.1`: installation safety and hardening
+
+**Status:** Planned
+
+- Add user-scoped PowerShell and POSIX installation helpers.
+- Require exact versions and SHA-256 verification.
+- Preserve an existing installation on failure and require explicit upgrade and
+  PATH decisions.
+- Test all six supported operating-system and architecture targets.
+- Keep new workspace, skill, self-update, signing, package-manager, and
+  production TUF behavior outside this patch release.
+
+### `v0.2.0`: skill authoring and lifecycle
+
+**Status:** Planned; canonical format is an open decision
+
+- Define the provider-neutral skill contract and ownership model.
+- Add read-only discovery, inspection, and validation first.
+- Add plan-and-approve creation, update, and removal operations.
+- Record skill mutations through plans, journals, and checkpoints.
+- Do not silently execute scripts, install remote skills, or select one provider
+  format as canonical without an accepted decision.
+
+### `v0.2.1`: selective provider synchronization
+
+**Status:** Planned
+
+- Render approved canonical skills selectively for Codex, Claude Code, and
+  OpenCode.
+- Preview conflicts and report unsupported or lossy mappings.
+- Preserve canonical data and provider-owned files outside the approved scope.
+
+### `v0.2.2`: project, workflow, and Spec Kit composition
+
+**Status:** Planned; command shape and profile format are open decisions
+
+- Distinguish creation of a new project from initialization of an existing
+  workspace.
+- Add versioned project profiles and ecosystem-aware layout selection.
+- Compose `.agents` conventions, context, skills, and workflows through reviewed
+  plans.
+- Integrate official Spec Kit assets without weakening ownership or approval
+  boundaries.
+

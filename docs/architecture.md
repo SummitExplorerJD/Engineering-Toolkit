@@ -24,6 +24,8 @@ Engineering Toolkit is a modular monolith: one versioned CLI executable with coh
 | `index/sqlite` | Optional rebuildable SQLite projection | Sole ownership of project facts |
 | `adapters` | Capability model and adapter orchestration | Core workflow policy |
 | provider adapters | Codex, Claude Code, OpenCode rendering | Pretending unsupported capabilities exist |
+| `skills` | Canonical skill contracts, validation, ownership, and lifecycle planning | Provider-specific storage or implicit script execution |
+| `project` | Project-profile selection and new-workspace composition | Assuming one ecosystem or source layout |
 | `speckit` | Official Spec Kit detection and controlled interoperation | Forking upstream contracts silently |
 | `update` domain | Release channel, version, platform, and installation policy | TUF wire formats or network clients |
 | TUF adapter | Metadata refresh and verified target download | Channel policy, installation, signing, or publication |
@@ -116,6 +118,9 @@ The exact filenames, schemas, ignore policy, and privacy defaults remain decisio
 - Acceptance and exact version of the proposed go-tuf v2 dependency.
 - Locking and crash-consistency strategy per operating system.
 - Installer and self-replacement strategy per operating system.
+- Canonical skill representation and compatibility policy.
+- Project-creation command shape and versioned profile format.
+- Trust and permission model for executable skill resources.
 
 Each dependency choice requires a separate approval because it modifies `go.mod` and long-term compatibility.
 
