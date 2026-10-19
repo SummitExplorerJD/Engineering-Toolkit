@@ -79,16 +79,16 @@ expiration, signatures, hashes, or rollback protection.
 This additive gate applies to `v0.1.1`; it does not retroactively change the
 published `v0.1.0` asset set.
 
-- [ ] Confirm `install.ps1` and `install.sh` are included in the candidate,
+- [x] Confirm `install.ps1` and `install.sh` are included in the candidate,
       `release-manifest.json`, and `SHA256SUMS`.
-- [ ] Confirm the packaged `install.sh` uses LF line endings and both scripts
+- [x] Confirm the packaged `install.sh` uses LF line endings and both scripts
       accept the exact candidate version.
-- [ ] Pass fresh-install, checksum-failure, replacement-refusal, rollback,
+- [x] Pass fresh-install, checksum-failure, replacement-refusal, rollback,
       explicit-upgrade, PATH-idempotence, and version checks on all six runners.
-- [ ] Review the fixed GitHub Releases URL and confirm no network-source override
+- [x] Review the fixed GitHub Releases URL and confirm no network-source override
       was introduced.
-- [ ] Test installation from the published `v0.1.1-rc.1` assets on physical or
-      representative Windows, Linux, and macOS systems.
-- [ ] Confirm the scripts install without administrator or root privileges.
-- [ ] Record that HTTPS plus GitHub repository controls, not production TUF or
+- [x] Test installation from the approved `v0.1.1-rc.3` candidate artifact on
+      physical or representative Windows, Linux, and macOS systems.
+- [x] Confirm the scripts install without administrator or root privileges.
+- [x] Record that HTTPS plus GitHub repository controls, not production TUF or
       platform signing, authenticate this bootstrap release.
