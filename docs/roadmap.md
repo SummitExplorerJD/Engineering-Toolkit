@@ -230,7 +230,7 @@ between implemented, planned, deferred, and open work.
 
 ### `v0.1.1`: installation safety and hardening
 
-**Status:** Implementation in progress; cross-platform CI evidence pending
+**Status:** Completed and published on October 19, 2026
 
 - Add user-scoped PowerShell and POSIX installation helpers.
 - Require exact versions and SHA-256 verification.
@@ -240,11 +240,13 @@ between implemented, planned, deferred, and open work.
 - Keep new workspace, skill, self-update, signing, package-manager, and
   production TUF behavior outside this patch release.
 
-**Implemented locally:** PowerShell and POSIX bootstrap helpers, release
-packaging, additive manifest metadata, and six-target installer transaction
-tests. The Windows AMD64 local transaction test passes. Linux, macOS, Windows
-ARM64, commit, push, workflow execution, candidate publication, and release
-publication remain separate gates.
+**Published evidence:** PowerShell and POSIX bootstrap helpers, release
+packaging, additive manifest metadata, and installer transaction tests passed
+on Windows, Linux, and macOS for AMD64 and ARM64. Candidate `v0.1.1-rc.3` and
+the stable `v0.1.1` artifacts were independently reviewed. The immutable
+`v0.1.1` GitHub Release points to commit
+`0f7042fedb5571ad695de00abe8eab1ebebbe8ca`, and a fresh installation from the
+public release URL completed successfully.
 
 ### `v0.2.0`: skill authoring and lifecycle
 

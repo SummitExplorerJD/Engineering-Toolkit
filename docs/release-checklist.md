@@ -92,3 +92,15 @@ published `v0.1.0` asset set.
 - [x] Confirm the scripts install without administrator or root privileges.
 - [x] Record that HTTPS plus GitHub repository controls, not production TUF or
       platform signing, authenticate this bootstrap release.
+
+### `v0.1.1` publication evidence
+
+- [x] Build the stable `v0.1.1` artifacts from commit
+      `0f7042fedb5571ad695de00abe8eab1ebebbe8ca` and pass all six workflow jobs.
+- [x] Independently verify the stable asset inventory, manifest, checksums,
+      executable formats, and installer line endings.
+- [x] Publish immutable tag and GitHub Release `v0.1.1` from the reviewed
+      commit and mark it as the latest release.
+- [x] Download `install.ps1` from the public release, confirm its digest matches
+      the reviewed artifact, and complete a fresh network installation that
+      reports exactly `v0.1.1`.
