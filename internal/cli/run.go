@@ -12,6 +12,7 @@ import (
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/execution"
 	sqliteindex "github.com/SummitExplorerJD/Engineering-Toolkit/internal/index/sqlite"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/plan"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skillplan"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skills"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/speckit"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/workspace"
@@ -66,7 +67,7 @@ func Run(args []string, stdout, stderr io.Writer) int {
 
 func runSkills(args []string, stdout, stderr io.Writer) error {
 	if len(args) == 0 {
-		return &usageError{message: "skills requires a subcommand: list, inspect, or validate"}
+		return &usageError{message: "skills requires a subcommand: list, inspect, validate, plan-create, plan-update, or plan-remove"}
 	}
 	switch args[0] {
 	case "list":
@@ -122,6 +123,61 @@ func runSkills(args []string, stdout, stderr io.Writer) error {
 			return skills.ErrValidationFailed
 		}
 		return nil
+	case "plan-create":
+		flags := newFlagSet("skills plan-create", stderr)
+		root := flags.String("root", ".", "workspace root to inspect")
+		source := flags.String("source", "", "complete canonical source package")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "skills plan-create does not accept positional arguments"}
+		}
+		if *source == "" {
+			return &usageError{message: "skills plan-create requires --source"}
+		}
+		result, err := skillplan.NewCreate(*root, *source)
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "plan-update":
+		flags := newFlagSet("skills plan-update", stderr)
+		root := flags.String("root", ".", "workspace root to inspect")
+		id := flags.String("id", "", "normalized target skill identifier")
+		source := flags.String("source", "", "complete canonical source package")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "skills plan-update does not accept positional arguments"}
+		}
+		if *id == "" || *source == "" {
+			return &usageError{message: "skills plan-update requires --id and --source"}
+		}
+		result, err := skillplan.NewUpdate(*root, *id, *source)
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "plan-remove":
+		flags := newFlagSet("skills plan-remove", stderr)
+		root := flags.String("root", ".", "workspace root to inspect")
+		id := flags.String("id", "", "normalized target skill identifier")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "skills plan-remove does not accept positional arguments"}
+		}
+		if *id == "" {
+			return &usageError{message: "skills plan-remove requires --id"}
+		}
+		result, err := skillplan.NewRemove(*root, *id)
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
 	default:
 		return &usageError{message: fmt.Sprintf("unknown skills subcommand %q", args[0])}
 	}
@@ -376,10 +432,14 @@ Usage:
 	engkit skills list [--root PATH]
 	engkit skills inspect [--root PATH] --id SKILL_ID
 	engkit skills validate [--root PATH] [--id SKILL_ID]
+	engkit skills plan-create [--root PATH] --source PACKAGE_PATH
+	engkit skills plan-update [--root PATH] --id SKILL_ID --source PACKAGE_PATH
+	engkit skills plan-remove [--root PATH] --id SKILL_ID
 
 inspect and plan-init are read-only. init revalidates the workspace and only
 publishes .engkit when --approve exactly matches the current plan ID. Adapter
 inspection and Spec Kit planning are read-only; no Spec Kit execution command
-is provided in this milestone. Skill listing, inspection, and validation are
-read-only and never execute package resources.`)
+is provided in this milestone. Skill listing, inspection, validation, and
+mutation planning are read-only and never execute package resources or apply
+the proposed operations.`)
 }

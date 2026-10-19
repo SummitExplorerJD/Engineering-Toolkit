@@ -108,7 +108,22 @@ func resolveRoot(root string) (string, error) {
 }
 
 func discover(root string) ([]Package, error) {
-	skillsRoot := filepath.Join(root, ".agents", "skills")
+	agentsRoot := filepath.Join(root, ".agents")
+	agentsInfo, err := os.Lstat(agentsRoot)
+	if errors.Is(err, os.ErrNotExist) {
+		return []Package{}, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("inspect agents root: %w", err)
+	}
+	if agentsInfo.Mode()&os.ModeSymlink != 0 {
+		return nil, errors.New(".agents must not be a symbolic link")
+	}
+	if !agentsInfo.IsDir() {
+		return nil, errors.New(".agents is not a directory")
+	}
+
+	skillsRoot := filepath.Join(agentsRoot, "skills")
 	info, err := os.Lstat(skillsRoot)
 	if errors.Is(err, os.ErrNotExist) {
 		return []Package{}, nil

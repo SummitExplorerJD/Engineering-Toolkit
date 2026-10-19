@@ -12,7 +12,8 @@ Official Spec Kit `v1.2.0` is installed for Codex; its generated workflows have
 not been executed. User-scoped bootstrap installers provide exact versions,
 mandatory checksums, explicit upgrades, recoverable replacement, and opt-in
 PATH changes. Development toward `v0.2.0` adds the provider-neutral skill
-contract and read-only skill discovery and validation. Production TUF
+contract, read-only skill discovery and validation, and non-executable local
+mutation planning. Production TUF
 activation, platform signing, package-manager distribution, automatic updates,
 self-replacement, and skill execution remain deferred.
 
@@ -34,6 +35,7 @@ self-replacement, and skill execution remain deferred.
 - [Roadmap](docs/roadmap.md)
 - [Future capabilities](docs/future-capabilities.md)
 - [Canonical skill manifest v1alpha1](docs/skill-manifest-v1alpha1.md)
+- [Skill mutation plan v1alpha1](docs/skill-mutation-plan-v1alpha1.md)
 - [Agent adapter matrix](docs/agent-adapters.md)
 - [Spec Kit adoption](docs/spec-kit-adoption.md)
 - [Spec Kit v1.2.0 Codex inventory](docs/spec-kit-v1.2.0-codex-inventory.md)
@@ -71,6 +73,9 @@ engkit speckit plan [--root PATH] --integration PROVIDER --version RELEASE_TAG
 engkit skills list [--root PATH]
 engkit skills inspect [--root PATH] --id SKILL_ID
 engkit skills validate [--root PATH] [--id SKILL_ID]
+engkit skills plan-create [--root PATH] --source PACKAGE_PATH
+engkit skills plan-update [--root PATH] --id SKILL_ID --source PACKAGE_PATH
+engkit skills plan-remove [--root PATH] --id SKILL_ID
 ```
 
 The context database is derived, local, and ignored by generated `.engkit/.gitignore` rules. Deleting it does not remove canonical project artifacts; run `context rebuild` to recreate it.
@@ -80,9 +85,9 @@ official release source and reports potential ownership conflicts, but it is
 deliberately marked non-executable and does not invoke `uvx` or `specify`.
 The installed Spec Kit skills remain subject to `AGENTS.md` approval boundaries;
 their presence does not authorize workflow execution or external mutations.
-Canonical skill discovery, inspection, and validation are also read-only. They
-do not execute scripts, resolve dependencies, access credentials, or contact
-networks.
+Canonical skill discovery, inspection, validation, and mutation planning are
+also read-only. They do not apply proposed operations, execute scripts, resolve
+dependencies, access credentials, or contact networks.
 
 ## Contributing
 

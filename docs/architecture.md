@@ -174,4 +174,7 @@ checkpoint lifecycle.
 
 The complete experimental manifest fields and read-only CLI behavior are
 specified in [`skill-manifest-v1alpha1.md`](skill-manifest-v1alpha1.md).
+Immutable create, update, and remove previews use the separate
+[`engkit.skill-mutation-plan/v1alpha1`](skill-mutation-plan-v1alpha1.md)
+contract. The planning module exposes no execution function.
 

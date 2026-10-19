@@ -86,8 +86,8 @@ Not included:
 
 ### `v0.2.0`: skill authoring and lifecycle
 
-**Status:** Canonical package design and read-only lifecycle implemented
-locally; mutation planning and execution have not started.
+**Status:** Canonical package design, read-only lifecycle, and mutation planning
+implemented locally; mutation execution has not started.
 
 This release is intended to establish the canonical, provider-neutral skill
 model and safe local lifecycle.
@@ -110,15 +110,20 @@ engkit skills inspect [--root PATH] --id SKILL_ID
 engkit skills validate [--root PATH] [--id SKILL_ID]
 ```
 
-Proposed mutation commands, not yet public contracts:
+Implemented non-executable planning commands:
 
 ```text
-engkit skills plan-create
+engkit skills plan-create [--root PATH] --source PACKAGE_PATH
+engkit skills plan-update [--root PATH] --id SKILL_ID --source PACKAGE_PATH
+engkit skills plan-remove [--root PATH] --id SKILL_ID
+```
+
+Proposed execution commands, not yet public contracts:
+
+```text
 engkit skills create --approve PLAN_ID
-engkit skills plan-update SKILL
-engkit skills update SKILL --approve PLAN_ID
-engkit skills plan-remove SKILL
-engkit skills remove SKILL --approve PLAN_ID
+engkit skills update --approve PLAN_ID
+engkit skills remove --approve PLAN_ID
 ```
 
 Every mutation will follow the established lifecycle:
@@ -141,7 +146,7 @@ Remaining decisions for separately approved implementation slices include:
 
 - Canonical serialization and migration rules beyond the implemented
   `v1alpha1` read-only contract.
-- Mutation-plan payloads and recovery details for create, update, and remove.
+- Execution-time locking, backup, journal, checkpoint, and recovery behavior.
 - Future runtime trust and permission UX for executable resources.
 - Import, export, and migration behavior for existing provider-native skills.
 

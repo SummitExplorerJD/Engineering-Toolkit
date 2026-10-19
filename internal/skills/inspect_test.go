@@ -154,6 +154,17 @@ func TestInspectRejectsUnsafeID(t *testing.T) {
 	}
 }
 
+func TestListRejectsSymlinkedAgentsRoot(t *testing.T) {
+	root := t.TempDir()
+	outside := t.TempDir()
+	if err := os.Symlink(outside, filepath.Join(root, ".agents")); err != nil {
+		t.Skipf("symbolic links are unavailable: %v", err)
+	}
+	if _, err := List(root); err == nil || !strings.Contains(err.Error(), "must not be a symbolic link") {
+		t.Fatalf("expected symlinked agents-root refusal, got %v", err)
+	}
+}
+
 func writeCanonicalPackage(t *testing.T, root, id, instructions, extra string, resourceOverrides ...string) string {
 	t.Helper()
 	packageRoot := filepath.Join(root, ".agents", "skills", id)

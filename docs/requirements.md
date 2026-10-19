@@ -184,3 +184,17 @@ Errors shall distinguish user input, policy refusal, environmental failure, inte
 - Provider synchronization, remote installation, imports, and script execution
   remain outside the approved design milestone.
 
+## 8. `v0.2.0C` skill-planning acceptance criteria
+
+- Create, update, and remove plans are deterministic JSON and contain no
+  timestamps or random identifiers.
+- Plans bind exact source and target state through content and inventory hashes.
+- Create refuses existing targets; update requires a higher version; remove
+  accepts only valid canonical targets.
+- External, invalid, conflicting, escaping, or symlinked state fails closed.
+- File and directory type transitions are ordered without escaping the target
+  package root.
+- Every plan requires approval and remains explicitly non-executable.
+- Planning performs no mutation, script execution, dependency resolution,
+  provider rendering, network access, or credential access.
+

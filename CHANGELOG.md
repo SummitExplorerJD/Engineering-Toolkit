@@ -10,6 +10,8 @@ The project follows Semantic Versioning while the public surface evolves.
 - Experimental provider-neutral `engkit.skill/v1alpha1` manifest contract.
 - Read-only skill discovery, inspection, and validation commands with strict
   resource integrity and ownership classification.
+- Deterministic, non-executable create, update, and remove plans bound to exact
+  source and target package digests.
 
 ## [0.1.1] - 2026-10-19
 

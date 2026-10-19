@@ -2,7 +2,10 @@ package cli
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -195,6 +198,41 @@ func TestSkillValidateUsesFailureExitCode(t *testing.T) {
 	}
 }
 
+func TestSkillMutationPlanCommandsAreReadOnly(t *testing.T) {
+	root := testWorkspace(t)
+	sourceParent := t.TempDir()
+	source := writeCLISkill(t, sourceParent, "release-review", "1.0.0", "# Proposed\n")
+
+	var stdout, stderr bytes.Buffer
+	code := Run([]string{"skills", "plan-create", "--root", root, "--source", source}, &stdout, &stderr)
+	if code != 0 || !strings.Contains(stdout.String(), `"kind": "skill.create"`) || !strings.Contains(stdout.String(), `"executable": false`) {
+		t.Fatalf("plan-create code = %d, stdout = %q, stderr = %q", code, stdout.String(), stderr.String())
+	}
+	if _, err := os.Stat(filepath.Join(root, ".agents")); !os.IsNotExist(err) {
+		t.Fatalf("plan-create mutated workspace: %v", err)
+	}
+
+	writeCLISkill(t, filepath.Join(root, ".agents", "skills"), "release-review", "1.0.0", "# Current\n")
+	source = writeCLISkill(t, t.TempDir(), "release-review", "1.1.0", "# Proposed update\n")
+	for _, test := range []struct {
+		args []string
+		kind string
+	}{
+		{args: []string{"skills", "plan-update", "--root", root, "--id", "release-review", "--source", source}, kind: "skill.update"},
+		{args: []string{"skills", "plan-remove", "--root", root, "--id", "release-review"}, kind: "skill.remove"},
+	} {
+		stdout.Reset()
+		stderr.Reset()
+		code = Run(test.args, &stdout, &stderr)
+		if code != 0 || !strings.Contains(stdout.String(), `"kind": "`+test.kind+`"`) {
+			t.Fatalf("Run(%v) code = %d, stdout = %q, stderr = %q", test.args, code, stdout.String(), stderr.String())
+		}
+	}
+	if got, err := os.ReadFile(filepath.Join(root, ".agents", "skills", "release-review", "instructions.md")); err != nil || string(got) != "# Current\n" {
+		t.Fatalf("planning modified target instructions: %q, %v", got, err)
+	}
+}
+
 func TestUnknownCommandIsUsageError(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	code := Run([]string{"unknown"}, &stdout, &stderr)
@@ -230,4 +268,38 @@ func initializeWithCLI(t *testing.T, root string) {
 	if code := Run([]string{"workspace", "init", "--root", root, "--approve", preview.PlanID}, &initOut, &initErr); code != 0 {
 		t.Fatalf("workspace init code = %d, stderr = %q", code, initErr.String())
 	}
+}
+
+func writeCLISkill(t *testing.T, parent, id, version, instructions string) string {
+	t.Helper()
+	packageRoot := filepath.Join(parent, id)
+	if err := os.MkdirAll(packageRoot, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(packageRoot, "instructions.md"), []byte(instructions), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	digest := sha256.Sum256([]byte(instructions))
+	manifest := fmt.Sprintf(`schema_version: engkit.skill/v1alpha1
+id: %s
+version: %s
+description: Reviews releases.
+instructions: instructions.md
+permissions: {}
+compatibility:
+  minimum_engkit: 0.2.0
+ownership:
+  owner: engineering
+provenance:
+  source: local
+  revision: %s
+resources:
+  - path: instructions.md
+    kind: instructions
+    sha256: sha256:%s
+`, id, version, version, hex.EncodeToString(digest[:]))
+	if err := os.WriteFile(filepath.Join(packageRoot, "skill.yaml"), []byte(manifest), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	return packageRoot
 }
