@@ -12,6 +12,7 @@ import (
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/execution"
 	sqliteindex "github.com/SummitExplorerJD/Engineering-Toolkit/internal/index/sqlite"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/plan"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skills"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/speckit"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/workspace"
 )
@@ -43,6 +44,8 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		err = runAdapters(args[1:], stdout, stderr)
 	case "speckit":
 		err = runSpecKit(args[1:], stdout, stderr)
+	case "skills":
+		err = runSkills(args[1:], stdout, stderr)
 	default:
 		fmt.Fprintf(stderr, "unknown command %q\n\n", args[0])
 		writeUsage(stderr)
@@ -59,6 +62,69 @@ func Run(args []string, stdout, stderr io.Writer) int {
 	}
 	fmt.Fprintf(stderr, "engkit: %v\n", err)
 	return 1
+}
+
+func runSkills(args []string, stdout, stderr io.Writer) error {
+	if len(args) == 0 {
+		return &usageError{message: "skills requires a subcommand: list, inspect, or validate"}
+	}
+	switch args[0] {
+	case "list":
+		flags := newFlagSet("skills list", stderr)
+		root := flags.String("root", ".", "workspace root to inspect")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "skills list does not accept positional arguments"}
+		}
+		result, err := skills.List(*root)
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "inspect":
+		flags := newFlagSet("skills inspect", stderr)
+		root := flags.String("root", ".", "workspace root to inspect")
+		id := flags.String("id", "", "normalized skill identifier")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "skills inspect does not accept positional arguments"}
+		}
+		if *id == "" {
+			return &usageError{message: "skills inspect requires --id"}
+		}
+		result, err := skills.Inspect(*root, *id)
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "validate":
+		flags := newFlagSet("skills validate", stderr)
+		root := flags.String("root", ".", "workspace root to validate")
+		id := flags.String("id", "", "optional normalized skill identifier")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "skills validate does not accept positional arguments"}
+		}
+		result, err := skills.Validate(*root, *id)
+		if err != nil {
+			return err
+		}
+		if err := writeJSON(stdout, result); err != nil {
+			return err
+		}
+		if !result.Valid {
+			return skills.ErrValidationFailed
+		}
+		return nil
+	default:
+		return &usageError{message: fmt.Sprintf("unknown skills subcommand %q", args[0])}
+	}
 }
 
 func runAdapters(args []string, stdout, stderr io.Writer) error {
@@ -307,9 +373,13 @@ Usage:
 	engkit adapters list
 	engkit adapters inspect [--root PATH] --provider PROVIDER
 	engkit speckit plan [--root PATH] --integration PROVIDER --version RELEASE_TAG
+	engkit skills list [--root PATH]
+	engkit skills inspect [--root PATH] --id SKILL_ID
+	engkit skills validate [--root PATH] [--id SKILL_ID]
 
 inspect and plan-init are read-only. init revalidates the workspace and only
 publishes .engkit when --approve exactly matches the current plan ID. Adapter
 inspection and Spec Kit planning are read-only; no Spec Kit execution command
-is provided in this milestone.`)
+is provided in this milestone. Skill listing, inspection, and validation are
+read-only and never execute package resources.`)
 }

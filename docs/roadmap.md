@@ -250,7 +250,7 @@ public release URL completed successfully.
 
 ### `v0.2.0`: skill authoring and lifecycle
 
-**Status:** Canonical package design accepted; implementation not started
+**Status:** In progress; canonical design and read-only operations implemented
 
 - Define the provider-neutral skill contract and ownership model.
 - Add read-only discovery, inspection, and validation first.
@@ -264,9 +264,9 @@ Planned implementation gates:
 1. **`v0.2.0A` — canonical design:** accepted in ADR 0007. Canonical packages
    use `.agents/skills/SKILL_ID/skill.yaml` plus `instructions.md`; existing
    Spec Kit and provider-native directories remain external.
-2. **`v0.2.0B` — schema and read-only operations:** approve the complete
-   `engkit.skill/v1alpha1` schema, then implement deterministic discovery,
-   inspection, and validation without execution or mutation.
+2. **`v0.2.0B` — schema and read-only operations:** implemented locally. The
+   complete `engkit.skill/v1alpha1` schema and deterministic discovery,
+   inspection, and validation do not execute resources or mutate workspaces.
 3. **`v0.2.0C` — mutation planning:** define immutable plan contracts for local
    create, update, and remove operations without applying them.
 4. **`v0.2.0D` — approved local lifecycle:** apply approved mutations with

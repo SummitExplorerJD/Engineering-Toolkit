@@ -172,3 +172,6 @@ network access, credential access, process execution, or workspace mutation.
 Mutation follows the standard plan, approval, execution, journal, and
 checkpoint lifecycle.
 
+The complete experimental manifest fields and read-only CLI behavior are
+specified in [`skill-manifest-v1alpha1.md`](skill-manifest-v1alpha1.md).
+

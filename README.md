@@ -1,24 +1,20 @@
 # Engineering Toolkit
 
-Engineering Toolkit is a planned cross-platform command-line application for creating and operating durable engineering workspaces. It is designed as a modular monolith in Go, with explicit approval gates, inspectable artifacts, optional contextual indexing, selective coding-agent adapters, Spec Kit interoperability, and a secure distribution path based on The Update Framework (TUF).
+Engineering Toolkit is a cross-platform command-line application for creating and operating durable engineering workspaces. It is designed as a modular monolith in Go, with explicit approval gates, inspectable artifacts, optional contextual indexing, selective coding-agent adapters, Spec Kit interoperability, and a secure distribution path based on The Update Framework (TUF).
 
 ## Status
 
-Milestones 1 through 4 and the internal Milestone 5A verified-download core are
-implemented. Milestone 5B production activation planning is prepared but
-blocked pending an approved bootstrap root, repository endpoints, and hosting
-controls. CI and the Milestone 6A release workflow validate six targets across
-Windows, Linux, and macOS on `amd64` and `arm64`. The CLI can inspect and
+Release `v0.1.1` is published. CI and the release workflow validate six targets
+across Windows, Linux, and macOS on `amd64` and `arm64`. The CLI can inspect and
 initialize workspace state, rebuild the optional context index, describe
 supported agent capabilities, and prepare non-executable Spec Kit plans.
 Official Spec Kit `v1.2.0` is installed for Codex; its generated workflows have
-not been executed. The update core is not exposed through the CLI and has no
-production trust root or endpoint, so `v0.1.0` is a manual-update-only release.
-Development toward `v0.1.1` adds user-scoped bootstrap installers with exact
-versions, mandatory checksums, explicit upgrades, recoverable replacement, and
-opt-in PATH changes. Production TUF activation, platform signing,
-package-manager distribution, automatic updates, and self-replacement remain
-deferred.
+not been executed. User-scoped bootstrap installers provide exact versions,
+mandatory checksums, explicit upgrades, recoverable replacement, and opt-in
+PATH changes. Development toward `v0.2.0` adds the provider-neutral skill
+contract and read-only skill discovery and validation. Production TUF
+activation, platform signing, package-manager distribution, automatic updates,
+self-replacement, and skill execution remain deferred.
 
 ## Design principles
 
@@ -37,6 +33,7 @@ deferred.
 - [Architecture](docs/architecture.md)
 - [Roadmap](docs/roadmap.md)
 - [Future capabilities](docs/future-capabilities.md)
+- [Canonical skill manifest v1alpha1](docs/skill-manifest-v1alpha1.md)
 - [Agent adapter matrix](docs/agent-adapters.md)
 - [Spec Kit adoption](docs/spec-kit-adoption.md)
 - [Spec Kit v1.2.0 Codex inventory](docs/spec-kit-v1.2.0-codex-inventory.md)
@@ -47,7 +44,7 @@ deferred.
 - [Installation](docs/installation.md)
 - [First release checklist](docs/release-checklist.md)
 - [v0.1.0 release notes](docs/release-notes/v0.1.0.md)
-- [v0.1.1 draft release notes](docs/release-notes/v0.1.1.md)
+- [v0.1.1 release notes](docs/release-notes/v0.1.1.md)
 - [Security policy](SECURITY.md)
 - [Architecture decisions](docs/adr/)
 - [Agent conventions](.agents/conventions/)
@@ -71,6 +68,9 @@ engkit context search [--root PATH] QUERY
 engkit adapters list
 engkit adapters inspect [--root PATH] --provider PROVIDER
 engkit speckit plan [--root PATH] --integration PROVIDER --version RELEASE_TAG
+engkit skills list [--root PATH]
+engkit skills inspect [--root PATH] --id SKILL_ID
+engkit skills validate [--root PATH] [--id SKILL_ID]
 ```
 
 The context database is derived, local, and ignored by generated `.engkit/.gitignore` rules. Deleting it does not remove canonical project artifacts; run `context rebuild` to recreate it.
@@ -80,6 +80,9 @@ official release source and reports potential ownership conflicts, but it is
 deliberately marked non-executable and does not invoke `uvx` or `specify`.
 The installed Spec Kit skills remain subject to `AGENTS.md` approval boundaries;
 their presence does not authorize workflow execution or external mutations.
+Canonical skill discovery, inspection, and validation are also read-only. They
+do not execute scripts, resolve dependencies, access credentials, or contact
+networks.
 
 ## Contributing
 

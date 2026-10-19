@@ -141,6 +141,60 @@ func TestAdapterAndSpecKitCommandsAreReadOnly(t *testing.T) {
 	}
 }
 
+func TestSkillCommandsClassifyExternalPackagesWithoutWriting(t *testing.T) {
+	root := testWorkspace(t)
+	skillRoot := filepath.Join(root, ".agents", "skills", "speckit-plan")
+	if err := os.MkdirAll(skillRoot, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	skillPath := filepath.Join(skillRoot, "SKILL.md")
+	contents := []byte("# External Spec Kit skill\n")
+	if err := os.WriteFile(skillPath, contents, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, test := range []struct {
+		args []string
+		want string
+	}{
+		{args: []string{"skills", "list", "--root", root}, want: `"classification": "external"`},
+		{args: []string{"skills", "inspect", "--root", root, "--id", "speckit-plan"}, want: `"directory": "speckit-plan"`},
+		{args: []string{"skills", "validate", "--root", root}, want: `"valid": true`},
+	} {
+		var stdout, stderr bytes.Buffer
+		if code := Run(test.args, &stdout, &stderr); code != 0 {
+			t.Fatalf("Run(%v) code = %d, stderr = %q", test.args, code, stderr.String())
+		}
+		if !strings.Contains(stdout.String(), test.want) {
+			t.Fatalf("Run(%v) output = %q, want %q", test.args, stdout.String(), test.want)
+		}
+	}
+	got, err := os.ReadFile(skillPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(got, contents) {
+		t.Fatal("read-only skill commands modified an external skill")
+	}
+}
+
+func TestSkillValidateUsesFailureExitCode(t *testing.T) {
+	root := testWorkspace(t)
+	invalidRoot := filepath.Join(root, ".agents", "skills", "invalid-skill")
+	if err := os.MkdirAll(invalidRoot, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(invalidRoot, "skill.yaml"), []byte("schema_version: unsupported\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	var stdout, stderr bytes.Buffer
+	code := Run([]string{"skills", "validate", "--root", root, "--id", "invalid-skill"}, &stdout, &stderr)
+	if code != 1 || !strings.Contains(stdout.String(), `"valid": false`) || !strings.Contains(stderr.String(), "skill validation failed") {
+		t.Fatalf("code = %d, stdout = %q, stderr = %q", code, stdout.String(), stderr.String())
+	}
+}
+
 func TestUnknownCommandIsUsageError(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	code := Run([]string{"unknown"}, &stdout, &stderr)

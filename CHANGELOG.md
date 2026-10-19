@@ -7,6 +7,14 @@ The project follows Semantic Versioning while the public surface evolves.
 
 ### Added
 
+- Experimental provider-neutral `engkit.skill/v1alpha1` manifest contract.
+- Read-only skill discovery, inspection, and validation commands with strict
+  resource integrity and ownership classification.
+
+## [0.1.1] - 2026-10-19
+
+### Added
+
 - User-scoped PowerShell and POSIX bootstrap installers with exact-version,
   architecture, local-asset, upgrade, and opt-in PATH handling.
 - Release packaging and six-platform CI coverage for installation transactions.
@@ -36,5 +44,6 @@ The project follows Semantic Versioning while the public surface evolves.
 - Bounded HTTPS transport, rollback protection, last-known-good metadata, and
   non-executable content-addressed target caching.
 
-[Unreleased]: https://github.com/SummitExplorerJD/Engineering-Toolkit/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/SummitExplorerJD/Engineering-Toolkit/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/SummitExplorerJD/Engineering-Toolkit/releases/tag/v0.1.1
 [0.1.0]: https://github.com/SummitExplorerJD/Engineering-Toolkit/releases/tag/v0.1.0

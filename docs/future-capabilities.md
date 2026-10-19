@@ -86,7 +86,8 @@ Not included:
 
 ### `v0.2.0`: skill authoring and lifecycle
 
-**Status:** Canonical package design accepted; implementation not started.
+**Status:** Canonical package design and read-only lifecycle implemented
+locally; mutation planning and execution have not started.
 
 This release is intended to establish the canonical, provider-neutral skill
 model and safe local lifecycle.
@@ -101,12 +102,17 @@ Planned skill concepts:
 - Provenance, content hashes, and update policy.
 - Deterministic validation and rendering.
 
-Proposed commands, not yet public contracts:
+Implemented read-only commands:
 
 ```text
-engkit skills list
-engkit skills inspect SKILL
-engkit skills validate PATH
+engkit skills list [--root PATH]
+engkit skills inspect [--root PATH] --id SKILL_ID
+engkit skills validate [--root PATH] [--id SKILL_ID]
+```
+
+Proposed mutation commands, not yet public contracts:
+
+```text
 engkit skills plan-create
 engkit skills create --approve PLAN_ID
 engkit skills plan-update SKILL
@@ -133,8 +139,8 @@ Accepted design decisions:
 
 Remaining decisions for separately approved implementation slices include:
 
-- The complete `v1alpha1` field schema, canonical serialization, diagnostics,
-  and compatibility rules.
+- Canonical serialization and migration rules beyond the implemented
+  `v1alpha1` read-only contract.
 - Mutation-plan payloads and recovery details for create, update, and remove.
 - Future runtime trust and permission UX for executable resources.
 - Import, export, and migration behavior for existing provider-native skills.
@@ -194,7 +200,7 @@ A future managed workspace may contain:
   conventions/
   skills/
     SKILL_NAME/
-      skill.yaml             # one candidate canonical format
+      skill.yaml             # accepted canonical ownership marker
       instructions.md
       references/
       scripts/
@@ -213,8 +219,9 @@ AGENTS.md
 README.md
 ```
 
-This example is illustrative and must not be treated as an accepted persisted
-schema.
+The skill-package portion is defined by the `engkit.skill/v1alpha1` contract.
+The wider project layout remains illustrative and is not an accepted project
+creation schema.
 
 ## 4. Deferred capabilities
 

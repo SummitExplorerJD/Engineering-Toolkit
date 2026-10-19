@@ -6,6 +6,7 @@ require (
 	github.com/ncruces/go-sqlite3 v0.35.4
 	github.com/theupdateframework/go-tuf/v2 v2.4.2
 	golang.org/x/mod v0.30.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
