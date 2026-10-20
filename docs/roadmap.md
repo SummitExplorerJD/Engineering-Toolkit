@@ -288,7 +288,7 @@ installation upgraded successfully and reported `engkit v0.2.0`.
 
 ### `v0.2.1`: template authoring and project-profile composition
 
-**Status:** Planned
+**Status:** Contract design completed; `v0.2.1B` pending approval
 
 - Define versioned skill-template, project-profile, catalog, and composition-plan
   schemas.
@@ -299,6 +299,23 @@ installation upgraded successfully and reported `engkit v0.2.0`.
 - Plan and apply new-project creation or existing-workspace composition through
   approval, journals, checkpoints, verification, and recovery.
 - Ship an independently approved first-party template set and pilot profile.
+
+Planned implementation gates:
+
+1. **`v0.2.1A` — exact contracts:** accepted in
+   [ADR 0010](adr/0010-template-profile-v1alpha1-contracts.md). The catalog,
+   skill-template, project-profile, and composition-plan schemas plus future CLI
+   families are specified. No runtime behavior is implemented by this slice.
+2. **`v0.2.1B` — strict readers and authoring scaffold:** implement offline
+   catalog, template, and profile parsing, deterministic inspection, and
+   bounded creation of an explicit absent template directory.
+3. **`v0.2.1C` — rendering and composition planning:** implement bounded
+   substitution, profile recommendations, and non-executable plans for new and
+   existing workspaces.
+4. **`v0.2.1D` — approved composition lifecycle:** apply matching plans through
+   locks, staging, journals, checkpoints, verification, and recovery.
+5. **`v0.2.1E` — first-party pilot content:** independently review and package
+   the initial templates and one pilot profile.
 
 ### `v0.2.2`: selective provider synchronization
 

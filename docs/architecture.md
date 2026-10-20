@@ -226,3 +226,32 @@ separately approved transaction using journals, checkpoints, verification, and
 recovery. Provider rendering consumes canonical output downstream and cannot
 become the canonical template model.
 
+## 15. Experimental template and composition contracts
+
+The accepted `v1alpha1` contracts are split by ownership boundary:
+
+- [`template-catalog-v1alpha1.md`](template-catalog-v1alpha1.md) defines the
+  immutable packaged catalog, skill-template sources, bounded variables, and
+  deterministic rendering inputs.
+- [`project-profile-v1alpha1.md`](project-profile-v1alpha1.md) defines exact
+  template selection, compatibility evidence, source-layout policy, workspace
+  assets, and non-executable integration requests.
+- [`composition-plan-v1alpha1.md`](composition-plan-v1alpha1.md) defines the
+  shared immutable preview for new-project creation and existing-workspace
+  composition.
+
+Future implementation keeps parsing and rendering in provider-neutral core
+modules. Catalog embedding and filesystem publication are infrastructure at the
+CLI boundary. Rendered canonical skills pass through the existing `skills`
+validator and lifecycle; profile-owned workspace assets require separate
+composition ownership records and cannot be inferred as canonical skills.
+Profile-owned workspace assets include the root `AGENTS.md` and declared files
+below `.agents/context`, `.agents/conventions`, and `.agents/workflows`;
+canonical packages remain exclusively below `.agents/skills`.
+
+The plan layer depends on catalog, template, profile, workspace inspection, and
+canonical skill validation ports. It exposes no mutation function. A later
+executor may consume a rebuilt matching plan only after its journaling,
+checkpoint, staging, verification, and recovery contract is independently
+approved.
+

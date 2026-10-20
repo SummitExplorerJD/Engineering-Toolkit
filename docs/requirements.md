@@ -262,3 +262,28 @@ Errors shall distinguish user input, policy refusal, environmental failure, inte
   content, and provider synchronization remain separately approved
   implementation slices.
 
+## 11. `v0.2.1A` template-and-profile contract acceptance criteria
+
+- Catalog, template, profile, and composition-plan artifacts use explicit
+  experimental schema identifiers and reject unknown or ambiguous YAML state.
+- Catalog entries and profile selections bind exact versions and content
+  digests; floating or implicit latest-version resolution is unavailable.
+- Template and profile variables are declared, typed, validated, and rendered
+  through bounded single-pass substitution in text resources only.
+- Output paths are fixed declarations and cannot be produced through variable
+  interpolation, ambient environment state, or executable template logic.
+- Profile recommendation emits evidence but never selects a profile or grants
+  approval.
+- Profiles can declare the initial `AGENTS.md` and `.agents/context`,
+  `.agents/conventions`, `.agents/skills`, and `.agents/workflows` workspace
+  surfaces without treating those assets as installed canonical skills.
+- Project creation and existing-workspace composition emit deterministic JSON
+  plans that bind every input, output, conflict, owner, digest, precondition,
+  operation, verification rule, and recovery rule before mutation.
+- Catalog inspection, template inspection, profile inspection, recommendation,
+  and composition planning are offline and perform no writes.
+- Every CLI command family and subcommand provides successful `help`, `-h`, and
+  `--help` behavior rather than interpreting help as an unknown subcommand.
+- Parsers, scaffold execution, rendering, plan execution, first-party catalog
+  content, and provider synchronization remain separate implementation gates.
+
