@@ -51,6 +51,8 @@ Expected dependency flow:
 | Context index | SQLite | Rebuildable | Search and derived relationships |
 | Skill manifest | YAML | User-edited | Canonical identity, contract, ownership, and declared resources |
 | Skill instructions | Markdown | User-edited | Provider-neutral instructional content |
+| Skill template | YAML and declared text resources | Catalog-authored | Deterministic source for a rendered canonical skill |
+| Project profile | YAML | Catalog-authored | Versioned selection and composition intent |
 | Trust metadata | TUF JSON | Signed and versioned | Distribution trust decisions |
 
 Every persisted artifact includes a schema version. Canonical serialization rules will be defined before signing or stable machine-output commitments.
@@ -126,8 +128,9 @@ require explicit retention policy.
 - Locking and crash-consistency strategy for workflows other than the accepted
   skill-mutation transaction.
 - Installer and self-replacement strategy per operating system.
-- Project-creation command shape and versioned profile format.
 - Exact skill-schema fields, canonical serialization, and migration policy.
+- Exact template and profile schema fields, catalog update policy, and public
+  command names.
 - Runtime trust and permission UX for executable skill resources.
 
 Each dependency choice requires a separate approval because it modifies `go.mod` and long-term compatibility.
@@ -187,4 +190,39 @@ locks, durable plans, journals and checkpoints, and explicit digest-based
 recovery as specified in
 [`skill-execution-v1alpha1.md`](skill-execution-v1alpha1.md). Implementation
 is owned by the separate `skillexec` module.
+
+## 14. Template and project-profile composition boundary
+
+A skill template is catalog source, not installed workspace state. First-party
+template sources and project profiles are reviewed in this repository and
+packaged with a specific CLI release. The initial catalog is local and offline;
+remote catalogs, marketplace discovery, and runtime catalog updates are outside
+the boundary.
+
+A rendered skill is an ordinary canonical package governed by the existing
+`engkit.skill/v1alpha1` validator and transactional lifecycle. The renderer
+generates declared resources first, computes their content hashes, and emits the
+canonical manifest last. It may substitute only schema-declared typed variables
+through a bounded placeholder syntax. It has no general expression language and
+does not read ambient environment variables, execute template resources, contact
+a network, or access credentials.
+
+A project profile selects exact template identifiers and versions and may
+describe conventions, workflows, source-layout policy, and optional integration
+requests. Read-only workspace classification produces evidence and compatible
+profile recommendations. The user selects a profile explicitly; detection is
+never approval.
+
+Composition has two use cases with one policy boundary:
+
+- new-project creation targets an absent or explicitly empty destination; and
+- existing-workspace composition preserves all unowned content and reports
+  conflicts before mutation.
+
+Both produce a deterministic JSON plan that binds the profile, catalog version,
+template versions, resolved variables, workspace facts, rendered file digests,
+ownership, conflicts, and ordered operations. Execution remains a later,
+separately approved transaction using journals, checkpoints, verification, and
+recovery. Provider rendering consumes canonical output downstream and cannot
+become the canonical template model.
 

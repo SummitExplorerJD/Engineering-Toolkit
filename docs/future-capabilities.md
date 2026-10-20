@@ -87,7 +87,8 @@ Not included:
 ### `v0.2.0`: skill authoring and lifecycle
 
 **Status:** Canonical package design, read-only lifecycle, mutation planning,
-and approved transactional local lifecycle implemented.
+approved transactional local lifecycle, and template/profile composition design
+completed.
 
 This release is intended to establish the canonical, provider-neutral skill
 model and safe local lifecycle.
@@ -152,55 +153,59 @@ Remaining decisions for separately approved implementation slices include:
 
 - Canonical serialization and migration rules beyond the implemented
   `v1alpha1` read-only contract.
+- Exact skill-template, project-profile, catalog, and composition-plan schemas.
 - Future runtime trust and permission UX for executable resources.
 - Import, export, and migration behavior for existing provider-native skills.
 
 No provider's current format will become the canonical model merely by being
 implemented first.
 
-### `v0.2.1`: selective provider synchronization
+### `v0.2.1`: template authoring and project-profile composition
 
-This release is intended to render or synchronize approved canonical skills for
-Codex, Claude Code, and OpenCode according to their declared capabilities.
-
-Proposed commands, not yet public contracts:
-
-```text
-engkit skills plan-sync --provider PROVIDER
-engkit skills sync --provider PROVIDER --approve PLAN_ID
-```
-
-Required behavior:
-
-- Preview every generated, modified, conflicting, and removed path.
-- Preserve provider-owned files that are outside the approved ownership set.
-- Report unsupported capability mappings instead of claiming parity.
-- Detect lossy conversion and require an explicit decision.
-- Keep canonical workspace data independent from provider-specific output.
-
-### `v0.2.2`: project, workflow, and Spec Kit composition
-
-This release is intended to connect skills with workspace creation, reusable
-workflows, and official Spec Kit interoperability.
+This release is intended to generate project-appropriate canonical skills and
+workspace assets from an explicitly selected, versioned profile.
+[ADR 0009](adr/0009-skill-templates-and-project-profiles.md) fixes the ownership
+and safety boundary; exact schemas and commands remain separate approval
+decisions.
 
 Planned capabilities:
 
-- Create a new project from an explicitly selected and versioned profile.
-- Extend an existing initialized workspace through a reviewed plan.
+- Create an editable skill-template draft without installing it.
+- List and inspect first-party templates and profiles shipped with the CLI.
+- Inspect a project read-only and recommend compatible profiles with evidence.
+- Create a new project from an explicitly selected profile.
+- Extend an existing initialized workspace through a reviewed composition plan.
 - Choose `src/` only after ecosystem compatibility checks.
-- Materialize the approved `.agents` structure.
-- Compose skills into declarative workflows.
-- Preview Spec Kit initialization or upgrade conflicts before execution.
-- Preserve clear ownership boundaries between Engineering Toolkit, providers,
-  users, and official Spec Kit assets.
+- Materialize approved `.agents` conventions, context, skills, and workflows.
+- Render canonical skill packages offline with declared typed variables.
+- Preview every output, conflict, ownership decision, and resolved variable.
+- Apply the approved composition through journals, checkpoints, verification,
+  and recovery.
 
-The command name remains an open decision. Candidate interfaces include:
+Candidate interfaces, not yet public contracts, include:
 
 ```text
-engkit project new NAME
-engkit workspace plan-init --profile PROFILE
-engkit workspace init --approve PLAN_ID
+engkit skills scaffold --id SKILL_ID --output PATH
+engkit catalog list
+engkit profiles recommend [--root PATH]
+engkit project plan-new --profile PROFILE --destination PATH
+engkit project new --profile PROFILE --destination PATH --approve PLAN_ID
+engkit workspace plan-compose --profile PROFILE [--root PATH]
+engkit workspace compose --profile PROFILE --approve PLAN_ID [--root PATH]
 ```
+
+The first implementation will use a reviewed, versioned catalog packaged with
+the CLI. Remote catalogs, arbitrary template imports, and automatic catalog
+updates remain deferred. Detection can recommend a profile but cannot select or
+apply one.
+
+The initial implementation slices are expected to be:
+
+1. exact schemas and catalog layout;
+2. read-only catalog inspection, scaffold, and deterministic rendering;
+3. project inspection and composition planning;
+4. approved composition execution and recovery; and
+5. independently reviewed first-party templates and a pilot profile.
 
 A future managed workspace may contain:
 
@@ -232,6 +237,29 @@ README.md
 The skill-package portion is defined by the `engkit.skill/v1alpha1` contract.
 The wider project layout remains illustrative and is not an accepted project
 creation schema.
+
+### `v0.2.2`: selective provider synchronization
+
+This release is intended to render or synchronize approved canonical skills for
+Codex, Claude Code, and OpenCode after canonical project composition exists.
+
+Proposed commands, not yet public contracts:
+
+```text
+engkit skills plan-sync --provider PROVIDER
+engkit skills sync --provider PROVIDER --approve PLAN_ID
+```
+
+Required behavior:
+
+- Preview every generated, modified, conflicting, and removed path.
+- Preserve provider-owned files that are outside the approved ownership set.
+- Report unsupported capability mappings instead of claiming parity.
+- Detect lossy conversion and require an explicit decision.
+- Keep canonical workspace data independent from provider-specific output.
+- Preview Spec Kit initialization or upgrade conflicts before execution.
+- Preserve clear ownership boundaries between Engineering Toolkit, providers,
+  users, and official Spec Kit assets.
 
 ## 4. Deferred capabilities
 
@@ -267,8 +295,9 @@ Before implementation, the applicable milestone should produce or update:
 - Functional and non-functional requirements.
 - Architecture boundaries and ownership rules.
 - An ADR for the canonical skill format.
-- An ADR for project creation and profile composition when the interface is
-  selected.
+- [ADR 0009](adr/0009-skill-templates-and-project-profiles.md) for the template
+  and profile composition boundary, followed by an update or superseding
+  decision if an exact public interface changes it.
 - Versioned schema proposals with migration and compatibility policy.
 - Exact path inventories and conflict behavior.
 - Security analysis for executable resources and remote provenance.

@@ -96,11 +96,35 @@ services, access credentials, or adopt external ownership.
 ### FR-015: Project creation and composition
 
 The system shall distinguish initializing an existing workspace from creating a
-new project. Future project creation shall use an explicitly selected,
-versioned profile; inspect ecosystem compatibility before choosing a source
-layout; preview all generated paths; and compose workspace conventions, skills,
-workflows, provider integrations, and optional Spec Kit assets without silently
-replacing existing files.
+new project. Project creation and existing-workspace composition shall use an
+explicitly selected, versioned profile; inspect ecosystem compatibility before
+choosing a source layout; preview all generated paths; and compose workspace
+conventions, skills, workflows, provider integrations, and optional Spec Kit
+assets without silently replacing existing files.
+
+Read-only detection may recommend compatible profiles but shall not select or
+apply one implicitly. A composition plan shall bind the exact profile version,
+skill-template versions, resolved variables, observed workspace facts, rendered
+content digests, conflicts, and affected paths. Applying a composition plan
+shall require approval of that complete plan.
+
+### FR-016: Skill templates and project profiles
+
+The system shall distinguish an editable skill template from an installed
+canonical skill. A template may produce a canonical skill package but shall not
+be discovered as installed state merely because it is available in a catalog.
+
+First-party templates and project profiles shall be versioned, provider-neutral,
+reviewable repository sources distributed with the CLI. Rendering shall be
+offline and deterministic. Template substitution shall use a bounded declarative
+variable model with no arbitrary expressions, process execution, network access,
+credential access, or environment-variable expansion. Missing, unknown, or
+invalid variables shall fail closed.
+
+Profiles shall identify exact template versions and may also declare
+conventions, workflows, source-layout policy, and optional integration requests.
+They shall not grant runtime permissions or bypass the existing plan, approval,
+ownership, conflict, journal, checkpoint, or recovery contracts.
 
 ## 4. Non-functional requirements
 
@@ -218,4 +242,23 @@ Errors shall distinguish user input, policy refusal, environmental failure, inte
 - Execution and recovery remain local and do not run package resources,
   resolve dependencies, render providers, access credentials, or contact a
   network.
+
+## 10. `v0.2.0E` template-and-profile design acceptance criteria
+
+- Templates, profiles, rendered canonical skills, and provider-specific output
+  have distinct ownership and storage boundaries.
+- First-party catalog content is versioned with the CLI and renders offline.
+- Profile selection is explicit; read-only project detection may only recommend
+  compatible profiles with evidence.
+- Rendering permits only declared, typed variables and performs no arbitrary
+  evaluation, process execution, network access, credential access, or ambient
+  environment expansion.
+- Composition plans bind all selected versions, resolved inputs, observed
+  workspace facts, rendered digests, conflicts, and affected paths before any
+  mutation.
+- Existing files, external Spec Kit skills, and provider-native assets remain
+  unchanged unless a later exact plan owns and approves their paths.
+- Authoring scaffolds, profile composition, execution, first-party catalog
+  content, and provider synchronization remain separately approved
+  implementation slices.
 

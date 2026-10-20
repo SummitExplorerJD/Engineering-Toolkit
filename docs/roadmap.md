@@ -251,7 +251,8 @@ public release URL completed successfully.
 ### `v0.2.0`: skill authoring and lifecycle
 
 **Status:** In progress; canonical design, read-only operations, mutation
-planning, and approved transactional local lifecycle implemented
+planning, approved transactional local lifecycle, and template/profile
+composition design completed
 
 - Define the provider-neutral skill contract and ownership model.
 - Add read-only discovery, inspection, and validation first.
@@ -274,8 +275,27 @@ Planned implementation gates:
    ownership checks, journals, checkpoints, verification, and recovery. The
    transactional execution contract is accepted in ADR 0008 and implemented
    locally with failure-injection coverage.
+5. **`v0.2.0E` — template and profile composition design:** accepted in
+   [ADR 0009](adr/0009-skill-templates-and-project-profiles.md). Templates,
+   explicit project profiles, rendered canonical skills, and provider output
+   have separate ownership. Exact schemas and implementation remain separately
+   approved.
 
-### `v0.2.1`: selective provider synchronization
+### `v0.2.1`: template authoring and project-profile composition
+
+**Status:** Planned
+
+- Define versioned skill-template, project-profile, catalog, and composition-plan
+  schemas.
+- Add an authoring scaffold that writes only to an explicit absent output
+  directory, plus a deterministic offline renderer.
+- Recommend compatible profiles from read-only evidence while requiring
+  explicit profile selection.
+- Plan and apply new-project creation or existing-workspace composition through
+  approval, journals, checkpoints, verification, and recovery.
+- Ship an independently approved first-party template set and pilot profile.
+
+### `v0.2.2`: selective provider synchronization
 
 **Status:** Planned
 
@@ -283,16 +303,5 @@ Planned implementation gates:
   OpenCode.
 - Preview conflicts and report unsupported or lossy mappings.
 - Preserve canonical data and provider-owned files outside the approved scope.
-
-### `v0.2.2`: project, workflow, and Spec Kit composition
-
-**Status:** Planned; command shape and profile format are open decisions
-
-- Distinguish creation of a new project from initialization of an existing
-  workspace.
-- Add versioned project profiles and ecosystem-aware layout selection.
-- Compose `.agents` conventions, context, skills, and workflows through reviewed
-  plans.
-- Integrate official Spec Kit assets without weakening ownership or approval
-  boundaries.
+- Keep official Spec Kit interoperation explicit and independently owned.
 
