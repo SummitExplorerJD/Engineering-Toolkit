@@ -32,6 +32,76 @@ func TestVersionJSON(t *testing.T) {
 	}
 }
 
+func TestScopedHelpSucceeds(t *testing.T) {
+	for _, args := range [][]string{
+		{"skills", "--help"},
+		{"skills", "list", "--help"},
+		{"workspace", "help"},
+		{"templates", "scaffold", "-h"},
+		{"profiles", "--help"},
+	} {
+		var stdout, stderr bytes.Buffer
+		if code := Run(args, &stdout, &stderr); code != 0 {
+			t.Fatalf("Run(%v) code = %d, stderr = %q", args, code, stderr.String())
+		}
+		if !strings.Contains(stdout.String(), "Usage:") || stderr.Len() != 0 {
+			t.Fatalf("Run(%v) stdout = %q, stderr = %q", args, stdout.String(), stderr.String())
+		}
+	}
+}
+
+func TestBuiltinCatalogCommandsAreOfflineAndDeterministic(t *testing.T) {
+	for _, test := range []struct {
+		args []string
+		want string
+	}{
+		{args: []string{"catalog", "inspect"}, want: `"schema_version": "engkit.catalog/v1alpha1"`},
+		{args: []string{"templates", "list"}, want: `"schema_version": "engkit.template-list/v1alpha1"`},
+		{args: []string{"profiles", "list"}, want: `"schema_version": "engkit.profile-list/v1alpha1"`},
+	} {
+		var first, second, stderr bytes.Buffer
+		if code := Run(test.args, &first, &stderr); code != 0 {
+			t.Fatalf("Run(%v) code = %d, stderr = %q", test.args, code, stderr.String())
+		}
+		stderr.Reset()
+		if code := Run(test.args, &second, &stderr); code != 0 {
+			t.Fatalf("second Run(%v) code = %d, stderr = %q", test.args, code, stderr.String())
+		}
+		if first.String() != second.String() || !strings.Contains(first.String(), test.want) {
+			t.Fatalf("Run(%v) output = %q, second = %q", test.args, first.String(), second.String())
+		}
+	}
+}
+
+func TestTemplateScaffoldCLI(t *testing.T) {
+	parent, err := os.MkdirTemp(".", "engkit-cli-template-test-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	parent, err = filepath.Abs(parent)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(parent) })
+	output := filepath.Join(parent, "release-review")
+	var stdout, stderr bytes.Buffer
+	code := Run([]string{"templates", "scaffold", "--output", output, "--id", "release-review", "--version", "0.1.0"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("Run() code = %d, stderr = %q", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), `"schema_version": "engkit.template-scaffold-result/v1alpha1"`) {
+		t.Fatalf("stdout = %q", stdout.String())
+	}
+	if _, err := os.Stat(filepath.Join(output, "template.yaml")); err != nil {
+		t.Fatal(err)
+	}
+	stdout.Reset()
+	stderr.Reset()
+	if code := Run([]string{"templates", "scaffold", "--output", output, "--id", "release-review", "--version", "0.1.0"}, &stdout, &stderr); code != 1 {
+		t.Fatalf("second Run() code = %d, stderr = %q", code, stderr.String())
+	}
+}
+
 func TestWorkspaceInspectJSON(t *testing.T) {
 	root := testWorkspace(t)
 	var stdout, stderr bytes.Buffer

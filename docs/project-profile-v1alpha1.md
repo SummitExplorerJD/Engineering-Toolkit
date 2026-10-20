@@ -64,6 +64,11 @@ select a profile, write a workspace, initialize Spec Kit, render provider
 files, or become approval. Subsequent planning requires an explicit
 `PROFILE_ID@VERSION` selection.
 
+`profiles list` emits `engkit.profile-list/v1alpha1`. `profiles inspect` emits
+`engkit.profile-inspection/v1alpha1` with the validated profile and its exact
+catalog directory digest. Both are implemented in `v0.2.1B`; profile
+recommendation remains reserved for `v0.2.1C`.
+
 ## 4. Ownership boundary
 
 Rendered canonical skills are owned by their canonical manifests and existing
@@ -72,5 +77,5 @@ assets are tracked separately by the composition plan. Existing unowned files,
 provider-native content, and Spec Kit content remain external and unchanged
 unless a later independently approved contract explicitly owns those paths.
 
-This document accepts the schema and read-only CLI contracts only.
-Implementation and first-party profile content remain later milestones.
+Strict reading and catalog-backed inspection are implemented. First-party
+profile content remains a separately approved milestone.

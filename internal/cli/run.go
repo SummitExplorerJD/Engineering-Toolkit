@@ -8,15 +8,20 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
+	"strings"
 
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/adapters"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/catalog"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/execution"
 	sqliteindex "github.com/SummitExplorerJD/Engineering-Toolkit/internal/index/sqlite"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/plan"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/profiles"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skillexec"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skillplan"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skills"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/speckit"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/templates"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/workspace"
 )
 
@@ -30,6 +35,9 @@ func Run(args []string, stdout, stderr io.Writer) int {
 	if len(args) == 0 {
 		writeUsage(stderr)
 		return 2
+	}
+	if prefix, ok := helpPrefix(args); ok && writeScopedUsage(stdout, prefix) {
+		return 0
 	}
 
 	var err error
@@ -49,6 +57,12 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		err = runSpecKit(args[1:], stdout, stderr)
 	case "skills":
 		err = runSkills(args[1:], stdout, stderr)
+	case "catalog":
+		err = runCatalog(args[1:], stdout, stderr)
+	case "templates":
+		err = runTemplates(args[1:], stdout, stderr)
+	case "profiles":
+		err = runProfiles(args[1:], stdout, stderr)
 	default:
 		fmt.Fprintf(stderr, "unknown command %q\n\n", args[0])
 		writeUsage(stderr)
@@ -65,6 +79,158 @@ func Run(args []string, stdout, stderr io.Writer) int {
 	}
 	fmt.Fprintf(stderr, "engkit: %v\n", err)
 	return 1
+}
+
+func runCatalog(args []string, stdout, stderr io.Writer) error {
+	if len(args) == 0 {
+		return &usageError{message: "catalog requires the inspect subcommand"}
+	}
+	if args[0] != "inspect" {
+		return &usageError{message: fmt.Sprintf("unknown catalog subcommand %q", args[0])}
+	}
+	flags := newFlagSet("catalog inspect", stderr)
+	if err := flags.Parse(args[1:]); err != nil {
+		return &usageError{message: err.Error()}
+	}
+	if flags.NArg() != 0 {
+		return &usageError{message: "catalog inspect does not accept positional arguments"}
+	}
+	loaded, _, err := catalog.Builtin()
+	if err != nil {
+		return err
+	}
+	return writeJSON(stdout, loaded)
+}
+
+func runTemplates(args []string, stdout, stderr io.Writer) error {
+	if len(args) == 0 {
+		return &usageError{message: "templates requires a subcommand: list, inspect, or scaffold"}
+	}
+	switch args[0] {
+	case "list":
+		flags := newFlagSet("templates list", stderr)
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "templates list does not accept positional arguments"}
+		}
+		loaded, _, err := catalog.Builtin()
+		if err != nil {
+			return err
+		}
+		items := make([]templates.Reference, 0, len(loaded.Templates))
+		for _, entry := range loaded.Templates {
+			items = append(items, templates.Reference{ID: entry.ID, Version: entry.Version, SHA256: entry.SHA256})
+		}
+		return writeJSON(stdout, templates.ListResult{SchemaVersion: templates.ListSchema, CatalogID: loaded.ID, CatalogVersion: loaded.Version, Templates: templates.SortedReferences(items)})
+	case "inspect":
+		flags := newFlagSet("templates inspect", stderr)
+		id := flags.String("id", "", "template identifier")
+		version := flags.String("version", "", "exact template version")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "templates inspect does not accept positional arguments"}
+		}
+		if *id == "" || *version == "" {
+			return &usageError{message: "templates inspect requires --id and --version"}
+		}
+		loaded, catalogFS, err := catalog.Builtin()
+		if err != nil {
+			return err
+		}
+		entry, ok := catalog.Find(loaded.Templates, *id, *version)
+		if !ok {
+			return fmt.Errorf("template %s@%s is not in the packaged catalog", *id, *version)
+		}
+		template, err := templates.Load(catalogFS, path.Join(entry.Path, "template.yaml"))
+		if err != nil {
+			return err
+		}
+		if template.ID != entry.ID || template.Version != entry.Version {
+			return fmt.Errorf("template identity does not match its catalog entry")
+		}
+		return writeJSON(stdout, templates.Inspection{SchemaVersion: templates.InspectionSchema, CatalogID: loaded.ID, CatalogVersion: loaded.Version, Template: template, DirectorySHA256: entry.SHA256})
+	case "scaffold":
+		flags := newFlagSet("templates scaffold", stderr)
+		output := flags.String("output", "", "explicit absent output directory")
+		id := flags.String("id", "", "template identifier")
+		version := flags.String("version", "", "exact template version")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "templates scaffold does not accept positional arguments"}
+		}
+		if *output == "" || *id == "" || *version == "" {
+			return &usageError{message: "templates scaffold requires --output, --id, and --version"}
+		}
+		result, err := templates.Scaffold(*output, *id, *version)
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	default:
+		return &usageError{message: fmt.Sprintf("unknown templates subcommand %q", args[0])}
+	}
+}
+
+func runProfiles(args []string, stdout, stderr io.Writer) error {
+	if len(args) == 0 {
+		return &usageError{message: "profiles requires a subcommand: list or inspect"}
+	}
+	switch args[0] {
+	case "list":
+		flags := newFlagSet("profiles list", stderr)
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "profiles list does not accept positional arguments"}
+		}
+		loaded, _, err := catalog.Builtin()
+		if err != nil {
+			return err
+		}
+		items := make([]profiles.Reference, 0, len(loaded.Profiles))
+		for _, entry := range loaded.Profiles {
+			items = append(items, profiles.Reference{ID: entry.ID, Version: entry.Version, SHA256: entry.SHA256})
+		}
+		return writeJSON(stdout, profiles.ListResult{SchemaVersion: profiles.ListSchema, CatalogID: loaded.ID, CatalogVersion: loaded.Version, Profiles: profiles.SortedReferences(items)})
+	case "inspect":
+		flags := newFlagSet("profiles inspect", stderr)
+		id := flags.String("id", "", "profile identifier")
+		version := flags.String("version", "", "exact profile version")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "profiles inspect does not accept positional arguments"}
+		}
+		if *id == "" || *version == "" {
+			return &usageError{message: "profiles inspect requires --id and --version"}
+		}
+		loaded, catalogFS, err := catalog.Builtin()
+		if err != nil {
+			return err
+		}
+		entry, ok := catalog.Find(loaded.Profiles, *id, *version)
+		if !ok {
+			return fmt.Errorf("profile %s@%s is not in the packaged catalog", *id, *version)
+		}
+		profile, err := profiles.Load(catalogFS, path.Join(entry.Path, "profile.yaml"))
+		if err != nil {
+			return err
+		}
+		if profile.ID != entry.ID || profile.Version != entry.Version {
+			return fmt.Errorf("profile identity does not match its catalog entry")
+		}
+		return writeJSON(stdout, profiles.Inspection{SchemaVersion: profiles.InspectionSchema, CatalogID: loaded.ID, CatalogVersion: loaded.Version, Profile: profile, DirectorySHA256: entry.SHA256})
+	default:
+		return &usageError{message: fmt.Sprintf("unknown profiles subcommand %q", args[0])}
+	}
 }
 
 func runSkills(args []string, stdout, stderr io.Writer) error {
@@ -506,35 +672,82 @@ func writeJSON(writer io.Writer, value any) error {
 	return nil
 }
 
+var usageLines = []string{
+	"version [--json]",
+	"workspace inspect [--root PATH]",
+	"workspace plan-init [--root PATH]",
+	"workspace init [--root PATH] --approve PLAN_ID",
+	"context rebuild [--root PATH]",
+	"context status [--root PATH]",
+	"context search [--root PATH] QUERY",
+	"adapters list",
+	"adapters inspect [--root PATH] --provider PROVIDER",
+	"speckit plan [--root PATH] --integration PROVIDER --version RELEASE_TAG",
+	"skills list [--root PATH]",
+	"skills inspect [--root PATH] --id SKILL_ID",
+	"skills validate [--root PATH] [--id SKILL_ID]",
+	"skills plan-create [--root PATH] --source PACKAGE_PATH",
+	"skills plan-update [--root PATH] --id SKILL_ID --source PACKAGE_PATH",
+	"skills plan-remove [--root PATH] --id SKILL_ID",
+	"skills create [--root PATH] --source PACKAGE_PATH --approve PLAN_ID",
+	"skills update [--root PATH] --id SKILL_ID --source PACKAGE_PATH --approve PLAN_ID",
+	"skills remove [--root PATH] --id SKILL_ID --approve PLAN_ID",
+	"skills recover [--root PATH] --id SKILL_ID --approve PLAN_ID",
+	"catalog inspect",
+	"templates list",
+	"templates inspect --id TEMPLATE_ID --version VERSION",
+	"templates scaffold --output PATH --id TEMPLATE_ID --version VERSION",
+	"profiles list",
+	"profiles inspect --id PROFILE_ID --version VERSION",
+}
+
+func helpPrefix(args []string) ([]string, bool) {
+	for index, argument := range args {
+		if argument == "help" || argument == "-h" || argument == "--help" {
+			return args[:index], true
+		}
+	}
+	return nil, false
+}
+
+func writeScopedUsage(writer io.Writer, prefix []string) bool {
+	if len(prefix) == 0 {
+		writeUsage(writer)
+		return true
+	}
+	wanted := strings.Join(prefix, " ")
+	matched := make([]string, 0)
+	for _, line := range usageLines {
+		command := strings.Fields(line)
+		if len(command) < len(prefix) {
+			continue
+		}
+		if strings.Join(command[:len(prefix)], " ") == wanted {
+			matched = append(matched, line)
+		}
+	}
+	if len(matched) == 0 {
+		return false
+	}
+	fmt.Fprintln(writer, "Usage:")
+	for _, line := range matched {
+		fmt.Fprintf(writer, "  engkit %s\n", line)
+	}
+	return true
+}
+
 func writeUsage(writer io.Writer) {
-	fmt.Fprintln(writer, `Engineering Toolkit
-
-Usage:
-  engkit version [--json]
-  engkit workspace inspect [--root PATH]
-  engkit workspace plan-init [--root PATH]
-  engkit workspace init [--root PATH] --approve PLAN_ID
-  engkit context rebuild [--root PATH]
-  engkit context status [--root PATH]
-  engkit context search [--root PATH] QUERY
-	engkit adapters list
-	engkit adapters inspect [--root PATH] --provider PROVIDER
-	engkit speckit plan [--root PATH] --integration PROVIDER --version RELEASE_TAG
-	engkit skills list [--root PATH]
-	engkit skills inspect [--root PATH] --id SKILL_ID
-	engkit skills validate [--root PATH] [--id SKILL_ID]
-	engkit skills plan-create [--root PATH] --source PACKAGE_PATH
-	engkit skills plan-update [--root PATH] --id SKILL_ID --source PACKAGE_PATH
-	engkit skills plan-remove [--root PATH] --id SKILL_ID
-	engkit skills create [--root PATH] --source PACKAGE_PATH --approve PLAN_ID
-	engkit skills update [--root PATH] --id SKILL_ID --source PACKAGE_PATH --approve PLAN_ID
-	engkit skills remove [--root PATH] --id SKILL_ID --approve PLAN_ID
-	engkit skills recover [--root PATH] --id SKILL_ID --approve PLAN_ID
-
+	fmt.Fprintln(writer, "Engineering Toolkit\n\nUsage:")
+	for _, line := range usageLines {
+		fmt.Fprintf(writer, "  engkit %s\n", line)
+	}
+	fmt.Fprintln(writer, `
 inspect and plan-init are read-only. init revalidates the workspace and only
 publishes .engkit when --approve exactly matches the current plan ID. Adapter
 inspection and Spec Kit planning are read-only; no Spec Kit execution command
 is provided in this milestone. Skill listing, inspection, validation, and
 mutation planning are read-only. Skill mutations require an initialized
-workspace and exact plan approval; they never execute package resources.`)
+workspace and exact plan approval; they never execute package resources.
+Catalog, template, and profile inspection are offline and read-only. Template
+scaffolding writes only to an explicit absent output directory.`)
 }

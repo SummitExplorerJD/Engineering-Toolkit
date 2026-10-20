@@ -103,5 +103,15 @@ directory and creates only the documented starter inventory. It refuses an
 existing path and never overwrites, merges, executes, imports, or contacts a
 network. Project and workspace composition remain plan-and-approve operations.
 
-This document accepts the public contracts only. CLI and renderer implementation
-remain later milestones.
+The implemented JSON result schemas are:
+
+- `engkit.catalog/v1alpha1` for `catalog inspect`, with an additional derived
+  `sha256` field covering the packaged `catalog.yaml` bytes;
+- `engkit.template-list/v1alpha1` for the sorted catalog template inventory;
+- `engkit.template-inspection/v1alpha1` for one validated template and its
+  catalog directory digest; and
+- `engkit.template-scaffold-result/v1alpha1` for the normalized output path and
+  created-file inventory.
+
+Strict reading, offline inspection, and bounded scaffold publication are
+implemented in `v0.2.1B`. Template rendering remains a later milestone.

@@ -25,6 +25,10 @@ Engineering Toolkit is a modular monolith: one versioned CLI executable with coh
 | `adapters` | Capability model and adapter orchestration | Core workflow policy |
 | provider adapters | Codex, Claude Code, OpenCode rendering | Pretending unsupported capabilities exist |
 | `skills` | Canonical skill contracts, validation, ownership, and lifecycle planning | Provider-specific storage or implicit script execution |
+| `catalog` | Embedded offline catalog inventory and exact content binding | Runtime catalog updates or remote discovery |
+| `templates` | Skill-template validation and bounded authoring scaffold | Provider rendering or project mutation policy |
+| `profiles` | Project-profile validation and exact template selection | Implicit profile selection or execution |
+| `schemautil` | Shared strict YAML and portable-path primitives | Domain-specific policy |
 | `project` | Project-profile selection and new-workspace composition | Assuming one ecosystem or source layout |
 | `speckit` | Official Spec Kit detection and controlled interoperation | Forking upstream contracts silently |
 | `update` domain | Release channel, version, platform, and installation policy | TUF wire formats or network clients |
@@ -249,8 +253,14 @@ Profile-owned workspace assets include the root `AGENTS.md` and declared files
 below `.agents/context`, `.agents/conventions`, and `.agents/workflows`;
 canonical packages remain exclusively below `.agents/skills`.
 
-The plan layer depends on catalog, template, profile, workspace inspection, and
-canonical skill validation ports. It exposes no mutation function. A later
+The implemented `catalog`, `templates`, and `profiles` packages provide strict
+offline readers. `schemautil` owns only shared YAML ambiguity rejection,
+portable path checks, and regular-file inventory rules. The CLI embeds an empty
+catalog until first-party content receives its own approval.
+
+The future plan layer depends on catalog, template, profile, workspace
+inspection, and canonical skill validation ports. It exposes no mutation
+function. A later
 executor may consume a rebuilt matching plan only after its journaling,
 checkpoint, staging, verification, and recovery contract is independently
 approved.

@@ -16,7 +16,9 @@ checksums, explicit upgrades, recoverable replacement, and opt-in PATH changes.
 `v0.2.0` adds the provider-neutral canonical skill contract, read-only skill
 discovery and validation, deterministic mutation planning, and approved
 transactional creation, update, removal, and recovery. Skill templates and
-project profiles are designed but remain planned for `v0.2.1`. Production TUF
+project profiles are under active `v0.2.1` development: strict offline readers,
+an empty packaged catalog, deterministic inspection, and bounded template
+scaffolding are implemented locally. Production TUF
 activation, platform signing, package-manager distribution, automatic updates,
 self-replacement, provider synchronization, and execution of skill resources
 remain deferred.
@@ -41,6 +43,9 @@ remain deferred.
 - [Canonical skill manifest v1alpha1](docs/skill-manifest-v1alpha1.md)
 - [Skill mutation plan v1alpha1](docs/skill-mutation-plan-v1alpha1.md)
 - [Skill mutation execution v1alpha1](docs/skill-execution-v1alpha1.md)
+- [Template catalog contracts v1alpha1](docs/template-catalog-v1alpha1.md)
+- [Project profile v1alpha1](docs/project-profile-v1alpha1.md)
+- [Project composition plan v1alpha1](docs/composition-plan-v1alpha1.md)
 - [Agent adapter matrix](docs/agent-adapters.md)
 - [Spec Kit adoption](docs/spec-kit-adoption.md)
 - [Spec Kit v1.2.0 Codex inventory](docs/spec-kit-v1.2.0-codex-inventory.md)
@@ -86,6 +91,12 @@ engkit skills create [--root PATH] --source PACKAGE_PATH --approve PLAN_ID
 engkit skills update [--root PATH] --id SKILL_ID --source PACKAGE_PATH --approve PLAN_ID
 engkit skills remove [--root PATH] --id SKILL_ID --approve PLAN_ID
 engkit skills recover [--root PATH] --id SKILL_ID --approve PLAN_ID
+engkit catalog inspect
+engkit templates list
+engkit templates inspect --id TEMPLATE_ID --version VERSION
+engkit templates scaffold --output PATH --id TEMPLATE_ID --version VERSION
+engkit profiles list
+engkit profiles inspect --id PROFILE_ID --version VERSION
 ```
 
 The context database is derived, local, and ignored by generated `.engkit/.gitignore` rules. Deleting it does not remove canonical project artifacts; run `context rebuild` to recreate it.

@@ -288,7 +288,8 @@ installation upgraded successfully and reported `engkit v0.2.0`.
 
 ### `v0.2.1`: template authoring and project-profile composition
 
-**Status:** Contract design completed; `v0.2.1B` pending approval
+**Status:** Strict readers and authoring scaffold implemented locally;
+`v0.2.1C` pending approval
 
 - Define versioned skill-template, project-profile, catalog, and composition-plan
   schemas.
@@ -308,7 +309,8 @@ Planned implementation gates:
    families are specified. No runtime behavior is implemented by this slice.
 2. **`v0.2.1B` — strict readers and authoring scaffold:** implement offline
    catalog, template, and profile parsing, deterministic inspection, and
-   bounded creation of an explicit absent template directory.
+   bounded creation of an explicit absent template directory. Implemented
+   locally with an intentionally empty embedded catalog and scoped CLI help.
 3. **`v0.2.1C` — rendering and composition planning:** implement bounded
    substitution, profile recommendations, and non-executable plans for new and
    existing workspaces.

@@ -1,0 +1,6 @@
+schema_version: engkit.catalog/v1alpha1
+id: engineering-toolkit
+version: 0.2.1
+minimum_engkit: 0.2.1
+templates: []
+profiles: []

@@ -5,6 +5,19 @@ The project follows Semantic Versioning while the public surface evolves.
 
 ## [Unreleased]
 
+### Added
+
+- Strict offline readers for the packaged catalog, skill templates, and project
+  profiles.
+- Deterministic catalog, template, and profile inspection commands.
+- Bounded `templates scaffold` authoring command with absent-target enforcement,
+  sibling staging, atomic publication, and rollback on failure.
+
+### Changed
+
+- Command families and subcommands now accept `help`, `-h`, and `--help` with a
+  successful exit code and scoped usage output.
+
 ## [0.2.0] - 2026-10-20
 
 ### Added
