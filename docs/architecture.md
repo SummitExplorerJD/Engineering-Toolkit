@@ -82,9 +82,13 @@ This repository will not add a `src/` wrapper around Go packages. `src/` belongs
   checkpoints/
   context/
   cache/
+  recovery/
 ```
 
-The exact filenames, schemas, ignore policy, and privacy defaults remain decisions for the CLI-foundation milestone. SQLite files and caches should normally be local and regenerable; portable plans and evidence need explicit retention policy.
+SQLite files and caches are local and regenerable. The ignored `recovery/`
+tree is not cache: it owns transaction staging, locks, and rollback copies that
+must be preserved while a mutation is incomplete. Portable plans and evidence
+require explicit retention policy.
 
 ## 8. Execution lifecycle
 
@@ -119,7 +123,8 @@ The exact filenames, schemas, ignore policy, and privacy defaults remain decisio
 - Exact schema identifiers and migration policy.
 - SQLite driver and build strategy.
 - Acceptance and exact version of the proposed go-tuf v2 dependency.
-- Locking and crash-consistency strategy per operating system.
+- Locking and crash-consistency strategy for workflows other than the accepted
+  skill-mutation transaction.
 - Installer and self-replacement strategy per operating system.
 - Project-creation command shape and versioned profile format.
 - Exact skill-schema fields, canonical serialization, and migration policy.
@@ -176,5 +181,10 @@ The complete experimental manifest fields and read-only CLI behavior are
 specified in [`skill-manifest-v1alpha1.md`](skill-manifest-v1alpha1.md).
 Immutable create, update, and remove previews use the separate
 [`engkit.skill-mutation-plan/v1alpha1`](skill-mutation-plan-v1alpha1.md)
-contract. The planning module exposes no execution function.
+contract. The planning module exposes no execution function. The approved
+execution design uses same-filesystem package-directory publication, per-skill
+locks, durable plans, journals and checkpoints, and explicit digest-based
+recovery as specified in
+[`skill-execution-v1alpha1.md`](skill-execution-v1alpha1.md). Implementation
+is owned by the separate `skillexec` module.
 

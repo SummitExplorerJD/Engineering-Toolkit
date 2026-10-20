@@ -33,11 +33,11 @@ the same explicit input.
 | `target_version` | Current version for update and remove. |
 | `proposed_version` | Source version for create and update. |
 | `requires_approval` | Always `true`. |
-| `executable` | Always `false` in this milestone. |
+| `executable` | `true` for plans produced by the implemented `v0.2.0D` lifecycle. The field participates in `plan_id`. |
 | `preconditions` | States and digests that must still match before execution. |
 | `operations` | Ordered proposed filesystem changes. |
-| `verification` | Required post-execution checks for a future executor. |
-| `recovery` | Required rollback constraints for a future executor. |
+| `verification` | Required post-execution checks for the executor. |
+| `recovery` | Required rollback constraints for the executor. |
 
 Plans contain no timestamps or random identifiers. Identical inputs and
 filesystem state produce the same `plan_id`.
@@ -91,8 +91,8 @@ access, dependency resolution, imports, or provider rendering. Passing a plan
 ID to any current command cannot execute it because no skill-plan execution API
 exists in `v0.2.0C`.
 
-A future executor must rebuild the plan immediately before execution, require
-the same complete `plan_id`, keep every mutation inside the canonical package
-root, journal each operation, maintain an atomic checkpoint, and apply the
-documented recovery rules. That executor requires a separate approval and
-implementation milestone.
+The executor rebuilds the plan immediately before
+execution, require the same complete `plan_id`, keep every mutation inside the
+canonical package root, journal each transition, maintain an atomic checkpoint,
+and apply the recovery rules in
+[`skill-execution-v1alpha1.md`](skill-execution-v1alpha1.md).

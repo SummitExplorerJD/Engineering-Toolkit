@@ -83,6 +83,7 @@ func workspaceInitOperations(alreadyInitialized bool) []Operation {
 		".engkit/checkpoints",
 		".engkit/context",
 		".engkit/cache",
+		".engkit/recovery",
 	}
 	operations := make([]Operation, 0, len(paths))
 	for _, path := range paths {
@@ -96,7 +97,7 @@ func workspaceInitOperations(alreadyInitialized bool) []Operation {
 		path   string
 		reason string
 	}{
-		{path: ".engkit/.gitignore", reason: "exclude rebuildable databases and caches from version control"},
+		{path: ".engkit/.gitignore", reason: "exclude local databases, caches, and transaction recovery state from version control"},
 		{path: ".engkit/config.yaml", reason: "create the declarative workspace configuration"},
 		{path: ".engkit/plans/workspace-init.json", reason: "preserve the approved initialization plan"},
 		{path: ".engkit/journals/workspace-init.jsonl", reason: "record append-only initialization evidence"},

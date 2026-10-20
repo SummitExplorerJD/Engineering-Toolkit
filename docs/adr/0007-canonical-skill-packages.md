@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted for `v0.2.0` design; implementation requires separate approval.
+Accepted and implemented for the `v0.2.0` canonical package and mutation
+planning slices. Transactional mutation execution is specified by ADR 0008.
 
 ## Context
 

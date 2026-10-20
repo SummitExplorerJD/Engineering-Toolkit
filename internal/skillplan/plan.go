@@ -1,4 +1,4 @@
-// Package skillplan creates immutable, non-executable skill mutation plans.
+// Package skillplan creates immutable skill mutation plans.
 package skillplan
 
 import (
@@ -119,7 +119,7 @@ func NewCreate(root, source string) (Plan, error) {
 	return finalize(digestBody{
 		SchemaVersion: PlanSchema, Kind: "skill.create", Root: listed.Root, SkillID: id,
 		SourcePath: sourceSnapshot.PackageRoot, SourceSHA256: sourceSnapshot.PackageSHA256,
-		ProposedVersion: sourceSnapshot.Package.Manifest.Version, RequiresApproval: true, Executable: false,
+		ProposedVersion: sourceSnapshot.Package.Manifest.Version, RequiresApproval: true, Executable: true,
 		Preconditions: preconditions, Operations: operations,
 		Verification: standardVerification(),
 		Recovery: []string{
@@ -153,7 +153,7 @@ func NewUpdate(root, id, source string) (Plan, error) {
 	return finalize(digestBody{
 		SchemaVersion: PlanSchema, Kind: "skill.update", Root: workspaceRoot(targetSnapshot.PackageRoot), SkillID: id,
 		SourcePath: sourceSnapshot.PackageRoot, SourceSHA256: sourceSnapshot.PackageSHA256,
-		TargetVersion: currentVersion, ProposedVersion: proposedVersion, RequiresApproval: true, Executable: false,
+		TargetVersion: currentVersion, ProposedVersion: proposedVersion, RequiresApproval: true, Executable: true,
 		Preconditions: []Precondition{
 			{Path: packagePath, ExpectedState: "canonical", ExpectedSHA256: targetSnapshot.PackageSHA256},
 			{Path: sourceSnapshot.PackageRoot, ExpectedState: "canonical_source", ExpectedSHA256: sourceSnapshot.PackageSHA256},
@@ -183,7 +183,7 @@ func NewRemove(root, id string) (Plan, error) {
 	operations = append(operations, Operation{Action: "remove_directory", Path: packagePath, Reason: "remove the empty canonical skill package root"})
 	return finalize(digestBody{
 		SchemaVersion: PlanSchema, Kind: "skill.remove", Root: workspaceRoot(targetSnapshot.PackageRoot), SkillID: id,
-		TargetVersion: targetSnapshot.Package.Manifest.Version, RequiresApproval: true, Executable: false,
+		TargetVersion: targetSnapshot.Package.Manifest.Version, RequiresApproval: true, Executable: true,
 		Preconditions: []Precondition{{Path: packagePath, ExpectedState: "canonical", ExpectedSHA256: targetSnapshot.PackageSHA256}},
 		Operations:    operations, Verification: standardVerification(),
 		Recovery: []string{
@@ -367,4 +367,25 @@ func finalize(body digestBody) (Plan, error) {
 		Preconditions: body.Preconditions, Operations: body.Operations,
 		Verification: body.Verification, Recovery: body.Recovery,
 	}, nil
+}
+
+// ValidateIdentity verifies that a persisted plan still matches its digest.
+func ValidateIdentity(preview Plan) error {
+	body := digestBody{
+		SchemaVersion: preview.SchemaVersion, Kind: preview.Kind, Root: preview.Root,
+		SkillID: preview.SkillID, SourcePath: preview.SourcePath,
+		SourceSHA256: preview.SourceSHA256, TargetVersion: preview.TargetVersion,
+		ProposedVersion:  preview.ProposedVersion,
+		RequiresApproval: preview.RequiresApproval, Executable: preview.Executable,
+		Preconditions: preview.Preconditions, Operations: preview.Operations,
+		Verification: preview.Verification, Recovery: preview.Recovery,
+	}
+	rebuilt, err := finalize(body)
+	if err != nil {
+		return err
+	}
+	if rebuilt.PlanID != preview.PlanID {
+		return errors.New("persisted skill plan does not match its plan_id")
+	}
+	return nil
 }

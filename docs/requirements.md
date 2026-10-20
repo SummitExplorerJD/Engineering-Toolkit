@@ -198,3 +198,24 @@ Errors shall distinguish user input, policy refusal, environmental failure, inte
 - Planning performs no mutation, script execution, dependency resolution,
   provider rendering, network access, or credential access.
 
+## 9. `v0.2.0D` skill-execution acceptance criteria
+
+- Execution rebuilds the applicable plan from current filesystem state and
+  requires approval of the complete matching plan ID before writing artifacts.
+- Only canonical managed packages may be created, updated, removed, or
+  recovered; provider-native, Spec Kit, conflicting, and invalid state remains
+  unchanged.
+- Create and update stage and validate a complete package before publication.
+  Update and remove preserve an exact same-filesystem recovery backup instead
+  of mutating or deleting the live package file by file.
+- A per-skill lock, immutable persisted plan, append-only JSONL journal, and
+  atomically replaced JSON checkpoint make every transition attributable.
+- Explicit recovery compares actual target, staging, and backup digests with
+  the persisted approved plan and refuses ambiguous content without deleting
+  it.
+- Completion is recorded only after canonical validation and complete digest
+  verification of the final state.
+- Execution and recovery remain local and do not run package resources,
+  resolve dependencies, render providers, access credentials, or contact a
+  network.
+

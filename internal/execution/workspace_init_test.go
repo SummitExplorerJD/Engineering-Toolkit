@@ -42,6 +42,7 @@ func TestInitializePublishesCanonicalArtifacts(t *testing.T) {
 		"checkpoints/workspace-init.json",
 		"context",
 		"cache",
+		"recovery",
 	} {
 		if _, err := os.Stat(filepath.Join(root, ".engkit", filepath.FromSlash(relative))); err != nil {
 			t.Errorf("expected %s: %v", relative, err)

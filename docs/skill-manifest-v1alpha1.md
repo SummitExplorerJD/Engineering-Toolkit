@@ -34,7 +34,7 @@ than 1 MiB are rejected.
 | Field | Required | Contract |
 | --- | --- | --- |
 | `schema_version` | Yes | Exactly `engkit.skill/v1alpha1`. |
-| `id` | Yes | Lowercase hyphenated identifier; must match `SKILL_ID`. |
+| `id` | Yes | Lowercase hyphenated identifier; must match `SKILL_ID` and not be a reserved Windows device name. |
 | `version` | Yes | Exact Semantic Version without a leading `v`. |
 | `description` | Yes | Non-empty normalized text. |
 | `instructions` | Yes | Exactly `instructions.md` in this schema. |
@@ -62,7 +62,9 @@ resource or grant permission.
 
 Resource fields are:
 
-- `path`: normalized relative slash path with no traversal or backslashes.
+- `path`: normalized, cross-platform relative slash path with no traversal,
+  backslashes, Windows-reserved components, invalid Windows filename
+  characters, or trailing dots or spaces.
 - `kind`: `instructions`, `reference`, `script`, `template`, or `asset`.
 - `sha256`: `sha256:` followed by 64 lowercase hexadecimal characters.
 

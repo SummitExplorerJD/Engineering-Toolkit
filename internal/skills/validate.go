@@ -22,7 +22,7 @@ var (
 )
 
 func validID(value string) bool {
-	return idPattern.MatchString(value)
+	return idPattern.MatchString(value) && !windowsReservedComponent(value)
 }
 
 func validateManifest(manifest Manifest, directory string) []Diagnostic {
@@ -211,6 +211,10 @@ func validateResources(packageRoot string, manifest Manifest) []Diagnostic {
 			return nil
 		}
 		if entry.IsDir() {
+			if err := validateWindowsPortablePath(relative); err != nil {
+				findings = append(findings, diagnostic("resource.directory", relative, err.Error()))
+				return nil
+			}
 			if !validResourceDirectory(relative) {
 				findings = append(findings, diagnostic("resource.directory", relative, "package directories must be under references, scripts, templates, or assets"))
 			}
@@ -262,7 +266,41 @@ func validateResourcePath(value string) error {
 	if value == "" || strings.Contains(value, `\`) || windowsVolumePattern.MatchString(value) || path.IsAbs(value) || filepath.IsAbs(native) || filepath.VolumeName(native) != "" || path.Clean(value) != value || value == "." || value == ".." || strings.HasPrefix(value, "../") {
 		return fmt.Errorf("resource path %q must be a normalized relative slash path", value)
 	}
+	if err := validateWindowsPortablePath(value); err != nil {
+		return err
+	}
 	return nil
+}
+
+func validateWindowsPortablePath(value string) error {
+	for _, component := range strings.Split(value, "/") {
+		if component == "" || strings.HasSuffix(component, ".") || strings.HasSuffix(component, " ") ||
+			strings.ContainsAny(component, `<>:"|?*`) {
+			return fmt.Errorf("resource path %q is not portable to Windows", value)
+		}
+		for _, character := range component {
+			if character < 32 {
+				return fmt.Errorf("resource path %q is not portable to Windows", value)
+			}
+		}
+		if windowsReservedComponent(component) {
+			return fmt.Errorf("resource path %q uses a reserved Windows name", value)
+		}
+	}
+	return nil
+}
+
+func windowsReservedComponent(value string) bool {
+	base := strings.ToLower(strings.SplitN(value, ".", 2)[0])
+	switch base {
+	case "con", "prn", "aux", "nul", "clock$":
+		return true
+	}
+	if len(base) == 4 && (strings.HasPrefix(base, "com") || strings.HasPrefix(base, "lpt")) &&
+		base[3] >= '1' && base[3] <= '9' {
+		return true
+	}
+	return false
 }
 
 func validResourceDirectory(value string) bool {

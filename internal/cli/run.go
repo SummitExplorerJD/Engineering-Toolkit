@@ -7,11 +7,13 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/adapters"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/execution"
 	sqliteindex "github.com/SummitExplorerJD/Engineering-Toolkit/internal/index/sqlite"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/plan"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skillexec"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skillplan"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skills"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/speckit"
@@ -67,7 +69,7 @@ func Run(args []string, stdout, stderr io.Writer) int {
 
 func runSkills(args []string, stdout, stderr io.Writer) error {
 	if len(args) == 0 {
-		return &usageError{message: "skills requires a subcommand: list, inspect, validate, plan-create, plan-update, or plan-remove"}
+		return &usageError{message: "skills requires a subcommand: list, inspect, validate, plan-create, plan-update, plan-remove, create, update, remove, or recover"}
 	}
 	switch args[0] {
 	case "list":
@@ -174,6 +176,95 @@ func runSkills(args []string, stdout, stderr io.Writer) error {
 			return &usageError{message: "skills plan-remove requires --id"}
 		}
 		result, err := skillplan.NewRemove(*root, *id)
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "create":
+		flags := newFlagSet("skills create", stderr)
+		root := flags.String("root", ".", "initialized workspace root")
+		source := flags.String("source", "", "complete canonical source package")
+		approved := flags.String("approve", "", "complete plan ID approved for execution")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "skills create does not accept positional arguments"}
+		}
+		if *source == "" {
+			return &usageError{message: "skills create requires --source"}
+		}
+		preview, err := skillplan.NewCreate(*root, *source)
+		if err != nil {
+			return err
+		}
+		result, err := skillexec.Execute(preview, *approved, skillexec.Options{ProcessID: os.Getpid()})
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "update":
+		flags := newFlagSet("skills update", stderr)
+		root := flags.String("root", ".", "initialized workspace root")
+		id := flags.String("id", "", "normalized target skill identifier")
+		source := flags.String("source", "", "complete canonical source package")
+		approved := flags.String("approve", "", "complete plan ID approved for execution")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "skills update does not accept positional arguments"}
+		}
+		if *id == "" || *source == "" {
+			return &usageError{message: "skills update requires --id and --source"}
+		}
+		preview, err := skillplan.NewUpdate(*root, *id, *source)
+		if err != nil {
+			return err
+		}
+		result, err := skillexec.Execute(preview, *approved, skillexec.Options{ProcessID: os.Getpid()})
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "remove":
+		flags := newFlagSet("skills remove", stderr)
+		root := flags.String("root", ".", "initialized workspace root")
+		id := flags.String("id", "", "normalized target skill identifier")
+		approved := flags.String("approve", "", "complete plan ID approved for execution")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "skills remove does not accept positional arguments"}
+		}
+		if *id == "" {
+			return &usageError{message: "skills remove requires --id"}
+		}
+		preview, err := skillplan.NewRemove(*root, *id)
+		if err != nil {
+			return err
+		}
+		result, err := skillexec.Execute(preview, *approved, skillexec.Options{ProcessID: os.Getpid()})
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "recover":
+		flags := newFlagSet("skills recover", stderr)
+		root := flags.String("root", ".", "initialized workspace root")
+		id := flags.String("id", "", "normalized target skill identifier")
+		approved := flags.String("approve", "", "complete interrupted plan ID")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "skills recover does not accept positional arguments"}
+		}
+		if *id == "" {
+			return &usageError{message: "skills recover requires --id"}
+		}
+		result, err := skillexec.Recover(*root, *id, *approved, skillexec.Options{ProcessID: os.Getpid()})
 		if err != nil {
 			return err
 		}
@@ -435,11 +526,15 @@ Usage:
 	engkit skills plan-create [--root PATH] --source PACKAGE_PATH
 	engkit skills plan-update [--root PATH] --id SKILL_ID --source PACKAGE_PATH
 	engkit skills plan-remove [--root PATH] --id SKILL_ID
+	engkit skills create [--root PATH] --source PACKAGE_PATH --approve PLAN_ID
+	engkit skills update [--root PATH] --id SKILL_ID --source PACKAGE_PATH --approve PLAN_ID
+	engkit skills remove [--root PATH] --id SKILL_ID --approve PLAN_ID
+	engkit skills recover [--root PATH] --id SKILL_ID --approve PLAN_ID
 
 inspect and plan-init are read-only. init revalidates the workspace and only
 publishes .engkit when --approve exactly matches the current plan ID. Adapter
 inspection and Spec Kit planning are read-only; no Spec Kit execution command
 is provided in this milestone. Skill listing, inspection, validation, and
-mutation planning are read-only and never execute package resources or apply
-the proposed operations.`)
+mutation planning are read-only. Skill mutations require an initialized
+workspace and exact plan approval; they never execute package resources.`)
 }

@@ -250,8 +250,8 @@ public release URL completed successfully.
 
 ### `v0.2.0`: skill authoring and lifecycle
 
-**Status:** In progress; canonical design, read-only operations, and mutation
-planning implemented
+**Status:** In progress; canonical design, read-only operations, mutation
+planning, and approved transactional local lifecycle implemented
 
 - Define the provider-neutral skill contract and ownership model.
 - Add read-only discovery, inspection, and validation first.
@@ -271,7 +271,9 @@ Planned implementation gates:
 3. **`v0.2.0C` — mutation planning:** implemented locally. Immutable create,
    update, and remove plans bind exact package state without applying changes.
 4. **`v0.2.0D` — approved local lifecycle:** apply approved mutations with
-   ownership checks, journals, checkpoints, verification, and recovery.
+   ownership checks, journals, checkpoints, verification, and recovery. The
+   transactional execution contract is accepted in ADR 0008 and implemented
+   locally with failure-injection coverage.
 
 ### `v0.2.1`: selective provider synchronization
 

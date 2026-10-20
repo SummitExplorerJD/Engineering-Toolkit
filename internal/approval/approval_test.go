@@ -18,3 +18,12 @@ func TestValidateRequiresExactPlanID(t *testing.T) {
 		t.Fatalf("Validate() error = %v", err)
 	}
 }
+
+func TestValidateIDSupportsOtherPlanTypes(t *testing.T) {
+	if err := ValidateID("sha256:expected", "sha256:expected", true); err != nil {
+		t.Fatalf("ValidateID() error = %v", err)
+	}
+	if err := ValidateID("sha256:wrong", "sha256:expected", true); err == nil {
+		t.Fatal("ValidateID() expected mismatch error")
+	}
+}

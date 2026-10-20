@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/plan"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skillplan"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/workspace"
 )
 
@@ -205,7 +206,7 @@ func TestSkillMutationPlanCommandsAreReadOnly(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	code := Run([]string{"skills", "plan-create", "--root", root, "--source", source}, &stdout, &stderr)
-	if code != 0 || !strings.Contains(stdout.String(), `"kind": "skill.create"`) || !strings.Contains(stdout.String(), `"executable": false`) {
+	if code != 0 || !strings.Contains(stdout.String(), `"kind": "skill.create"`) || !strings.Contains(stdout.String(), `"executable": true`) {
 		t.Fatalf("plan-create code = %d, stdout = %q, stderr = %q", code, stdout.String(), stderr.String())
 	}
 	if _, err := os.Stat(filepath.Join(root, ".agents")); !os.IsNotExist(err) {
@@ -230,6 +231,25 @@ func TestSkillMutationPlanCommandsAreReadOnly(t *testing.T) {
 	}
 	if got, err := os.ReadFile(filepath.Join(root, ".agents", "skills", "release-review", "instructions.md")); err != nil || string(got) != "# Current\n" {
 		t.Fatalf("planning modified target instructions: %q, %v", got, err)
+	}
+}
+
+func TestSkillMutationCLI(t *testing.T) {
+	root := testWorkspace(t)
+	initializeWithCLI(t, root)
+	source := writeCLISkill(t, t.TempDir(), "release-review", "1.0.0", "# Proposed\n")
+
+	create := skillPlanFromCLI(t, []string{"skills", "plan-create", "--root", root, "--source", source})
+	runCLI(t, []string{"skills", "create", "--root", root, "--source", source, "--approve", create.PlanID}, `"status": "complete"`)
+
+	source = writeCLISkill(t, t.TempDir(), "release-review", "1.1.0", "# Updated\n")
+	update := skillPlanFromCLI(t, []string{"skills", "plan-update", "--root", root, "--id", "release-review", "--source", source})
+	runCLI(t, []string{"skills", "update", "--root", root, "--id", "release-review", "--source", source, "--approve", update.PlanID}, `"status": "complete"`)
+
+	remove := skillPlanFromCLI(t, []string{"skills", "plan-remove", "--root", root, "--id", "release-review"})
+	runCLI(t, []string{"skills", "remove", "--root", root, "--id", "release-review", "--approve", remove.PlanID}, `"status": "complete"`)
+	if _, err := os.Stat(filepath.Join(root, ".agents", "skills", "release-review")); !os.IsNotExist(err) {
+		t.Fatalf("skills remove target state = %v", err)
 	}
 }
 
@@ -267,6 +287,30 @@ func initializeWithCLI(t *testing.T, root string) {
 	var initOut, initErr bytes.Buffer
 	if code := Run([]string{"workspace", "init", "--root", root, "--approve", preview.PlanID}, &initOut, &initErr); code != 0 {
 		t.Fatalf("workspace init code = %d, stderr = %q", code, initErr.String())
+	}
+}
+
+func skillPlanFromCLI(t *testing.T, args []string) skillplan.Plan {
+	t.Helper()
+	var stdout, stderr bytes.Buffer
+	if code := Run(args, &stdout, &stderr); code != 0 {
+		t.Fatalf("Run(%v) code = %d, stderr = %q", args, code, stderr.String())
+	}
+	var preview skillplan.Plan
+	if err := json.Unmarshal(stdout.Bytes(), &preview); err != nil {
+		t.Fatal(err)
+	}
+	return preview
+}
+
+func runCLI(t *testing.T, args []string, want string) {
+	t.Helper()
+	var stdout, stderr bytes.Buffer
+	if code := Run(args, &stdout, &stderr); code != 0 {
+		t.Fatalf("Run(%v) code = %d, stderr = %q", args, code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), want) {
+		t.Fatalf("Run(%v) output = %q, want %q", args, stdout.String(), want)
 	}
 }
 

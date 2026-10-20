@@ -19,7 +19,7 @@ const (
 	journalSchema     = "engkit.journal-event/v1alpha1"
 	checkpointSchema  = "engkit.checkpoint/v1alpha1"
 	configContents    = "schema_version: engkit.config/v1alpha1\nworkspace:\n  source_layout: auto\n"
-	gitignoreContents = "/cache/*\n/context/*.db\n/context/*.db-*\n"
+	gitignoreContents = "/cache/*\n/context/*.db\n/context/*.db-*\n/recovery/*\n"
 )
 
 // Result identifies the canonical artifacts published by initialization.
@@ -88,7 +88,7 @@ func Initialize(preview plan.Plan, approvedPlanID string, now func() time.Time) 
 		}
 	}()
 
-	for _, relative := range []string{"plans", "journals", "checkpoints", "context", "cache"} {
+	for _, relative := range []string{"plans", "journals", "checkpoints", "context", "cache", "recovery"} {
 		if err := os.Mkdir(filepath.Join(staging, relative), 0o700); err != nil {
 			return Result{}, fmt.Errorf("create staging directory %s: %w", relative, err)
 		}

@@ -29,7 +29,7 @@ func TestCreatePlanIsDeterministicAndReadOnly(t *testing.T) {
 	if first.PlanID != second.PlanID || !strings.HasPrefix(first.PlanID, "sha256:") {
 		t.Fatalf("plan is not deterministic: %q != %q", first.PlanID, second.PlanID)
 	}
-	if first.Kind != "skill.create" || !first.RequiresApproval || first.Executable {
+	if first.Kind != "skill.create" || !first.RequiresApproval || !first.Executable {
 		t.Fatalf("unexpected create plan controls: %#v", first)
 	}
 	if !hasAction(first, "create_directory", ".agents/skills/release-review") || !hasAction(first, "write_file", ".agents/skills/release-review/skill.yaml") {
@@ -144,7 +144,7 @@ func TestRemovePlanRejectsExternalAndPlansCanonicalInventory(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.Kind != "skill.remove" || got.Executable || !got.RequiresApproval {
+	if got.Kind != "skill.remove" || !got.Executable || !got.RequiresApproval {
 		t.Fatalf("unexpected remove plan controls: %#v", got)
 	}
 	if !hasAction(got, "remove_file", ".agents/skills/release-review/skill.yaml") || !hasAction(got, "remove_directory", ".agents/skills/release-review") {
@@ -152,6 +152,22 @@ func TestRemovePlanRejectsExternalAndPlansCanonicalInventory(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(root, ".agents", "skills", "release-review", "skill.yaml")); err != nil {
 		t.Fatalf("remove planning mutated the package: %v", err)
+	}
+}
+
+func TestValidateIdentityRejectsModifiedPlan(t *testing.T) {
+	root := t.TempDir()
+	source := writePackage(t, t.TempDir(), "release-review", "1.0.0", map[string]string{"instructions.md": "# Proposed\n"})
+	preview, err := NewCreate(root, source)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := ValidateIdentity(preview); err != nil {
+		t.Fatalf("ValidateIdentity() error = %v", err)
+	}
+	preview.SkillID = "changed"
+	if err := ValidateIdentity(preview); err == nil {
+		t.Fatal("ValidateIdentity() accepted modified plan")
 	}
 }
 

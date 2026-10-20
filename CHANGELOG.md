@@ -12,6 +12,12 @@ The project follows Semantic Versioning while the public surface evolves.
   resource integrity and ownership classification.
 - Deterministic, non-executable create, update, and remove plans bound to exact
   source and target package digests.
+- Transactional skill-execution design with exact approval binding,
+  same-filesystem publication, durable recovery artifacts, and fail-closed
+  interruption handling.
+- Approved local `skills create`, `skills update`, `skills remove`, and
+  `skills recover` execution with per-skill locks, retained backups, journals,
+  checkpoints, and post-publication validation.
 
 ## [0.1.1] - 2026-10-19
 

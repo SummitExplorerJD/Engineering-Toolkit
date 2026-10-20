@@ -28,8 +28,11 @@ func TestWorkspaceInitPlanIsDeterministic(t *testing.T) {
 	if !first.RequiresApproval {
 		t.Fatal("workspace initialization must require approval")
 	}
-	if len(first.Operations) != 11 {
+	if len(first.Operations) != 12 {
 		t.Fatalf("Operations count = %d", len(first.Operations))
+	}
+	if first.Operations[6].Path != ".engkit/recovery" {
+		t.Fatalf("recovery operation = %#v", first.Operations[6])
 	}
 }
 

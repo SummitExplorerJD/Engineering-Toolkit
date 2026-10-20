@@ -86,8 +86,8 @@ Not included:
 
 ### `v0.2.0`: skill authoring and lifecycle
 
-**Status:** Canonical package design, read-only lifecycle, and mutation planning
-implemented locally; mutation execution has not started.
+**Status:** Canonical package design, read-only lifecycle, mutation planning,
+and approved transactional local lifecycle implemented.
 
 This release is intended to establish the canonical, provider-neutral skill
 model and safe local lifecycle.
@@ -118,12 +118,13 @@ engkit skills plan-update [--root PATH] --id SKILL_ID --source PACKAGE_PATH
 engkit skills plan-remove [--root PATH] --id SKILL_ID
 ```
 
-Proposed execution commands, not yet public contracts:
+Implemented execution interface:
 
 ```text
-engkit skills create --approve PLAN_ID
-engkit skills update --approve PLAN_ID
-engkit skills remove --approve PLAN_ID
+engkit skills create [--root PATH] --source PACKAGE_PATH --approve PLAN_ID
+engkit skills update [--root PATH] --id SKILL_ID --source PACKAGE_PATH --approve PLAN_ID
+engkit skills remove [--root PATH] --id SKILL_ID --approve PLAN_ID
+engkit skills recover [--root PATH] --id SKILL_ID --approve PLAN_ID
 ```
 
 Every mutation will follow the established lifecycle:
@@ -141,12 +142,16 @@ Accepted design decisions:
   external state and remain unchanged by default.
 - Read-only discovery, inspection, and validation do not execute resources,
   contact networks, access credentials, or mutate the workspace.
+- Execution will rebuild the current plan before approval, stage a complete
+  package, publish with same-filesystem directory renames, and retain update or
+  remove backups under `.engkit/recovery/`.
+- Per-skill locks, durable plans, append-only journals, atomic checkpoints, and
+  explicit digest-based recovery govern every mutation.
 
 Remaining decisions for separately approved implementation slices include:
 
 - Canonical serialization and migration rules beyond the implemented
   `v1alpha1` read-only contract.
-- Execution-time locking, backup, journal, checkpoint, and recovery behavior.
 - Future runtime trust and permission UX for executable resources.
 - Import, export, and migration behavior for existing provider-native skills.
 
