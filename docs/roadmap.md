@@ -250,9 +250,9 @@ public release URL completed successfully.
 
 ### `v0.2.0`: skill authoring and lifecycle
 
-**Status:** Release-candidate preparation; canonical design, read-only
-operations, mutation planning, approved transactional local lifecycle, and
-template/profile composition design completed
+**Status:** Published on 2026-10-20; canonical design, read-only operations,
+mutation planning, approved transactional local lifecycle, and template/profile
+composition design completed
 
 - Define the provider-neutral skill contract and ownership model.
 - Add read-only discovery, inspection, and validation first.
@@ -280,6 +280,11 @@ Planned implementation gates:
    explicit project profiles, rendered canonical skills, and provider output
    have separate ownership. Exact schemas and implementation remain separately
    approved.
+
+**Published evidence:** The immutable `v0.2.0` tag points to release commit
+`4a26c9a`. The six-platform release workflow completed, the GitHub Release was
+published with its manifest and checksums, and an existing Windows `v0.1.1`
+installation upgraded successfully and reported `engkit v0.2.0`.
 
 ### `v0.2.1`: template authoring and project-profile composition
 

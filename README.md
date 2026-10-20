@@ -4,7 +4,7 @@ Engineering Toolkit is a cross-platform command-line application for creating an
 
 ## Status
 
-Release `v0.1.1` is published, and `v0.2.0` is in release-candidate validation.
+Release `v0.2.0` is published and is the current stable release.
 CI and the release workflow validate six targets across Windows, Linux, and
 macOS on `amd64` and `arm64`. The CLI can inspect and initialize workspace
 state, rebuild the optional context index, describe supported agent
