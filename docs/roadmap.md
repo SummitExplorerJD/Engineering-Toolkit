@@ -250,9 +250,9 @@ public release URL completed successfully.
 
 ### `v0.2.0`: skill authoring and lifecycle
 
-**Status:** In progress; canonical design, read-only operations, mutation
-planning, approved transactional local lifecycle, and template/profile
-composition design completed
+**Status:** Release-candidate preparation; canonical design, read-only
+operations, mutation planning, approved transactional local lifecycle, and
+template/profile composition design completed
 
 - Define the provider-neutral skill contract and ownership model.
 - Add read-only discovery, inspection, and validation first.

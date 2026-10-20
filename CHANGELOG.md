@@ -5,6 +5,8 @@ The project follows Semantic Versioning while the public surface evolves.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-20
+
 ### Added
 
 - Experimental provider-neutral `engkit.skill/v1alpha1` manifest contract.
@@ -18,6 +20,8 @@ The project follows Semantic Versioning while the public surface evolves.
 - Approved local `skills create`, `skills update`, `skills remove`, and
   `skills recover` execution with per-skill locks, retained backups, journals,
   checkpoints, and post-publication validation.
+- Accepted architecture for offline skill templates and explicit project
+  profiles planned for `v0.2.1`.
 
 ### Fixed
 
@@ -57,6 +61,7 @@ The project follows Semantic Versioning while the public surface evolves.
 - Bounded HTTPS transport, rollback protection, last-known-good metadata, and
   non-executable content-addressed target caching.
 
-[Unreleased]: https://github.com/SummitExplorerJD/Engineering-Toolkit/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/SummitExplorerJD/Engineering-Toolkit/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/SummitExplorerJD/Engineering-Toolkit/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/SummitExplorerJD/Engineering-Toolkit/releases/tag/v0.1.1
 [0.1.0]: https://github.com/SummitExplorerJD/Engineering-Toolkit/releases/tag/v0.1.0

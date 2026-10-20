@@ -14,7 +14,7 @@ state directory. Existing Spec Kit and provider-native directories remain
 external and cannot be created, updated, removed, adopted, or recovered by this
 executor.
 
-## 2. Proposed CLI contract
+## 2. CLI contract
 
 ```text
 engkit skills create [--root PATH] --source PACKAGE_PATH --approve PLAN_ID

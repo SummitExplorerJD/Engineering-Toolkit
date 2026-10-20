@@ -4,18 +4,22 @@ Engineering Toolkit is a cross-platform command-line application for creating an
 
 ## Status
 
-Release `v0.1.1` is published. CI and the release workflow validate six targets
-across Windows, Linux, and macOS on `amd64` and `arm64`. The CLI can inspect and
-initialize workspace state, rebuild the optional context index, describe
-supported agent capabilities, and prepare non-executable Spec Kit plans.
-Official Spec Kit `v1.2.0` is installed for Codex; its generated workflows have
-not been executed. User-scoped bootstrap installers provide exact versions,
-mandatory checksums, explicit upgrades, recoverable replacement, and opt-in
-PATH changes. Development toward `v0.2.0` adds the provider-neutral skill
-contract, read-only skill discovery and validation, deterministic mutation
-planning, and approved transactional local mutation. Production TUF
+Release `v0.1.1` is published, and `v0.2.0` is in release-candidate validation.
+CI and the release workflow validate six targets across Windows, Linux, and
+macOS on `amd64` and `arm64`. The CLI can inspect and initialize workspace
+state, rebuild the optional context index, describe supported agent
+capabilities, and prepare non-executable Spec Kit plans. Official Spec Kit
+`v1.2.0` is installed for Codex; its generated workflows have not been
+executed. User-scoped bootstrap installers provide exact versions, mandatory
+checksums, explicit upgrades, recoverable replacement, and opt-in PATH changes.
+
+`v0.2.0` adds the provider-neutral canonical skill contract, read-only skill
+discovery and validation, deterministic mutation planning, and approved
+transactional creation, update, removal, and recovery. Skill templates and
+project profiles are designed but remain planned for `v0.2.1`. Production TUF
 activation, platform signing, package-manager distribution, automatic updates,
-self-replacement, and execution of skill resources remain deferred.
+self-replacement, provider synchronization, and execution of skill resources
+remain deferred.
 
 ## Design principles
 
@@ -48,6 +52,7 @@ self-replacement, and execution of skill resources remain deferred.
 - [First release checklist](docs/release-checklist.md)
 - [v0.1.0 release notes](docs/release-notes/v0.1.0.md)
 - [v0.1.1 release notes](docs/release-notes/v0.1.1.md)
+- [v0.2.0 release notes](docs/release-notes/v0.2.0.md)
 - [Security policy](SECURITY.md)
 - [Architecture decisions](docs/adr/)
 - [Agent conventions](.agents/conventions/)
@@ -77,10 +82,10 @@ engkit skills validate [--root PATH] [--id SKILL_ID]
 engkit skills plan-create [--root PATH] --source PACKAGE_PATH
 engkit skills plan-update [--root PATH] --id SKILL_ID --source PACKAGE_PATH
 engkit skills plan-remove [--root PATH] --id SKILL_ID
-	engkit skills create [--root PATH] --source PACKAGE_PATH --approve PLAN_ID
-	engkit skills update [--root PATH] --id SKILL_ID --source PACKAGE_PATH --approve PLAN_ID
-	engkit skills remove [--root PATH] --id SKILL_ID --approve PLAN_ID
-	engkit skills recover [--root PATH] --id SKILL_ID --approve PLAN_ID
+engkit skills create [--root PATH] --source PACKAGE_PATH --approve PLAN_ID
+engkit skills update [--root PATH] --id SKILL_ID --source PACKAGE_PATH --approve PLAN_ID
+engkit skills remove [--root PATH] --id SKILL_ID --approve PLAN_ID
+engkit skills recover [--root PATH] --id SKILL_ID --approve PLAN_ID
 ```
 
 The context database is derived, local, and ignored by generated `.engkit/.gitignore` rules. Deleting it does not remove canonical project artifacts; run `context rebuild` to recreate it.
