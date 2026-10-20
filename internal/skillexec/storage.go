@@ -9,7 +9,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skillplan"
@@ -41,12 +40,8 @@ func validateWorkspace(root string) (string, error) {
 		return "", fmt.Errorf("resolve workspace root: %w", err)
 	}
 	absolute = filepath.Clean(absolute)
-	resolved, err := filepath.EvalSymlinks(absolute)
-	if err != nil {
-		return "", fmt.Errorf("resolve workspace links: %w", err)
-	}
-	if !samePath(absolute, filepath.Clean(resolved)) {
-		return "", errors.New("workspace root must not use symbolic-link or junction ancestors")
+	if err := rejectLinkAncestors(absolute); err != nil {
+		return "", err
 	}
 	for _, candidate := range []string{absolute, filepath.Join(absolute, ".engkit")} {
 		info, err := os.Lstat(candidate)
@@ -68,11 +63,20 @@ func validateWorkspace(root string) (string, error) {
 	return absolute, nil
 }
 
-func samePath(left, right string) bool {
-	if runtime.GOOS == "windows" {
-		return strings.EqualFold(left, right)
+func rejectLinkAncestors(path string) error {
+	for candidate := path; ; candidate = filepath.Dir(candidate) {
+		info, err := os.Lstat(candidate)
+		if err != nil {
+			return fmt.Errorf("inspect workspace ancestor %s: %w", candidate, err)
+		}
+		if info.Mode()&os.ModeSymlink != 0 {
+			return errors.New("workspace root must not use symbolic-link or junction ancestors")
+		}
+		parent := filepath.Dir(candidate)
+		if parent == candidate {
+			return nil
+		}
 	}
-	return left == right
 }
 
 func prepareState(root string) error {

@@ -19,6 +19,11 @@ The project follows Semantic Versioning while the public surface evolves.
   `skills recover` execution with per-skill locks, retained backups, journals,
   checkpoints, and post-publication validation.
 
+### Fixed
+
+- Windows 8.3 short-path aliases are no longer misclassified as symbolic-link
+  or junction ancestors during approved skill mutations.
+
 ## [0.1.1] - 2026-10-19
 
 ### Added

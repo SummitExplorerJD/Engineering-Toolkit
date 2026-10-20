@@ -322,6 +322,19 @@ func TestExecuteRefusesExistingLock(t *testing.T) {
 	}
 }
 
+func TestValidateWorkspaceRejectsLinkedAncestor(t *testing.T) {
+	root := initializedWorkspace(t)
+	linkedParent := filepath.Join(t.TempDir(), "linked-parent")
+	if err := os.Symlink(filepath.Dir(root), linkedParent); err != nil {
+		t.Skipf("symbolic links are not available: %v", err)
+	}
+	linkedRoot := filepath.Join(linkedParent, filepath.Base(root))
+	if _, err := validateWorkspace(linkedRoot); err == nil ||
+		!strings.Contains(err.Error(), "symbolic-link or junction ancestors") {
+		t.Fatalf("validateWorkspace() error = %v", err)
+	}
+}
+
 func initializedWorkspace(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
