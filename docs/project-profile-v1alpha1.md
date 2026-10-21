@@ -66,8 +66,11 @@ files, or become approval. Subsequent planning requires an explicit
 
 `profiles list` emits `engkit.profile-list/v1alpha1`. `profiles inspect` emits
 `engkit.profile-inspection/v1alpha1` with the validated profile and its exact
-catalog directory digest. Both are implemented in `v0.2.1B`; profile
-recommendation remains reserved for `v0.2.1C`.
+catalog directory digest. `profiles recommend` emits
+`engkit.profile-recommendation/v1alpha1`, including the inspected root,
+catalog identity, observed evidence, compatibility result, and reasons for
+every packaged profile. It is implemented in `v0.2.1C` and does not rank,
+select, or approve a profile.
 
 ## 4. Ownership boundary
 
@@ -77,5 +80,6 @@ assets are tracked separately by the composition plan. Existing unowned files,
 provider-native content, and Spec Kit content remain external and unchanged
 unless a later independently approved contract explicitly owns those paths.
 
-Strict reading and catalog-backed inspection are implemented. First-party
-profile content remains a separately approved milestone.
+Strict reading, catalog-backed inspection, and evidence-based recommendation
+are implemented. First-party profile content remains a separately approved
+milestone.

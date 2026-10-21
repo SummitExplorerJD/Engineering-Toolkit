@@ -59,6 +59,7 @@ func Validate(fsys fs.FS, root string, template Template) error {
 	}
 	seenSource := make(map[string]struct{}, len(template.Files))
 	seenDestination := make(map[string]struct{}, len(template.Files))
+	destinations := make([]string, 0, len(template.Files))
 	for _, file := range template.Files {
 		if err := schemautil.ValidateRelative(file.Source); err != nil || !strings.HasPrefix(file.Source, "files/") {
 			return fmt.Errorf("template source %q must be a portable path below files/", file.Source)
@@ -74,6 +75,7 @@ func Validate(fsys fs.FS, root string, template Template) error {
 		}
 		seenSource[strings.ToLower(file.Source)] = struct{}{}
 		seenDestination[strings.ToLower(file.Destination)] = struct{}{}
+		destinations = append(destinations, strings.ToLower(file.Destination))
 		if !validKind(file.Destination, file.Kind) {
 			return fmt.Errorf("kind %q does not match destination %q", file.Kind, file.Destination)
 		}
@@ -106,6 +108,13 @@ func Validate(fsys fs.FS, root string, template Template) error {
 			}
 		} else if placeholderPattern.Match(contents) {
 			return fmt.Errorf("binary template source %q contains a placeholder", file.Source)
+		}
+	}
+	for _, destination := range destinations {
+		for parent := path.Dir(destination); parent != "."; parent = path.Dir(parent) {
+			if _, exists := seenDestination[parent]; exists {
+				return fmt.Errorf("template destinations %q and %q have a file/directory collision", parent, destination)
+			}
 		}
 	}
 	inventory, err := schemautil.RegularInventory(fsys, root)

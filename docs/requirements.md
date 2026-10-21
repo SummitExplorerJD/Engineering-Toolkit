@@ -287,3 +287,24 @@ Errors shall distinguish user input, policy refusal, environmental failure, inte
 - Parsers, scaffold execution, rendering, plan execution, first-party catalog
   content, and provider synchronization remain separate implementation gates.
 
+## 12. `v0.2.1C` rendering-and-planning acceptance criteria
+
+- Template and profile values are resolved by declared type, constraint, and
+  canonical text form; unknown, duplicate, missing, or invalid inputs fail.
+- Rendering is a single pass over declared text resources and does not write
+  temporary or target files, execute code, read credentials, or contact a
+  network.
+- Every rendered canonical skill is validated in memory before it enters a
+  composition plan.
+- Recommendation records observed evidence and compatibility reasons without
+  ranking, selecting, approving, or applying a profile.
+- New-project and existing-workspace planning produce deterministic
+  `engkit.composition-plan/v1alpha1` JSON with exact catalog, profile, template,
+  variable, filesystem, output, conflict, precondition, operation,
+  verification, and recovery data.
+- Planning inventories the target, rejects links and special files, treats
+  unowned collisions as blocking, preserves unrelated content, and performs no
+  writes.
+- Every composition plan has `requires_approval: true` and `executable: false`;
+  applying or recovering a composition remains a separate approval gate.
+

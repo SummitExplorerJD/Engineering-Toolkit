@@ -12,6 +12,11 @@ The project follows Semantic Versioning while the public surface evolves.
 - Deterministic catalog, template, and profile inspection commands.
 - Bounded `templates scaffold` authoring command with absent-target enforcement,
   sibling staging, atomic publication, and rollback on failure.
+- Deterministic in-memory template rendering with typed variables and canonical
+  skill validation.
+- Evidence-based profile recommendations that never select a profile.
+- Read-only project inspection and non-executable composition plans for new and
+  existing workspaces.
 
 ### Changed
 

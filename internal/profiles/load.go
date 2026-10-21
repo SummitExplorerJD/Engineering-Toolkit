@@ -145,6 +145,7 @@ func validateDirectories(values []string) error {
 func validateAssets(fsys fs.FS, root string, assets []Asset, variables map[string]struct{}) error {
 	seen := make(map[string]struct{}, len(assets))
 	seenSources := make(map[string]struct{}, len(assets))
+	destinations := make([]string, 0, len(assets))
 	for _, asset := range assets {
 		if err := schemautil.ValidateRelative(asset.Source); err != nil || !strings.HasPrefix(asset.Source, "files/") {
 			return fmt.Errorf("asset source %q is invalid", asset.Source)
@@ -160,6 +161,7 @@ func validateAssets(fsys fs.FS, root string, assets []Asset, variables map[strin
 			return fmt.Errorf("duplicate or case-colliding asset destination %q", asset.Destination)
 		}
 		seen[key] = struct{}{}
+		destinations = append(destinations, key)
 		sourceKey := strings.ToLower(asset.Source)
 		if _, exists := seenSources[sourceKey]; exists {
 			return fmt.Errorf("duplicate or case-colliding asset source %q", asset.Source)
@@ -193,6 +195,13 @@ func validateAssets(fsys fs.FS, root string, assets []Asset, variables map[strin
 			}
 		} else if placeholderPattern.Match(contents) {
 			return fmt.Errorf("binary asset %q contains a placeholder", asset.Source)
+		}
+	}
+	for _, destination := range destinations {
+		for parent := path.Dir(destination); parent != "."; parent = path.Dir(parent) {
+			if _, exists := seen[parent]; exists {
+				return fmt.Errorf("asset destinations %q and %q have a file/directory collision", parent, destination)
+			}
 		}
 	}
 	inventory, err := schemautil.RegularInventory(fsys, root)

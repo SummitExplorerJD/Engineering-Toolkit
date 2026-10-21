@@ -18,7 +18,10 @@ discovery and validation, deterministic mutation planning, and approved
 transactional creation, update, removal, and recovery. Skill templates and
 project profiles are under active `v0.2.1` development: strict offline readers,
 an empty packaged catalog, deterministic inspection, and bounded template
-scaffolding are implemented locally. Production TUF
+scaffolding are implemented locally. Deterministic in-memory rendering,
+evidence-based profile recommendation, and non-executable project composition
+plans are also implemented; the embedded catalog intentionally remains empty.
+Production TUF
 activation, platform signing, package-manager distribution, automatic updates,
 self-replacement, provider synchronization, and execution of skill resources
 remain deferred.
@@ -97,6 +100,10 @@ engkit templates inspect --id TEMPLATE_ID --version VERSION
 engkit templates scaffold --output PATH --id TEMPLATE_ID --version VERSION
 engkit profiles list
 engkit profiles inspect --id PROFILE_ID --version VERSION
+engkit profiles recommend [--root PATH]
+engkit project inspect [--root PATH]
+engkit project plan-create --destination PATH --profile PROFILE_ID@VERSION [--set NAME=VALUE]
+engkit project plan-compose [--root PATH] --profile PROFILE_ID@VERSION [--set NAME=VALUE]
 ```
 
 The context database is derived, local, and ignored by generated `.engkit/.gitignore` rules. Deleting it does not remove canonical project artifacts; run `context rebuild` to recreate it.
@@ -111,6 +118,10 @@ read-only. Mutation commands rebuild the plan, require its exact approval, and
 record local plans, journals, checkpoints, locks, and recovery backups. No skill
 command executes package resources, resolves dependencies, accesses
 credentials, or contacts networks.
+Project inspection, recommendation, and composition planning are offline and
+read-only. Composition plans render and validate canonical skills in memory,
+inventory the target, report ownership conflicts, and remain explicitly
+non-executable until the separately approved lifecycle milestone.
 
 ## Contributing
 

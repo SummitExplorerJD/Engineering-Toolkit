@@ -21,6 +21,12 @@ engkit project recover [--root PATH] --approve PLAN_ID
 
 Execution and recovery are not authorized by this design milestone.
 
+The inspection and planning commands are implemented in `v0.2.1C`.
+`project inspect` emits `engkit.project-inspection/v1alpha1` and includes the
+workspace inspection plus profile recommendations. The packaged catalog is
+still empty, so successful selection of first-party content begins only after
+the independently approved pilot-content milestone.
+
 ## 2. Plan fields
 
 | Field | Contract |
@@ -78,3 +84,7 @@ Every command family and subcommand accepts `help`, `-h`, and `--help`, writes
 usage to standard output, and exits `0`. Usage mistakes exit `2`; validation,
 conflict, or execution failures exit `1`. Normal command results are
 deterministic JSON.
+
+The current planner may emit blocking conflicts as reviewable plan data, but
+`executable` remains `false` regardless of conflict state. No apply or recovery
+subcommand is present in `v0.2.1C`.

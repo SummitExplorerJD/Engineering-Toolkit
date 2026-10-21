@@ -254,13 +254,16 @@ below `.agents/context`, `.agents/conventions`, and `.agents/workflows`;
 canonical packages remain exclusively below `.agents/skills`.
 
 The implemented `catalog`, `templates`, and `profiles` packages provide strict
-offline readers. `schemautil` owns only shared YAML ambiguity rejection,
-portable path checks, and regular-file inventory rules. The CLI embeds an empty
-catalog until first-party content receives its own approval.
+offline readers. `templates` also resolves typed variables and produces a
+complete canonical package in memory. `skills` exposes a matching in-memory
+validation boundary so planning does not need temporary filesystem state.
+`schemautil` owns only shared YAML ambiguity rejection, portable path checks,
+and regular-file inventory rules. The CLI embeds an empty catalog until
+first-party content receives its own approval.
 
-The future plan layer depends on catalog, template, profile, workspace
-inspection, and canonical skill validation ports. It exposes no mutation
-function. A later
+The implemented `composition` plan layer depends on catalog, template,
+profile, workspace-inspection, and canonical-skill validation ports. It emits
+deterministic, non-executable plans and exposes no mutation function. A later
 executor may consume a rebuilt matching plan only after its journaling,
 checkpoint, staging, verification, and recovery contract is independently
 approved.

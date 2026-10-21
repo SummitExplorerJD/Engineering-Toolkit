@@ -13,6 +13,7 @@ import (
 
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/adapters"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/catalog"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/composition"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/execution"
 	sqliteindex "github.com/SummitExplorerJD/Engineering-Toolkit/internal/index/sqlite"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/plan"
@@ -63,6 +64,8 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		err = runTemplates(args[1:], stdout, stderr)
 	case "profiles":
 		err = runProfiles(args[1:], stdout, stderr)
+	case "project":
+		err = runProject(args[1:], stdout, stderr)
 	default:
 		fmt.Fprintf(stderr, "unknown command %q\n\n", args[0])
 		writeUsage(stderr)
@@ -179,7 +182,7 @@ func runTemplates(args []string, stdout, stderr io.Writer) error {
 
 func runProfiles(args []string, stdout, stderr io.Writer) error {
 	if len(args) == 0 {
-		return &usageError{message: "profiles requires a subcommand: list or inspect"}
+		return &usageError{message: "profiles requires a subcommand: list, inspect, or recommend"}
 	}
 	switch args[0] {
 	case "list":
@@ -228,9 +231,138 @@ func runProfiles(args []string, stdout, stderr io.Writer) error {
 			return fmt.Errorf("profile identity does not match its catalog entry")
 		}
 		return writeJSON(stdout, profiles.Inspection{SchemaVersion: profiles.InspectionSchema, CatalogID: loaded.ID, CatalogVersion: loaded.Version, Profile: profile, DirectorySHA256: entry.SHA256})
+	case "recommend":
+		flags := newFlagSet("profiles recommend", stderr)
+		root := flags.String("root", ".", "workspace root to inspect")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "profiles recommend does not accept positional arguments"}
+		}
+		loaded, catalogFS, err := catalog.Builtin()
+		if err != nil {
+			return err
+		}
+		result, err := profiles.Recommend(*root, loaded, catalogFS)
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
 	default:
 		return &usageError{message: fmt.Sprintf("unknown profiles subcommand %q", args[0])}
 	}
+}
+
+func runProject(args []string, stdout, stderr io.Writer) error {
+	if len(args) == 0 {
+		return &usageError{message: "project requires a subcommand: inspect, plan-create, or plan-compose"}
+	}
+	switch args[0] {
+	case "inspect":
+		flags := newFlagSet("project inspect", stderr)
+		root := flags.String("root", ".", "workspace root to inspect")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "project inspect does not accept positional arguments"}
+		}
+		loaded, catalogFS, err := catalog.Builtin()
+		if err != nil {
+			return err
+		}
+		result, err := composition.Inspect(*root, loaded, catalogFS)
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "plan-create":
+		flags := newFlagSet("project plan-create", stderr)
+		destination := flags.String("destination", "", "absent or empty project destination")
+		profile := flags.String("profile", "", "exact profile selection ID@VERSION")
+		values := stringMapFlag{}
+		flags.Var(&values, "set", "typed profile value NAME=VALUE; repeatable")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "project plan-create does not accept positional arguments"}
+		}
+		if *destination == "" || *profile == "" {
+			return &usageError{message: "project plan-create requires --destination and --profile"}
+		}
+		id, exactVersion, err := parseSelection(*profile)
+		if err != nil {
+			return &usageError{message: err.Error()}
+		}
+		loaded, catalogFS, err := catalog.Builtin()
+		if err != nil {
+			return err
+		}
+		result, err := composition.NewCreate(*destination, id, exactVersion, values, Version, loaded, catalogFS)
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "plan-compose":
+		flags := newFlagSet("project plan-compose", stderr)
+		root := flags.String("root", ".", "existing workspace root")
+		profile := flags.String("profile", "", "exact profile selection ID@VERSION")
+		values := stringMapFlag{}
+		flags.Var(&values, "set", "typed profile value NAME=VALUE; repeatable")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "project plan-compose does not accept positional arguments"}
+		}
+		if *profile == "" {
+			return &usageError{message: "project plan-compose requires --profile"}
+		}
+		id, exactVersion, err := parseSelection(*profile)
+		if err != nil {
+			return &usageError{message: err.Error()}
+		}
+		loaded, catalogFS, err := catalog.Builtin()
+		if err != nil {
+			return err
+		}
+		result, err := composition.NewCompose(*root, id, exactVersion, values, Version, loaded, catalogFS)
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	default:
+		return &usageError{message: fmt.Sprintf("unknown project subcommand %q", args[0])}
+	}
+}
+
+type stringMapFlag map[string]string
+
+func (values *stringMapFlag) String() string { return "" }
+
+func (values *stringMapFlag) Set(raw string) error {
+	name, value, found := strings.Cut(raw, "=")
+	if !found || name == "" {
+		return fmt.Errorf("--set requires NAME=VALUE")
+	}
+	if *values == nil {
+		*values = stringMapFlag{}
+	}
+	if _, exists := (*values)[name]; exists {
+		return fmt.Errorf("--set variable %q is duplicated", name)
+	}
+	(*values)[name] = value
+	return nil
+}
+
+func parseSelection(value string) (string, string, error) {
+	id, version, found := strings.Cut(value, "@")
+	if !found || id == "" || version == "" || strings.Contains(version, "@") {
+		return "", "", fmt.Errorf("profile must use exact ID@VERSION syntax")
+	}
+	return id, version, nil
 }
 
 func runSkills(args []string, stdout, stderr io.Writer) error {
@@ -699,6 +831,10 @@ var usageLines = []string{
 	"templates scaffold --output PATH --id TEMPLATE_ID --version VERSION",
 	"profiles list",
 	"profiles inspect --id PROFILE_ID --version VERSION",
+	"profiles recommend [--root PATH]",
+	"project inspect [--root PATH]",
+	"project plan-create --destination PATH --profile PROFILE_ID@VERSION [--set NAME=VALUE]",
+	"project plan-compose [--root PATH] --profile PROFILE_ID@VERSION [--set NAME=VALUE]",
 }
 
 func helpPrefix(args []string) ([]string, bool) {
@@ -749,5 +885,7 @@ is provided in this milestone. Skill listing, inspection, validation, and
 mutation planning are read-only. Skill mutations require an initialized
 workspace and exact plan approval; they never execute package resources.
 Catalog, template, and profile inspection are offline and read-only. Template
-scaffolding writes only to an explicit absent output directory.`)
+scaffolding writes only to an explicit absent output directory. Project
+inspection, recommendation, and composition planning are read-only; composition
+plans are non-executable in this milestone.`)
 }

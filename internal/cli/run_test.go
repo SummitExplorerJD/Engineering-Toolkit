@@ -120,6 +120,50 @@ func TestWorkspaceInspectJSON(t *testing.T) {
 	}
 }
 
+func TestProjectInspectionAndRecommendationsAreReadOnly(t *testing.T) {
+	root := testWorkspace(t)
+	for _, test := range []struct {
+		args []string
+		want string
+	}{
+		{args: []string{"project", "inspect", "--root", root}, want: `"schema_version": "engkit.project-inspection/v1alpha1"`},
+		{args: []string{"profiles", "recommend", "--root", root}, want: `"schema_version": "engkit.profile-recommendation/v1alpha1"`},
+		{args: []string{"project", "--help"}, want: "engkit project plan-create"},
+	} {
+		var stdout, stderr bytes.Buffer
+		if code := Run(test.args, &stdout, &stderr); code != 0 {
+			t.Fatalf("Run(%v) code = %d, stderr = %q", test.args, code, stderr.String())
+		}
+		if !strings.Contains(stdout.String(), test.want) {
+			t.Fatalf("Run(%v) output = %q, want %q", test.args, stdout.String(), test.want)
+		}
+	}
+	if _, err := os.Lstat(filepath.Join(root, ".agents")); !os.IsNotExist(err) {
+		t.Fatalf("read-only project commands wrote .agents: %v", err)
+	}
+}
+
+func TestProjectPlanningRequiresExactPackagedProfileWithoutWriting(t *testing.T) {
+	parent, err := os.MkdirTemp(".", "engkit-cli-project-test-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	parent, err = filepath.Abs(parent)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(parent) })
+	target := filepath.Join(parent, "new-project")
+	var stdout, stderr bytes.Buffer
+	code := Run([]string{"project", "plan-create", "--destination", target, "--profile", "go-service@0.1.0", "--set", "project_name=Toolkit"}, &stdout, &stderr)
+	if code != 1 || !strings.Contains(stderr.String(), "is not in the packaged catalog") {
+		t.Fatalf("code = %d, stdout = %q, stderr = %q", code, stdout.String(), stderr.String())
+	}
+	if _, err := os.Lstat(target); !os.IsNotExist(err) {
+		t.Fatalf("failed planning wrote target: %v", err)
+	}
+}
+
 func TestWorkspacePlanInitDoesNotWrite(t *testing.T) {
 	root := testWorkspace(t)
 	var stdout, stderr bytes.Buffer

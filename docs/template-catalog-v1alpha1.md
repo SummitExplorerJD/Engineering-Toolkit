@@ -114,4 +114,6 @@ The implemented JSON result schemas are:
   created-file inventory.
 
 Strict reading, offline inspection, and bounded scaffold publication are
-implemented in `v0.2.1B`. Template rendering remains a later milestone.
+implemented in `v0.2.1B`. `v0.2.1C` adds deterministic in-memory rendering,
+typed resolution, derived provenance and resource hashes, and validation of the
+complete canonical package without temporary filesystem output.

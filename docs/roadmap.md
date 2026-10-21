@@ -288,8 +288,8 @@ installation upgraded successfully and reported `engkit v0.2.0`.
 
 ### `v0.2.1`: template authoring and project-profile composition
 
-**Status:** Strict readers and authoring scaffold implemented locally;
-`v0.2.1C` pending approval
+**Status:** Rendering and composition planning implemented locally;
+`v0.2.1D` pending separate approval
 
 - Define versioned skill-template, project-profile, catalog, and composition-plan
   schemas.
@@ -313,7 +313,8 @@ Planned implementation gates:
    locally with an intentionally empty embedded catalog and scoped CLI help.
 3. **`v0.2.1C` — rendering and composition planning:** implement bounded
    substitution, profile recommendations, and non-executable plans for new and
-   existing workspaces.
+   existing workspaces. Implemented locally with in-memory canonical validation,
+   deterministic target inventories, and no composition mutation entry point.
 4. **`v0.2.1D` — approved composition lifecycle:** apply matching plans through
    locks, staging, journals, checkpoints, verification, and recovery.
 5. **`v0.2.1E` — first-party pilot content:** independently review and package
