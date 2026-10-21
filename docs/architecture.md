@@ -130,7 +130,7 @@ require explicit retention policy.
 - SQLite driver and build strategy.
 - Acceptance and exact version of the proposed go-tuf v2 dependency.
 - Locking and crash-consistency strategy for workflows other than the accepted
-  skill-mutation transaction.
+  skill-mutation and project-composition transaction designs.
 - Installer and self-replacement strategy per operating system.
 - Exact skill-schema fields, canonical serialization, and migration policy.
 - Exact template and profile schema fields, catalog update policy, and public
@@ -225,9 +225,10 @@ Composition has two use cases with one policy boundary:
 
 Both produce a deterministic JSON plan that binds the profile, catalog version,
 template versions, resolved variables, workspace facts, rendered file digests,
-ownership, conflicts, and ordered operations. Execution remains a later,
-separately approved transaction using journals, checkpoints, verification, and
-recovery. Provider rendering consumes canonical output downstream and cannot
+ownership, conflicts, and ordered operations. Execution implementation remains
+a later, separately approved transaction using the accepted journals,
+checkpoints, verification, and recovery design. Provider rendering consumes
+canonical output downstream and cannot
 become the canonical template model.
 
 ## 15. Experimental template and composition contracts
@@ -263,8 +264,37 @@ first-party content receives its own approval.
 
 The implemented `composition` plan layer depends on catalog, template,
 profile, workspace-inspection, and canonical-skill validation ports. It emits
-deterministic, non-executable plans and exposes no mutation function. A later
-executor may consume a rebuilt matching plan only after its journaling,
-checkpoint, staging, verification, and recovery contract is independently
-approved.
+deterministic, non-executable plans and exposes no mutation function. The
+accepted future executor may consume only a rebuilt matching plan through the
+independently approved journal, checkpoint, staging, verification, and recovery
+contract.
+
+## 16. Project-composition transaction boundary
+
+The accepted `v0.2.1D1` design keeps planning and execution in separate
+modules. A future composition executor may consume only a freshly rebuilt,
+fully matching executable plan with no blocking conflicts. Its first scope is
+additive: existing matching files are no-ops, while replacement, removal, and
+ownership adoption remain unsupported.
+
+New-project creation stages a complete initialized project in a hidden sibling
+directory on the destination filesystem. It publishes the complete tree with a
+directory rename; an approved empty destination is first retained as an exact
+sibling backup. Transaction evidence begins inside the staged `.engkit` tree
+and moves with the project, avoiding a successful project whose audit state is
+owned only by an external sidecar.
+
+Existing-workspace composition requires prior workspace initialization. It
+uses one workspace composition lock, recovery-local staging, aggregate
+directory publication for canonical skill packages, and atomic no-replace file
+publication for other profile assets. This path is recoverable but not globally
+atomic across separate workspace outputs. It never replaces the workspace
+root, `.git`, or unowned content.
+
+Both kinds use durable plans, JSONL journals, atomic JSON checkpoints,
+same-filesystem staging, digest verification, and explicit fail-closed
+recovery. The complete design is specified in
+[`composition-execution-v1alpha1.md`](composition-execution-v1alpha1.md) and
+[ADR 0011](adr/0011-transactional-project-composition.md). No executor is
+implemented by the design milestone.
 

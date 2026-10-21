@@ -20,7 +20,9 @@ project profiles are under active `v0.2.1` development: strict offline readers,
 an empty packaged catalog, deterministic inspection, and bounded template
 scaffolding are implemented locally. Deterministic in-memory rendering,
 evidence-based profile recommendation, and non-executable project composition
-plans are also implemented; the embedded catalog intentionally remains empty.
+plans are also implemented. The additive composition execution and recovery
+contract is accepted, but its executor is not yet implemented; the embedded
+catalog intentionally remains empty.
 Production TUF
 activation, platform signing, package-manager distribution, automatic updates,
 self-replacement, provider synchronization, and execution of skill resources
@@ -49,6 +51,7 @@ remain deferred.
 - [Template catalog contracts v1alpha1](docs/template-catalog-v1alpha1.md)
 - [Project profile v1alpha1](docs/project-profile-v1alpha1.md)
 - [Project composition plan v1alpha1](docs/composition-plan-v1alpha1.md)
+- [Project composition execution v1alpha1](docs/composition-execution-v1alpha1.md)
 - [Agent adapter matrix](docs/agent-adapters.md)
 - [Spec Kit adoption](docs/spec-kit-adoption.md)
 - [Spec Kit v1.2.0 Codex inventory](docs/spec-kit-v1.2.0-codex-inventory.md)
@@ -121,7 +124,10 @@ credentials, or contacts networks.
 Project inspection, recommendation, and composition planning are offline and
 read-only. Composition plans render and validate canonical skills in memory,
 inventory the target, report ownership conflicts, and remain explicitly
-non-executable until the separately approved lifecycle milestone.
+non-executable until the separately approved lifecycle implementation. The
+accepted future executor is additive only, uses complete-tree publication for
+new projects, requires initialized existing workspaces, and recovers from
+durable plan, journal, checkpoint, staging, and lock evidence.
 
 ## Contributing
 

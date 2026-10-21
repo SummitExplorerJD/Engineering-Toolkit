@@ -11,7 +11,7 @@ engkit project plan-create --destination PATH --profile PROFILE_ID@VERSION [--se
 engkit project plan-compose [--root PATH] --profile PROFILE_ID@VERSION [--set NAME=VALUE]
 ```
 
-Future execution commands are reserved as:
+The accepted `v0.2.1D1` execution design reserves:
 
 ```text
 engkit project create --destination PATH --profile PROFILE_ID@VERSION [--set NAME=VALUE] --approve PLAN_ID
@@ -19,7 +19,9 @@ engkit project compose [--root PATH] --profile PROFILE_ID@VERSION [--set NAME=VA
 engkit project recover [--root PATH] --approve PLAN_ID
 ```
 
-Execution and recovery are not authorized by this design milestone.
+`project recover --root` identifies the intended project destination for a
+`project.create` plan, even when that destination is absent. Execution and
+recovery remain unimplemented until the separately approved `v0.2.1D2` gate.
 
 The inspection and planning commands are implemented in `v0.2.1C`.
 `project inspect` emits `engkit.project-inspection/v1alpha1` and includes the
@@ -45,7 +47,7 @@ the independently approved pilot-content milestone.
 | `preconditions` | Exact state that execution must observe again. |
 | `operations` | Ordered proposed filesystem operations. |
 | `requires_approval` | Always `true`. |
-| `executable` | `false` until the separately approved execution milestone. |
+| `executable` | `false` until the separately approved executor exists; later `true` changes the plan ID. |
 | `verification` | Post-execution validation required from a future executor. |
 | `recovery` | Backup, journal, checkpoint, and ambiguity rules. |
 
@@ -66,9 +68,10 @@ or unknown variables, incompatible source layouts, duplicate outputs,
 case-insensitive collisions, escaping paths, links, special files, unsupported
 integration requirements, and ownership ambiguity.
 
-Operations are limited to portable directory creation and exact file creation
-or replacement that is owned by the selected profile and visible in the plan.
-Removal of unrelated content is never inferred. Provider rendering, Spec Kit
+Operations in the initial executor are limited to portable directory creation
+and exact additive file or canonical-package publication visible in the plan.
+Existing matching files are no-ops; replacement, adoption, and removal are not
+supported. Removal of unrelated content is never inferred. Provider rendering, Spec Kit
 initialization, dependency installation, script execution, network access, and
 credential access are outside this contract.
 
@@ -87,4 +90,6 @@ deterministic JSON.
 
 The current planner may emit blocking conflicts as reviewable plan data, but
 `executable` remains `false` regardless of conflict state. No apply or recovery
-subcommand is present in `v0.2.1C`.
+subcommand is present in `v0.2.1C`. The accepted future transaction contract is
+specified in
+[`composition-execution-v1alpha1.md`](composition-execution-v1alpha1.md).

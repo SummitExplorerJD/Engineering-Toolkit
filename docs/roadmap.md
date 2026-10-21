@@ -289,7 +289,7 @@ installation upgraded successfully and reported `engkit v0.2.0`.
 ### `v0.2.1`: template authoring and project-profile composition
 
 **Status:** Rendering and composition planning implemented locally;
-`v0.2.1D` pending separate approval
+`v0.2.1D1` execution design accepted, `v0.2.1D2` implementation pending
 
 - Define versioned skill-template, project-profile, catalog, and composition-plan
   schemas.
@@ -315,9 +315,15 @@ Planned implementation gates:
    substitution, profile recommendations, and non-executable plans for new and
    existing workspaces. Implemented locally with in-memory canonical validation,
    deterministic target inventories, and no composition mutation entry point.
-4. **`v0.2.1D` — approved composition lifecycle:** apply matching plans through
-   locks, staging, journals, checkpoints, verification, and recovery.
-5. **`v0.2.1E` — first-party pilot content:** independently review and package
+4. **`v0.2.1D1` — composition lifecycle design:** accepted in
+   [ADR 0011](adr/0011-transactional-project-composition.md). The additive
+   execution boundary, new-project tree publication, workspace no-replace
+   publication, artifacts, locks, verification, and recovery tables are exact.
+   No executor is implemented by this slice.
+5. **`v0.2.1D2` — approved composition lifecycle implementation:** apply
+   matching plans through the accepted transaction contract and complete the
+   cross-platform failure-injection gate.
+6. **`v0.2.1E` — first-party pilot content:** independently review and package
    the initial templates and one pilot profile.
 
 ### `v0.2.2`: selective provider synchronization

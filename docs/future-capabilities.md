@@ -182,16 +182,17 @@ Planned capabilities:
 - Apply the approved composition through journals, checkpoints, verification,
   and recovery.
 
-Candidate interfaces, not yet public contracts, include:
+Accepted planning interfaces and reserved execution interfaces include:
 
 ```text
-engkit skills scaffold --id SKILL_ID --output PATH
-engkit catalog list
+engkit templates scaffold --output PATH --id TEMPLATE_ID --version VERSION
+engkit catalog inspect
 engkit profiles recommend [--root PATH]
-engkit project plan-new --profile PROFILE --destination PATH
-engkit project new --profile PROFILE --destination PATH --approve PLAN_ID
-engkit workspace plan-compose --profile PROFILE [--root PATH]
-engkit workspace compose --profile PROFILE --approve PLAN_ID [--root PATH]
+engkit project plan-create --destination PATH --profile ID@VERSION [--set NAME=VALUE]
+engkit project plan-compose [--root PATH] --profile ID@VERSION [--set NAME=VALUE]
+engkit project create --destination PATH --profile ID@VERSION [--set NAME=VALUE] --approve PLAN_ID
+engkit project compose [--root PATH] --profile ID@VERSION [--set NAME=VALUE] --approve PLAN_ID
+engkit project recover [--root PATH] --approve PLAN_ID
 ```
 
 The first implementation will use a reviewed, versioned catalog packaged with

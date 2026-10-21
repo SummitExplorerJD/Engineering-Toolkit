@@ -17,6 +17,10 @@ The project follows Semantic Versioning while the public surface evolves.
 - Evidence-based profile recommendations that never select a profile.
 - Read-only project inspection and non-executable composition plans for new and
   existing workspaces.
+- Accepted transactional composition design for additive new-project creation
+  and initialized-workspace composition, with exact approval binding,
+  same-filesystem staging, no-replace publication, durable evidence, and
+  explicit fail-closed recovery.
 
 ### Changed
 

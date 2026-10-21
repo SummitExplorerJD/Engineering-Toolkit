@@ -308,3 +308,31 @@ Errors shall distinguish user input, policy refusal, environmental failure, inte
 - Every composition plan has `requires_approval: true` and `executable: false`;
   applying or recovering a composition remains a separate approval gate.
 
+## 13. `v0.2.1D1` composition-execution design acceptance criteria
+
+- Execution rebuilds the complete current plan, requires the exact full
+  approved ID, rejects blocking conflicts, and performs no write before lock
+  acquisition and approval validation complete.
+- The initial executor is additive only. Existing matching files are no-ops;
+  replacement, removal, and implicit ownership adoption are unavailable.
+- New projects are assembled as complete initialized workspace trees on the
+  destination filesystem and published by directory rename. An approved empty
+  destination is retained as an exact recovery backup during publication.
+- Existing-workspace composition requires valid `.engkit` state, uses one
+  workspace composition lock, publishes canonical skill packages as complete
+  directories, and publishes other files through an atomic no-replace
+  primitive that is capability-checked before mutation.
+- Plans are JSON, journals are append-only JSONL, checkpoints are atomically
+  replaced JSON, and all staging and backups stay on the target filesystem.
+- Recovery is explicit and approval-bound. It completes an exact published
+  state, rolls back only exact transaction-created output, or refuses ambiguous
+  and changed content while preserving evidence and the lock.
+- Project creation and workspace composition verify every output digest,
+  canonical skill, workspace state artifact, and preservation of unrelated
+  observed paths before reporting success.
+- The design introduces no dependency, network access, credential access,
+  script execution, provider synchronization, Spec Kit mutation, catalog
+  content, Git operation, or release operation.
+- Executor implementation and its Windows, Linux, and macOS failure-injection
+  suite remain a separate `v0.2.1D2` approval gate.
+
