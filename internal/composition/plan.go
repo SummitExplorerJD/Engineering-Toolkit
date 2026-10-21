@@ -185,11 +185,41 @@ func build(kind, target, profileID, profileVersion string, supplied map[string]s
 		Profile: ContentReference{ID: entry.ID, Version: entry.Version, SHA256: entry.SHA256}, Templates: templateRefs,
 		ResolvedVariables: resolved, WorkspaceFacts: facts, RenderedOutputs: renderedOutputs,
 		Conflicts: conflicts, Preconditions: preconditions, Operations: operations,
-		RequiresApproval: true, Executable: false,
+		RequiresApproval: true, Executable: !hasBlockingConflict(conflicts),
 		Verification: []string{"rebuild the plan and require the same plan_id before execution", "validate every canonical skill and rendered file digest", "preserve every unowned workspace path", "inspect the final changed-file list"},
-		Recovery:     []string{"future execution must use same-filesystem staging, an append-only JSONL journal, and an atomic JSON checkpoint", "future recovery must fail closed when observed ownership or content is ambiguous"},
+		Recovery:     []string{"execution uses same-filesystem staging, an append-only JSONL journal, and an atomic JSON checkpoint", "recovery fails closed when observed ownership or content is ambiguous"},
 	}
 	return finalize(body)
+}
+
+// ValidateIdentity confirms that the plan ID matches its canonical body.
+func ValidateIdentity(value Plan) error {
+	body := digestBody{
+		SchemaVersion: value.SchemaVersion, Kind: value.Kind, TargetRoot: value.TargetRoot,
+		Catalog: value.Catalog, Profile: value.Profile, Templates: value.Templates,
+		ResolvedVariables: value.ResolvedVariables, WorkspaceFacts: value.WorkspaceFacts,
+		RenderedOutputs: value.RenderedOutputs, Conflicts: value.Conflicts,
+		Preconditions: value.Preconditions, Operations: value.Operations,
+		RequiresApproval: value.RequiresApproval, Executable: value.Executable,
+		Verification: value.Verification, Recovery: value.Recovery,
+	}
+	rebuilt, err := finalize(body)
+	if err != nil {
+		return err
+	}
+	if rebuilt.PlanID != value.PlanID {
+		return errors.New("composition plan ID does not match its canonical body")
+	}
+	return nil
+}
+
+func hasBlockingConflict(values []Conflict) bool {
+	for _, value := range values {
+		if value.Severity == "blocking" {
+			return true
+		}
+	}
+	return false
 }
 
 func bindTemplate(definition templates.Template, selection profiles.SkillSelection, profileVariables []templates.Variable, profileValues map[string]any) (map[string]string, error) {
@@ -247,6 +277,11 @@ func observeAndPlan(kind, root string, profile profiles.Profile, outputs []plann
 	if kind == "workspace.compose" && state != "directory" {
 		return WorkspaceFacts{}, nil, nil, nil, fmt.Errorf("workspace composition target must be an existing directory")
 	}
+	if kind == "workspace.compose" {
+		if err := validateInitializedWorkspace(root); err != nil {
+			conflicts = append(conflicts, Conflict{Severity: "blocking", Code: "workspace.uninitialized", Path: ".engkit", Message: err.Error()})
+		}
+	}
 	if len(profile.Compatibility.Ecosystems) != 0 && kind == "workspace.compose" && len(stringIntersection(profile.Compatibility.Ecosystems, ecosystems)) == 0 {
 		conflicts = append(conflicts, Conflict{Severity: "blocking", Code: "ecosystem.incompatible", Message: "selected profile does not match observed ecosystem evidence"})
 	}
@@ -259,6 +294,10 @@ func observeAndPlan(kind, root string, profile profiles.Profile, outputs []plann
 	preconditions := []Precondition{{Path: ".", ExpectedState: state, SHA256: treeDigest}}
 	directories := directorySet(profile, outputs)
 	operations := []Operation{}
+	if kind == "project.create" {
+		preconditions = append(preconditions, Precondition{Path: ".engkit", ExpectedState: "missing"})
+		operations = append(operations, Operation{Action: "initialize_workspace", Path: ".engkit", Owner: "engkit", Reason: "create durable workspace transaction state"})
+	}
 	for _, directory := range directories {
 		full := filepath.Join(root, filepath.FromSlash(directory))
 		info, err := os.Lstat(full)
@@ -298,6 +337,9 @@ func observeAndPlan(kind, root string, profile profiles.Profile, outputs []plann
 			}
 		}
 	}
+	if kind == "workspace.compose" {
+		conflicts = append(conflicts, skillRootConflicts(root, outputs)...)
+	}
 	sort.Slice(preconditions, func(i, j int) bool { return preconditions[i].Path < preconditions[j].Path })
 	sort.Slice(operations, func(i, j int) bool {
 		if operations[i].Action != operations[j].Action {
@@ -306,6 +348,85 @@ func observeAndPlan(kind, root string, profile profiles.Profile, outputs []plann
 		return operations[i].Path < operations[j].Path
 	})
 	return facts, conflicts, preconditions, operations, nil
+}
+
+func skillRootConflicts(root string, outputs []plannedFile) []Conflict {
+	roots := map[string]struct{}{}
+	for _, output := range outputs {
+		if !strings.HasPrefix(output.Owner, "skill:") {
+			continue
+		}
+		parts := strings.Split(output.Path, "/")
+		if len(parts) >= 3 && parts[0] == ".agents" && parts[1] == "skills" {
+			roots[path.Join(parts[0], parts[1], parts[2])] = struct{}{}
+		}
+	}
+	conflicts := []Conflict{}
+	for relative := range roots {
+		full := filepath.Join(root, filepath.FromSlash(relative))
+		if _, err := os.Lstat(full); errors.Is(err, os.ErrNotExist) {
+			continue
+		} else if err != nil {
+			conflicts = append(conflicts, Conflict{Severity: "blocking", Code: "skill.target_ambiguous", Path: relative, Message: "canonical skill target cannot be inspected safely"})
+			continue
+		}
+		exact := skillDirectoryMatches(root, relative, outputs)
+		if !exact {
+			conflicts = append(conflicts, Conflict{Severity: "blocking", Code: "skill.target_not_absent", Path: relative, Message: "canonical skills must be published as complete absent directories"})
+		}
+	}
+	return conflicts
+}
+
+func skillDirectoryMatches(root, skillRoot string, outputs []plannedFile) bool {
+	expectedFiles := map[string]string{}
+	expectedDirs := map[string]struct{}{".": {}}
+	for _, output := range outputs {
+		if output.Path != skillRoot && !strings.HasPrefix(output.Path, skillRoot+"/") {
+			continue
+		}
+		relative := strings.TrimPrefix(strings.TrimPrefix(output.Path, skillRoot), "/")
+		expectedFiles[relative] = output.SHA256
+		for parent := path.Dir(relative); parent != "."; parent = path.Dir(parent) {
+			expectedDirs[parent] = struct{}{}
+		}
+	}
+	base := filepath.Join(root, filepath.FromSlash(skillRoot))
+	seen := 0
+	err := filepath.WalkDir(base, func(filename string, entry os.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		relative, err := filepath.Rel(base, filename)
+		if err != nil {
+			return err
+		}
+		relative = filepath.ToSlash(relative)
+		if entry.Type()&os.ModeSymlink != 0 {
+			return errors.New("link")
+		}
+		if entry.IsDir() {
+			if _, ok := expectedDirs[relative]; !ok {
+				return errors.New("unexpected directory")
+			}
+			return nil
+		}
+		info, err := entry.Info()
+		if err != nil || !info.Mode().IsRegular() {
+			return errors.New("special file")
+		}
+		expected, ok := expectedFiles[relative]
+		if !ok {
+			return errors.New("unexpected file")
+		}
+		digest, err := diskFileDigest(filename)
+		if err != nil || digest != expected {
+			return errors.New("digest mismatch")
+		}
+		seen++
+		return nil
+	})
+	return err == nil && seen == len(expectedFiles)
 }
 
 func inspectTarget(kind, root string) (string, []ObservedPath, string, []string, error) {
@@ -336,6 +457,9 @@ func inspectTarget(kind, root string) (string, []ObservedPath, string, []string,
 			return err
 		}
 		relative = filepath.ToSlash(relative)
+		if relative == ".engkit" && entry.IsDir() {
+			return filepath.SkipDir
+		}
 		if entry.Type()&os.ModeSymlink != 0 {
 			return fmt.Errorf("target contains symbolic link %q", relative)
 		}
@@ -373,6 +497,26 @@ func inspectTarget(kind, root string) (string, []ObservedPath, string, []string,
 		}
 	}
 	return state, observed, observedDigest(observed), ecosystems, nil
+}
+
+func validateInitializedWorkspace(root string) error {
+	for _, relative := range []string{".engkit", ".engkit/config.yaml", ".engkit/.gitignore"} {
+		full := filepath.Join(root, filepath.FromSlash(relative))
+		info, err := os.Lstat(full)
+		if err != nil {
+			return fmt.Errorf("workspace composition requires initialized regular state at %s", relative)
+		}
+		if info.Mode()&os.ModeSymlink != 0 {
+			return fmt.Errorf("workspace composition state %s must not be a link", relative)
+		}
+		if relative == ".engkit" && !info.IsDir() {
+			return errors.New("workspace composition state .engkit must be a directory")
+		}
+		if relative != ".engkit" && !info.Mode().IsRegular() {
+			return fmt.Errorf("workspace composition state %s must be a regular file", relative)
+		}
+	}
+	return nil
 }
 
 func rejectLinkedAncestors(target string) error {

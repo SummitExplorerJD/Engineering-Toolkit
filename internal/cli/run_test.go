@@ -39,6 +39,8 @@ func TestScopedHelpSucceeds(t *testing.T) {
 		{"workspace", "help"},
 		{"templates", "scaffold", "-h"},
 		{"profiles", "--help"},
+		{"project", "create", "--help"},
+		{"project", "recover", "--help"},
 	} {
 		var stdout, stderr bytes.Buffer
 		if code := Run(args, &stdout, &stderr); code != 0 {

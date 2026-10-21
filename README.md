@@ -19,10 +19,11 @@ transactional creation, update, removal, and recovery. Skill templates and
 project profiles are under active `v0.2.1` development: strict offline readers,
 an empty packaged catalog, deterministic inspection, and bounded template
 scaffolding are implemented locally. Deterministic in-memory rendering,
-evidence-based profile recommendation, and non-executable project composition
-plans are also implemented. The additive composition execution and recovery
-contract is accepted, but its executor is not yet implemented; the embedded
-catalog intentionally remains empty.
+evidence-based profile recommendation, and deterministic project composition
+plans are also implemented. Approved additive project creation, initialized
+workspace composition, and explicit recovery are implemented; the embedded
+catalog intentionally remains empty, so first-party selection remains blocked
+until the pilot-content milestone.
 Production TUF
 activation, platform signing, package-manager distribution, automatic updates,
 self-replacement, provider synchronization, and execution of skill resources
@@ -107,6 +108,9 @@ engkit profiles recommend [--root PATH]
 engkit project inspect [--root PATH]
 engkit project plan-create --destination PATH --profile PROFILE_ID@VERSION [--set NAME=VALUE]
 engkit project plan-compose [--root PATH] --profile PROFILE_ID@VERSION [--set NAME=VALUE]
+engkit project create --destination PATH --profile PROFILE_ID@VERSION [--set NAME=VALUE] --approve PLAN_ID
+engkit project compose [--root PATH] --profile PROFILE_ID@VERSION [--set NAME=VALUE] --approve PLAN_ID
+engkit project recover [--root PATH] --approve PLAN_ID
 ```
 
 The context database is derived, local, and ignored by generated `.engkit/.gitignore` rules. Deleting it does not remove canonical project artifacts; run `context rebuild` to recreate it.
@@ -122,12 +126,12 @@ record local plans, journals, checkpoints, locks, and recovery backups. No skill
 command executes package resources, resolves dependencies, accesses
 credentials, or contacts networks.
 Project inspection, recommendation, and composition planning are offline and
-read-only. Composition plans render and validate canonical skills in memory,
-inventory the target, report ownership conflicts, and remain explicitly
-non-executable until the separately approved lifecycle implementation. The
-accepted future executor is additive only, uses complete-tree publication for
-new projects, requires initialized existing workspaces, and recovers from
-durable plan, journal, checkpoint, staging, and lock evidence.
+read-only. Composition plans render and validate canonical skills in memory and
+inventory the target. Plans with blocking conflicts are non-executable. The
+executor is additive only, uses complete-tree publication for new projects,
+requires initialized existing workspaces, capability-checks no-replace file
+publication, and recovers from durable plan, journal, checkpoint, staging, and
+lock evidence.
 
 ## Contributing
 

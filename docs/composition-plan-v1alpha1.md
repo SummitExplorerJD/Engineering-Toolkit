@@ -21,7 +21,7 @@ engkit project recover [--root PATH] --approve PLAN_ID
 
 `project recover --root` identifies the intended project destination for a
 `project.create` plan, even when that destination is absent. Execution and
-recovery remain unimplemented until the separately approved `v0.2.1D2` gate.
+recovery are implemented by `v0.2.1D2`.
 
 The inspection and planning commands are implemented in `v0.2.1C`.
 `project inspect` emits `engkit.project-inspection/v1alpha1` and includes the
@@ -47,8 +47,8 @@ the independently approved pilot-content milestone.
 | `preconditions` | Exact state that execution must observe again. |
 | `operations` | Ordered proposed filesystem operations. |
 | `requires_approval` | Always `true`. |
-| `executable` | `false` until the separately approved executor exists; later `true` changes the plan ID. |
-| `verification` | Post-execution validation required from a future executor. |
+| `executable` | `true` only when the executor is available and no blocking conflict exists. |
+| `verification` | Post-execution validation required from the executor. |
 | `recovery` | Backup, journal, checkpoint, and ambiguity rules. |
 
 Plans contain no timestamps, random identifiers, machine-specific temporary
@@ -77,7 +77,7 @@ credential access are outside this contract.
 
 ## 4. Approval, help, and exit behavior
 
-A future executor must rebuild the plan from current state and accept only the
+The executor rebuilds the plan from current state and accepts only the
 complete matching `plan_id`. Changed catalog content, variables, target state,
 or rendered bytes invalidates approval. Execution must use JSON plans, JSONL
 journals, atomic JSON checkpoints, same-filesystem staging, verification, and
@@ -88,8 +88,7 @@ usage to standard output, and exits `0`. Usage mistakes exit `2`; validation,
 conflict, or execution failures exit `1`. Normal command results are
 deterministic JSON.
 
-The current planner may emit blocking conflicts as reviewable plan data, but
-`executable` remains `false` regardless of conflict state. No apply or recovery
-subcommand is present in `v0.2.1C`. The accepted future transaction contract is
-specified in
+The planner emits blocking conflicts as reviewable plan data and marks those
+plans non-executable. Valid additive plans are executable. The transaction
+contract is specified in
 [`composition-execution-v1alpha1.md`](composition-execution-v1alpha1.md).

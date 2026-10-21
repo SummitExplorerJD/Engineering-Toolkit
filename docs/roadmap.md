@@ -288,8 +288,8 @@ installation upgraded successfully and reported `engkit v0.2.0`.
 
 ### `v0.2.1`: template authoring and project-profile composition
 
-**Status:** Rendering and composition planning implemented locally;
-`v0.2.1D1` execution design accepted, `v0.2.1D2` implementation pending
+**Status:** Composition execution and recovery implemented locally;
+`v0.2.1E` pilot content pending separate approval
 
 - Define versioned skill-template, project-profile, catalog, and composition-plan
   schemas.
@@ -322,7 +322,9 @@ Planned implementation gates:
    No executor is implemented by this slice.
 5. **`v0.2.1D2` — approved composition lifecycle implementation:** apply
    matching plans through the accepted transaction contract and complete the
-   cross-platform failure-injection gate.
+   cross-platform failure-injection gate. Implemented locally with additive
+   new-project and initialized-workspace execution, durable evidence, exact
+   recovery, and capability-checked no-replace publication.
 6. **`v0.2.1E` — first-party pilot content:** independently review and package
    the initial templates and one pilot profile.
 

@@ -1,4 +1,4 @@
-// Package composition builds deterministic, non-executable project plans.
+// Package composition builds deterministic project composition plans.
 package composition
 
 import (
@@ -53,6 +53,12 @@ type RenderedOutput struct {
 	Kind   string `json:"kind"`
 	Size   int64  `json:"size"`
 	SHA256 string `json:"sha256"`
+}
+
+// MaterializedFile is a validated rendered output kept outside the JSON plan.
+type MaterializedFile struct {
+	RenderedOutput
+	Data []byte `json:"-"`
 }
 
 type Conflict struct {

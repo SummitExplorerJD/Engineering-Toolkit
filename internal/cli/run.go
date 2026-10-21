@@ -14,6 +14,7 @@ import (
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/adapters"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/catalog"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/composition"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/compositionexec"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/execution"
 	sqliteindex "github.com/SummitExplorerJD/Engineering-Toolkit/internal/index/sqlite"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/plan"
@@ -256,7 +257,7 @@ func runProfiles(args []string, stdout, stderr io.Writer) error {
 
 func runProject(args []string, stdout, stderr io.Writer) error {
 	if len(args) == 0 {
-		return &usageError{message: "project requires a subcommand: inspect, plan-create, or plan-compose"}
+		return &usageError{message: "project requires a subcommand: inspect, plan-create, plan-compose, create, compose, or recover"}
 	}
 	switch args[0] {
 	case "inspect":
@@ -329,6 +330,87 @@ func runProject(args []string, stdout, stderr io.Writer) error {
 			return err
 		}
 		result, err := composition.NewCompose(*root, id, exactVersion, values, Version, loaded, catalogFS)
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "create":
+		flags := newFlagSet("project create", stderr)
+		destination := flags.String("destination", "", "absent or empty project destination")
+		profile := flags.String("profile", "", "exact profile selection ID@VERSION")
+		approved := flags.String("approve", "", "complete plan ID approved for execution")
+		values := stringMapFlag{}
+		flags.Var(&values, "set", "typed profile value NAME=VALUE; repeatable")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "project create does not accept positional arguments"}
+		}
+		if *destination == "" || *profile == "" {
+			return &usageError{message: "project create requires --destination and --profile"}
+		}
+		id, exactVersion, err := parseSelection(*profile)
+		if err != nil {
+			return &usageError{message: err.Error()}
+		}
+		loaded, catalogFS, err := catalog.Builtin()
+		if err != nil {
+			return err
+		}
+		preview, err := composition.NewCreate(*destination, id, exactVersion, values, Version, loaded, catalogFS)
+		if err != nil {
+			return err
+		}
+		result, err := compositionexec.Execute(preview, *approved, loaded, catalogFS, compositionexec.Options{ProcessID: os.Getpid()})
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "compose":
+		flags := newFlagSet("project compose", stderr)
+		root := flags.String("root", ".", "initialized workspace root")
+		profile := flags.String("profile", "", "exact profile selection ID@VERSION")
+		approved := flags.String("approve", "", "complete plan ID approved for execution")
+		values := stringMapFlag{}
+		flags.Var(&values, "set", "typed profile value NAME=VALUE; repeatable")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "project compose does not accept positional arguments"}
+		}
+		if *profile == "" {
+			return &usageError{message: "project compose requires --profile"}
+		}
+		id, exactVersion, err := parseSelection(*profile)
+		if err != nil {
+			return &usageError{message: err.Error()}
+		}
+		loaded, catalogFS, err := catalog.Builtin()
+		if err != nil {
+			return err
+		}
+		preview, err := composition.NewCompose(*root, id, exactVersion, values, Version, loaded, catalogFS)
+		if err != nil {
+			return err
+		}
+		result, err := compositionexec.Execute(preview, *approved, loaded, catalogFS, compositionexec.Options{ProcessID: os.Getpid()})
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "recover":
+		flags := newFlagSet("project recover", stderr)
+		root := flags.String("root", ".", "intended project destination or initialized workspace root")
+		approved := flags.String("approve", "", "complete interrupted plan ID")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "project recover does not accept positional arguments"}
+		}
+		result, err := compositionexec.Recover(*root, *approved, compositionexec.Options{ProcessID: os.Getpid()})
 		if err != nil {
 			return err
 		}
@@ -835,6 +917,9 @@ var usageLines = []string{
 	"project inspect [--root PATH]",
 	"project plan-create --destination PATH --profile PROFILE_ID@VERSION [--set NAME=VALUE]",
 	"project plan-compose [--root PATH] --profile PROFILE_ID@VERSION [--set NAME=VALUE]",
+	"project create --destination PATH --profile PROFILE_ID@VERSION [--set NAME=VALUE] --approve PLAN_ID",
+	"project compose [--root PATH] --profile PROFILE_ID@VERSION [--set NAME=VALUE] --approve PLAN_ID",
+	"project recover [--root PATH] --approve PLAN_ID",
 }
 
 func helpPrefix(args []string) ([]string, bool) {
@@ -886,6 +971,7 @@ mutation planning are read-only. Skill mutations require an initialized
 workspace and exact plan approval; they never execute package resources.
 Catalog, template, and profile inspection are offline and read-only. Template
 scaffolding writes only to an explicit absent output directory. Project
-inspection, recommendation, and composition planning are read-only; composition
-plans are non-executable in this milestone.`)
+inspection, recommendation, and composition planning are read-only. Project
+creation and composition rebuild the exact approved plan, publish only additive
+outputs, and retain durable recovery evidence.`)
 }

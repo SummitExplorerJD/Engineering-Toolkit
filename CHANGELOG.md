@@ -21,6 +21,10 @@ The project follows Semantic Versioning while the public surface evolves.
   and initialized-workspace composition, with exact approval binding,
   same-filesystem staging, no-replace publication, durable evidence, and
   explicit fail-closed recovery.
+- Approved `project create`, `project compose`, and `project recover` lifecycle
+  with complete-tree new-project publication, initialized-workspace enforcement,
+  canonical skill validation, capability-checked no-replace publication, and
+  digest-based interruption recovery.
 
 ### Changed
 

@@ -225,9 +225,9 @@ Composition has two use cases with one policy boundary:
 
 Both produce a deterministic JSON plan that binds the profile, catalog version,
 template versions, resolved variables, workspace facts, rendered file digests,
-ownership, conflicts, and ordered operations. Execution implementation remains
-a later, separately approved transaction using the accepted journals,
-checkpoints, verification, and recovery design. Provider rendering consumes
+ownership, conflicts, and ordered operations. The separately approved executor
+implements the accepted journals, checkpoints, verification, and recovery
+design. Provider rendering consumes
 canonical output downstream and cannot
 become the canonical template model.
 
@@ -264,15 +264,15 @@ first-party content receives its own approval.
 
 The implemented `composition` plan layer depends on catalog, template,
 profile, workspace-inspection, and canonical-skill validation ports. It emits
-deterministic, non-executable plans and exposes no mutation function. The
-accepted future executor may consume only a rebuilt matching plan through the
-independently approved journal, checkpoint, staging, verification, and recovery
-contract.
+deterministic plans and materializes exact approved output bytes without owning
+filesystem publication. The separate `compositionexec` module consumes only a
+rebuilt matching executable plan through the approved journal, checkpoint,
+staging, verification, and recovery contract.
 
 ## 16. Project-composition transaction boundary
 
-The accepted `v0.2.1D1` design keeps planning and execution in separate
-modules. A future composition executor may consume only a freshly rebuilt,
+The implemented `v0.2.1D1`/`v0.2.1D2` boundary keeps planning and execution in
+separate modules. The composition executor consumes only a freshly rebuilt,
 fully matching executable plan with no blocking conflicts. Its first scope is
 additive: existing matching files are no-ops, while replacement, removal, and
 ownership adoption remain unsupported.
@@ -287,7 +287,9 @@ owned only by an external sidecar.
 Existing-workspace composition requires prior workspace initialization. It
 uses one workspace composition lock, recovery-local staging, aggregate
 directory publication for canonical skill packages, and atomic no-replace file
-publication for other profile assets. This path is recoverable but not globally
+publication through same-filesystem hard links for other profile assets. A
+capability probe fails before live mutation when that primitive is unavailable.
+This path is recoverable but not globally
 atomic across separate workspace outputs. It never replaces the workspace
 root, `.git`, or unowned content.
 
@@ -295,6 +297,5 @@ Both kinds use durable plans, JSONL journals, atomic JSON checkpoints,
 same-filesystem staging, digest verification, and explicit fail-closed
 recovery. The complete design is specified in
 [`composition-execution-v1alpha1.md`](composition-execution-v1alpha1.md) and
-[ADR 0011](adr/0011-transactional-project-composition.md). No executor is
-implemented by the design milestone.
+[ADR 0011](adr/0011-transactional-project-composition.md).
 

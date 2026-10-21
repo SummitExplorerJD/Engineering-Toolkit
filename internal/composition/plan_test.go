@@ -28,7 +28,7 @@ func TestNewCreateIsDeterministicAndDoesNotWrite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if first.PlanID != second.PlanID || first.Executable || !first.RequiresApproval {
+	if first.PlanID != second.PlanID || !first.Executable || !first.RequiresApproval {
 		t.Fatalf("unexpected plans: %#v %#v", first, second)
 	}
 	if len(first.RenderedOutputs) != 3 || !hasOperation(first.Operations, "create_directory", "src") {
@@ -47,6 +47,15 @@ func TestNewComposeInventoriesWorkspaceWithoutWriting(t *testing.T) {
 	}
 	goMod := []byte("module example.com/service\n\ngo 1.26.4\n")
 	if err := os.WriteFile(filepath.Join(root, "go.mod"), goMod, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Mkdir(filepath.Join(root, ".engkit"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, ".engkit", "config.yaml"), []byte("schema_version: engkit.config/v1alpha1\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, ".engkit", ".gitignore"), []byte("/recovery/*\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	preview, err := NewCompose(root, "go-service", "0.1.0", map[string]string{"project_name": "Service"}, "0.2.1", inventory, catalogFS)
@@ -83,6 +92,54 @@ func TestNewCreateReportsNonemptyDestinationConflict(t *testing.T) {
 	}
 	if !hasConflict(preview.Conflicts, "target.nonempty") {
 		t.Fatalf("missing target conflict: %#v", preview.Conflicts)
+	}
+}
+
+func TestNewComposeRequiresInitializedWorkspace(t *testing.T) {
+	inventory, catalogFS := testCatalog(t)
+	root := filepath.Join(localParent(t), "workspace")
+	if err := os.Mkdir(root, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "go.mod"), []byte("module example.com/service\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	preview, err := NewCompose(root, "go-service", "0.1.0", map[string]string{"project_name": "Service"}, "0.2.1", inventory, catalogFS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if preview.Executable || !hasConflict(preview.Conflicts, "workspace.uninitialized") {
+		t.Fatalf("unexpected uninitialized plan: %#v", preview)
+	}
+}
+
+func TestNewComposeBlocksPartialCanonicalSkill(t *testing.T) {
+	inventory, catalogFS := testCatalog(t)
+	root := filepath.Join(localParent(t), "workspace")
+	if err := os.MkdirAll(filepath.Join(root, ".engkit"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	for name, contents := range map[string]string{"config.yaml": "schema_version: engkit.config/v1alpha1\n", ".gitignore": "/recovery/*\n"} {
+		if err := os.WriteFile(filepath.Join(root, ".engkit", name), []byte(contents), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := os.WriteFile(filepath.Join(root, "go.mod"), []byte("module example.com/service\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	skillRoot := filepath.Join(root, ".agents", "skills", "project-guide")
+	if err := os.MkdirAll(skillRoot, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(skillRoot, "instructions.md"), []byte("# Service\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	preview, err := NewCompose(root, "go-service", "0.1.0", map[string]string{"project_name": "Service"}, "0.2.1", inventory, catalogFS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if preview.Executable || !hasConflict(preview.Conflicts, "skill.target_not_absent") {
+		t.Fatalf("partial canonical skill was not blocked: %#v", preview.Conflicts)
 	}
 }
 

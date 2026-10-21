@@ -2,8 +2,7 @@
 
 ## Status
 
-Accepted for `v0.2.1D1` design. Executor implementation remains a separately
-approved `v0.2.1D2` milestone.
+Accepted in `v0.2.1D1` and implemented for `v0.2.1D2`.
 
 ## Context
 

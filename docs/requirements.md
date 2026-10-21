@@ -334,5 +334,24 @@ Errors shall distinguish user input, policy refusal, environmental failure, inte
   script execution, provider synchronization, Spec Kit mutation, catalog
   content, Git operation, or release operation.
 - Executor implementation and its Windows, Linux, and macOS failure-injection
-  suite remain a separate `v0.2.1D2` approval gate.
+  suite were accepted through the separate `v0.2.1D2` approval gate.
+
+## 14. `v0.2.1D2` composition-execution acceptance criteria
+
+- Valid additive plans are executable; blocking conflicts remain reviewable but
+  non-executable, and pre-executor plan IDs cannot be reused.
+- `project create`, `project compose`, and `project recover` implement exact
+  approval binding, durable transaction evidence, verification, and explicit
+  recovery.
+- New-project publication moves a complete initialized project tree into place
+  and supports both absent and approved-empty destinations.
+- Existing-workspace composition stages all bytes, publishes complete canonical
+  skill directories, and capability-checks atomic no-replace file publication
+  before changing live outputs.
+- Recovery validates persisted plan identity, journal sequence, checkpoint
+  layout, locks, output digests, canonical skills, and transaction-created
+  directories before completing or rolling back.
+- The implementation has no new dependency, network access, credential access,
+  provider synchronization, Spec Kit mutation, first-party catalog content,
+  Git operation, or release operation.
 

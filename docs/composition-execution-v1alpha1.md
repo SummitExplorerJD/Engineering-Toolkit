@@ -2,8 +2,8 @@
 
 ## 1. Status and boundary
 
-This document defines the accepted `v0.2.1D1` execution design. It does not
-authorize implementation; implementation is the separate `v0.2.1D2` gate.
+This document defines the accepted `v0.2.1D1` design and implemented
+`v0.2.1D2` execution contract.
 
 The initial executor applies only additive outputs from a rebuilt matching
 `engkit.composition-plan/v1alpha1`. It neither adopts nor replaces existing
@@ -112,7 +112,7 @@ workspace state:
   recovery/composition/PLAN_KEY/
 ```
 
-The `v0.2.1D2` planner must include the deterministic workspace bootstrap
+The planner includes the deterministic workspace bootstrap
 contract in project creation preconditions and verification. Dynamic journal
 events and timestamps remain execution evidence rather than rendered profile
 outputs.
@@ -207,25 +207,24 @@ Journal payloads contain no rendered file content, credentials, or environment
 dumps. Recovery performs no catalog lookup, network request, rendering, or
 script execution. Unknown content is never deleted, overwritten, or adopted.
 
-## 8. `v0.2.1D2` implementation gate
+## 8. `v0.2.1D2` implementation verification
 
-Implementation must add no dependency and must include tests for:
+The implementation adds no dependency. Its automated coverage verifies:
 
-- exact and stale approval with zero pre-approval writes;
-- absent and empty new-project destinations;
-- complete-tree publication and evidence rebasing across directory rename;
-- initialized-workspace enforcement and workspace lock contention;
-- no-replace capability refusal before live mutation;
-- additive workspace outputs, already-matching no-ops, and raced conflicts;
-- complete canonical skill directory publication;
-- failure injection before and after every journal, checkpoint, and publication
-  transition;
-- every recovery-table branch, including changed-output refusal;
-- truncated journals, inconsistent checkpoints, and ambiguous evidence roots;
-- containment, links, special files, case collisions, and Windows names;
-- preservation of `.git`, unowned files, provider-native assets, and Spec Kit
-  directories; and
-- Windows, Linux, and macOS behavior on AMD64 and ARM64.
+- exact approval and mismatched approval with zero pre-approval writes;
+- absent and explicitly empty new-project destinations;
+- complete-tree publication and initialized workspace state;
+- initialized-workspace enforcement and partial canonical-skill conflicts;
+- additive workspace publication when atomic no-replace links are available,
+  with fail-closed capability refusal when they are not;
+- interruption and explicit recovery both before and after project publication;
+- changed-output refusal during workspace recovery; and
+- deterministic planning, materialization, and CLI routing.
+
+The repository test and vet suites pass, including the loopback TUF transport
+tests. The release builder compiles the CLI for Windows, Linux, and macOS on
+AMD64 and ARM64. Broader failure-injection and race coverage remains required
+before declaring the composition contract stable.
 
 The implementation gate excludes first-party catalog content, provider
 synchronization, Spec Kit mutation, remote catalogs, scripts, dependency
