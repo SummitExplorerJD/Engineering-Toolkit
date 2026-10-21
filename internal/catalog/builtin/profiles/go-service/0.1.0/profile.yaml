@@ -1,0 +1,52 @@
+schema_version: engkit.project-profile/v1alpha1
+id: go-service
+version: 0.1.0
+description: Adds a provider-neutral Engineering Toolkit workspace to a Go service.
+compatibility:
+  ecosystems:
+    - go
+  modes:
+    - new-project
+    - existing-workspace
+variables:
+  - name: project_name
+    type: string
+    description: Human-readable project name.
+    required: true
+    min_length: 1
+    max_length: 80
+skills:
+  - template_id: project-guide
+    template_version: 0.1.0
+    bindings:
+      project_name:
+        variable: project_name
+workspace_directories:
+  - .agents/context
+  - .agents/conventions
+  - .agents/skills
+  - .agents/workflows
+workspace_assets:
+  - source: files/AGENTS.md.tmpl
+    destination: AGENTS.md
+    kind: agent-instructions
+    media_type: text
+    source_sha256: sha256:2e64148180db80465626d5fd60a2b50db85602242b6bd2b151fcc8207cb1182d
+  - source: files/go.md.tmpl
+    destination: .agents/conventions/go.md
+    kind: convention
+    media_type: text
+    source_sha256: sha256:7215abdb655d52c00bbc8a8f905c1de3ad8468e76436c09355b28326a55d6ec0
+  - source: files/project-overview.md.tmpl
+    destination: .agents/context/project-overview.md
+    kind: context
+    media_type: text
+    source_sha256: sha256:5f4fc38923b57a874d1daff56d37854ef51a22259da76b789b1c0673351559c7
+  - source: files/verify.md.tmpl
+    destination: .agents/workflows/verify.md
+    kind: workflow
+    media_type: text
+    source_sha256: sha256:4e1f1bad1f3900584b5ad20f423e2c2023d94365645d571a7d416f3481d51b4e
+source_layout:
+  policy: src
+integration_requests: []

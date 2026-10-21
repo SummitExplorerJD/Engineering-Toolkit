@@ -17,13 +17,12 @@ checksums, explicit upgrades, recoverable replacement, and opt-in PATH changes.
 discovery and validation, deterministic mutation planning, and approved
 transactional creation, update, removal, and recovery. Skill templates and
 project profiles are under active `v0.2.1` development: strict offline readers,
-an empty packaged catalog, deterministic inspection, and bounded template
-scaffolding are implemented locally. Deterministic in-memory rendering,
+a versioned packaged pilot catalog, deterministic inspection, and bounded
+template scaffolding are implemented locally. Deterministic in-memory rendering,
 evidence-based profile recommendation, and deterministic project composition
 plans are also implemented. Approved additive project creation, initialized
-workspace composition, and explicit recovery are implemented; the embedded
-catalog intentionally remains empty, so first-party selection remains blocked
-until the pilot-content milestone.
+workspace composition, and explicit recovery are implemented. The embedded
+catalog includes `project-guide@0.1.0` and the `go-service@0.1.0` pilot profile.
 Production TUF
 activation, platform signing, package-manager distribution, automatic updates,
 self-replacement, provider synchronization, and execution of skill resources
@@ -112,6 +111,11 @@ engkit project create --destination PATH --profile PROFILE_ID@VERSION [--set NAM
 engkit project compose [--root PATH] --profile PROFILE_ID@VERSION [--set NAME=VALUE] --approve PLAN_ID
 engkit project recover [--root PATH] --approve PLAN_ID
 ```
+
+The packaged pilot can be inspected with `engkit templates inspect --id
+project-guide --version 0.1.0` and `engkit profiles inspect --id go-service
+--version 0.1.0`. It creates the provider-neutral engineering workspace layer;
+it does not scaffold Go application code or execute the generated workflow.
 
 The context database is derived, local, and ignored by generated `.engkit/.gitignore` rules. Deleting it does not remove canonical project artifacts; run `context rebuild` to recreate it.
 

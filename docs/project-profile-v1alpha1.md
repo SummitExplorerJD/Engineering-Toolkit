@@ -81,5 +81,12 @@ provider-native content, and Spec Kit content remain external and unchanged
 unless a later independently approved contract explicitly owns those paths.
 
 Strict reading, catalog-backed inspection, and evidence-based recommendation
-are implemented. First-party profile content remains a separately approved
-milestone.
+are implemented. `v0.2.1E` packages the independently approved
+`go-service@0.1.0` pilot profile. It selects `project-guide@0.1.0`, creates the
+four canonical `.agents` workspace surfaces, renders `AGENTS.md`, project
+context, Go conventions, and a verification workflow, and selects `src/` as
+the source root. It does not generate application source, `go.mod`, scripts,
+provider files, or Spec Kit content.
+
+Published profile versions are immutable. Any content or binding change
+requires a new profile version and catalog digest.

@@ -288,8 +288,8 @@ installation upgraded successfully and reported `engkit v0.2.0`.
 
 ### `v0.2.1`: template authoring and project-profile composition
 
-**Status:** Composition execution and recovery implemented locally;
-`v0.2.1E` pilot content pending separate approval
+**Status:** Pilot template and profile content implemented locally; release
+validation remains pending
 
 - Define versioned skill-template, project-profile, catalog, and composition-plan
   schemas.
@@ -326,7 +326,9 @@ Planned implementation gates:
    new-project and initialized-workspace execution, durable evidence, exact
    recovery, and capability-checked no-replace publication.
 6. **`v0.2.1E` — first-party pilot content:** independently review and package
-   the initial templates and one pilot profile.
+   the initial templates and one pilot profile. Implemented locally with
+   `project-guide@0.1.0` and `go-service@0.1.0`; the pilot produces only the
+   provider-neutral engineering workspace layer and no application code.
 
 ### `v0.2.2`: selective provider synchronization
 

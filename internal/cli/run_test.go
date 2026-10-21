@@ -59,7 +59,9 @@ func TestBuiltinCatalogCommandsAreOfflineAndDeterministic(t *testing.T) {
 	}{
 		{args: []string{"catalog", "inspect"}, want: `"schema_version": "engkit.catalog/v1alpha1"`},
 		{args: []string{"templates", "list"}, want: `"schema_version": "engkit.template-list/v1alpha1"`},
+		{args: []string{"templates", "inspect", "--id", "project-guide", "--version", "0.1.0"}, want: `"id": "project-guide"`},
 		{args: []string{"profiles", "list"}, want: `"schema_version": "engkit.profile-list/v1alpha1"`},
+		{args: []string{"profiles", "inspect", "--id", "go-service", "--version", "0.1.0"}, want: `"id": "go-service"`},
 	} {
 		var first, second, stderr bytes.Buffer
 		if code := Run(test.args, &first, &stderr); code != 0 {
@@ -158,11 +160,65 @@ func TestProjectPlanningRequiresExactPackagedProfileWithoutWriting(t *testing.T)
 	target := filepath.Join(parent, "new-project")
 	var stdout, stderr bytes.Buffer
 	code := Run([]string{"project", "plan-create", "--destination", target, "--profile", "go-service@0.1.0", "--set", "project_name=Toolkit"}, &stdout, &stderr)
-	if code != 1 || !strings.Contains(stderr.String(), "is not in the packaged catalog") {
+	if code != 0 || stderr.Len() != 0 {
 		t.Fatalf("code = %d, stdout = %q, stderr = %q", code, stdout.String(), stderr.String())
 	}
+	var preview struct {
+		PlanID     string `json:"plan_id"`
+		Executable bool   `json:"executable"`
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &preview); err != nil {
+		t.Fatal(err)
+	}
+	if preview.PlanID == "" || !preview.Executable {
+		t.Fatalf("unexpected plan: %#v", preview)
+	}
 	if _, err := os.Lstat(target); !os.IsNotExist(err) {
-		t.Fatalf("failed planning wrote target: %v", err)
+		t.Fatalf("planning wrote target: %v", err)
+	}
+}
+
+func TestProjectCreateInstallsBuiltinPilotProfile(t *testing.T) {
+	parent, err := os.MkdirTemp(".", "engkit-cli-project-create-test-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	parent, err = filepath.Abs(parent)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(parent) })
+	target := filepath.Join(parent, "pilot")
+	arguments := []string{"--destination", target, "--profile", "go-service@0.1.0", "--set", "project_name=Pilot"}
+	var planOutput, stderr bytes.Buffer
+	if code := Run(append([]string{"project", "plan-create"}, arguments...), &planOutput, &stderr); code != 0 {
+		t.Fatalf("plan code = %d, stderr = %q", code, stderr.String())
+	}
+	var preview struct {
+		PlanID string `json:"plan_id"`
+	}
+	if err := json.Unmarshal(planOutput.Bytes(), &preview); err != nil {
+		t.Fatal(err)
+	}
+	var createOutput bytes.Buffer
+	stderr.Reset()
+	createArguments := append([]string{"project", "create"}, arguments...)
+	createArguments = append(createArguments, "--approve", preview.PlanID)
+	if code := Run(createArguments, &createOutput, &stderr); code != 0 {
+		t.Fatalf("create code = %d, stderr = %q", code, stderr.String())
+	}
+	for _, relative := range []string{"AGENTS.md", ".agents/context/project-overview.md", ".agents/conventions/go.md", ".agents/skills/project-guide/skill.yaml", ".agents/workflows/verify.md", ".engkit/config.yaml", "src"} {
+		if _, err := os.Stat(filepath.Join(target, filepath.FromSlash(relative))); err != nil {
+			t.Fatalf("missing %s: %v", relative, err)
+		}
+	}
+	var validationOutput bytes.Buffer
+	stderr.Reset()
+	if code := Run([]string{"skills", "validate", "--root", target, "--id", "project-guide"}, &validationOutput, &stderr); code != 0 {
+		t.Fatalf("validate code = %d, stderr = %q", code, stderr.String())
+	}
+	if !strings.Contains(validationOutput.String(), `"valid": true`) {
+		t.Fatalf("unexpected validation output: %s", validationOutput.String())
 	}
 }
 

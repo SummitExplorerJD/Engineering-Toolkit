@@ -25,9 +25,9 @@ recovery are implemented by `v0.2.1D2`.
 
 The inspection and planning commands are implemented in `v0.2.1C`.
 `project inspect` emits `engkit.project-inspection/v1alpha1` and includes the
-workspace inspection plus profile recommendations. The packaged catalog is
-still empty, so successful selection of first-party content begins only after
-the independently approved pilot-content milestone.
+workspace inspection plus profile recommendations. The packaged catalog
+contains the independently approved `project-guide@0.1.0` template and
+`go-service@0.1.0` pilot profile.
 
 ## 2. Plan fields
 

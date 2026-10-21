@@ -117,3 +117,15 @@ Strict reading, offline inspection, and bounded scaffold publication are
 implemented in `v0.2.1B`. `v0.2.1C` adds deterministic in-memory rendering,
 typed resolution, derived provenance and resource hashes, and validation of the
 complete canonical package without temporary filesystem output.
+
+## 5. Packaged pilot content
+
+`v0.2.1E` packages `project-guide@0.1.0`. It renders one canonical,
+provider-neutral skill whose instructions bind the selected project name and
+direct work toward the repository's `AGENTS.md`, context, conventions, and
+workflows. The skill contains no executable resource, dependency, network
+permission, provider declaration, or implicit authority.
+
+Published template versions are immutable. A content change requires a new
+template version and updated catalog digest rather than changing the bytes of
+`project-guide@0.1.0`.

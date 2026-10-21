@@ -355,3 +355,20 @@ Errors shall distinguish user input, policy refusal, environmental failure, inte
   provider synchronization, Spec Kit mutation, first-party catalog content,
   Git operation, or release operation.
 
+## 15. `v0.2.1E` first-party pilot-content acceptance criteria
+
+- The packaged offline catalog contains exactly `project-guide@0.1.0` and
+  `go-service@0.1.0`, each bound to a complete immutable directory digest.
+- The template renders a valid canonical skill with derived provenance and no
+  executable resource, dependency, network permission, or provider output.
+- The profile explicitly binds `project_name`, selects the exact template
+  version, creates the approved `.agents` surfaces and `src/`, and renders only
+  `AGENTS.md`, context, convention, and workflow assets.
+- Planning remains read-only. Creation requires the exact approved plan ID and
+  produces an initialized workspace whose installed skill validates.
+- The pilot generates no application code, `go.mod`, script, dependency
+  installation, provider synchronization, Spec Kit mutation, network access,
+  credential access, Git operation, or release operation.
+- Published template and profile versions are immutable; changed bytes require
+  a new version and catalog digest.
+

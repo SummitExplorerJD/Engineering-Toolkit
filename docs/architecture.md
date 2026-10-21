@@ -259,8 +259,9 @@ offline readers. `templates` also resolves typed variables and produces a
 complete canonical package in memory. `skills` exposes a matching in-memory
 validation boundary so planning does not need temporary filesystem state.
 `schemautil` owns only shared YAML ambiguity rejection, portable path checks,
-and regular-file inventory rules. The CLI embeds an empty catalog until
-first-party content receives its own approval.
+and regular-file inventory rules. The CLI embeds the reviewed
+`project-guide@0.1.0` template and `go-service@0.1.0` pilot profile as immutable
+offline catalog content.
 
 The implemented `composition` plan layer depends on catalog, template,
 profile, workspace-inspection, and canonical-skill validation ports. It emits

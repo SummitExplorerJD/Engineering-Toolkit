@@ -15,7 +15,7 @@ The project follows Semantic Versioning while the public surface evolves.
 - Deterministic in-memory template rendering with typed variables and canonical
   skill validation.
 - Evidence-based profile recommendations that never select a profile.
-- Read-only project inspection and non-executable composition plans for new and
+- Read-only project inspection and deterministic composition plans for new and
   existing workspaces.
 - Accepted transactional composition design for additive new-project creation
   and initialized-workspace composition, with exact approval binding,
@@ -25,6 +25,8 @@ The project follows Semantic Versioning while the public surface evolves.
   with complete-tree new-project publication, initialized-workspace enforcement,
   canonical skill validation, capability-checked no-replace publication, and
   digest-based interruption recovery.
+- Immutable offline pilot catalog content with the `project-guide@0.1.0`
+  canonical skill template and `go-service@0.1.0` project profile.
 
 ### Changed
 

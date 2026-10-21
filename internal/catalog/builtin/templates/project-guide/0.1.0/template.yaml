@@ -1,0 +1,29 @@
+schema_version: engkit.skill-template/v1alpha1
+id: project-guide
+version: 0.1.0
+description: Guides safe, repository-aware engineering work for one project.
+variables:
+  - name: project_name
+    type: string
+    description: Human-readable project name.
+    required: true
+    min_length: 1
+    max_length: 80
+skill:
+  id: project-guide
+  version: 0.1.0
+  description: Guides safe, repository-aware engineering work for one project.
+  instructions: instructions.md
+  capabilities:
+    - project-guidance
+  permissions: {}
+  compatibility:
+    minimum_engkit: 0.2.1
+  ownership:
+    owner: engineering-toolkit
+files:
+  - source: files/instructions.md.tmpl
+    destination: instructions.md
+    kind: instructions
+    media_type: text
+    source_sha256: sha256:ad2620025f0133e6e44b7abcfc24a05e4f899a8a6d29ae552e10ea12dac9b162

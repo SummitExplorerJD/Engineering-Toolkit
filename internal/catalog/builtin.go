@@ -5,7 +5,7 @@ import (
 	"io/fs"
 )
 
-//go:embed builtin/catalog.yaml
+//go:embed builtin
 var embedded embed.FS
 
 func Builtin() (Catalog, fs.FS, error) {

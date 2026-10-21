@@ -1,0 +1,13 @@
+# Verify {{engkit.project_name}}
+
+Run this workflow after an approved implementation change:
+
+1. Review the changed-file list and confirm scope.
+2. Run `gofmt` on changed Go files.
+3. Run the narrowest affected tests.
+4. Run `go test ./...`.
+5. Run `go vet ./...`.
+6. Run `git diff --check` and inspect the final diff.
+7. Report skipped checks, environment limitations, and remaining risks.
+
+These commands are documentation, not execution authority. Obtain any required approval before running tools that mutate external state.

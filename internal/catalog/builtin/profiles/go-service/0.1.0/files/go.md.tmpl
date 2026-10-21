@@ -1,0 +1,9 @@
+# Go conventions for {{engkit.project_name}}
+
+- Keep packages focused and use explicit internal boundaries.
+- Format changed Go files with `gofmt`.
+- Add or update tests with behavior changes.
+- Run targeted tests before `go test ./...` and `go vet ./...`.
+- Avoid hidden network access, ambient credentials, and nondeterministic filesystem behavior.
+- Preserve cross-platform behavior unless the project explicitly documents a narrower target.
+- Treat `src/` as the profile's selected source root and document any intentional exception.
