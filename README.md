@@ -4,7 +4,7 @@ Engineering Toolkit is a cross-platform command-line application for creating an
 
 ## Status
 
-Release `v0.2.0` is published and is the current stable release.
+Release `v0.2.1` is published and is the current stable release.
 CI and the release workflow validate six targets across Windows, Linux, and
 macOS on `amd64` and `arm64`. The CLI can inspect and initialize workspace
 state, rebuild the optional context index, describe supported agent
@@ -13,16 +13,12 @@ capabilities, and prepare non-executable Spec Kit plans. Official Spec Kit
 executed. User-scoped bootstrap installers provide exact versions, mandatory
 checksums, explicit upgrades, recoverable replacement, and opt-in PATH changes.
 
-`v0.2.0` adds the provider-neutral canonical skill contract, read-only skill
-discovery and validation, deterministic mutation planning, and approved
-transactional creation, update, removal, and recovery. Skill templates and
-project profiles are under active `v0.2.1` development: strict offline readers,
-a versioned packaged pilot catalog, deterministic inspection, and bounded
-template scaffolding are implemented locally. Deterministic in-memory rendering,
-evidence-based profile recommendation, and deterministic project composition
-plans are also implemented. Approved additive project creation, initialized
-workspace composition, and explicit recovery are implemented. The embedded
-catalog includes `project-guide@0.1.0` and the `go-service@0.1.0` pilot profile.
+`v0.2.0` added the provider-neutral canonical skill contract and guarded local
+skill lifecycle. `v0.2.1` adds strict offline template and profile catalogs,
+bounded template scaffolding, deterministic rendering and recommendations, and
+approved transactional project creation, workspace composition, and recovery.
+The embedded catalog includes `project-guide@0.1.0` and the
+`go-service@0.1.0` pilot profile.
 Production TUF
 activation, platform signing, package-manager distribution, automatic updates,
 self-replacement, provider synchronization, and execution of skill resources
@@ -64,6 +60,7 @@ remain deferred.
 - [v0.1.0 release notes](docs/release-notes/v0.1.0.md)
 - [v0.1.1 release notes](docs/release-notes/v0.1.1.md)
 - [v0.2.0 release notes](docs/release-notes/v0.2.0.md)
+- [v0.2.1 release notes](docs/release-notes/v0.2.1.md)
 - [Security policy](SECURITY.md)
 - [Architecture decisions](docs/adr/)
 - [Agent conventions](.agents/conventions/)

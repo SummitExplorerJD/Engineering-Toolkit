@@ -288,8 +288,7 @@ installation upgraded successfully and reported `engkit v0.2.0`.
 
 ### `v0.2.1`: template authoring and project-profile composition
 
-**Status:** Pilot template and profile content implemented locally; release
-validation remains pending
+**Status:** Completed and published on 2026-10-22
 
 - Define versioned skill-template, project-profile, catalog, and composition-plan
   schemas.
@@ -329,6 +328,13 @@ Planned implementation gates:
    the initial templates and one pilot profile. Implemented locally with
    `project-guide@0.1.0` and `go-service@0.1.0`; the pilot produces only the
    provider-neutral engineering workspace layer and no application code.
+
+**Published evidence:** The immutable `v0.2.1` tag points to commit
+`38b7aab7b24253fee3e55ff1dbfae000dced4a4e`. Candidate `v0.2.1-rc.1` and the
+stable package passed the release workflow on Windows, Linux, and macOS for
+AMD64 and ARM64. All published asset digests matched the independently reviewed
+manifest and `SHA256SUMS`; a local Windows upgrade reported `engkit v0.2.1` and
+successfully inspected the embedded pilot catalog.
 
 ### `v0.2.2`: selective provider synchronization
 

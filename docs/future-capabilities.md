@@ -162,13 +162,15 @@ implemented first.
 
 ### `v0.2.1`: template authoring and project-profile composition
 
-This release is intended to generate project-appropriate canonical skills and
-workspace assets from an explicitly selected, versioned profile.
-[ADR 0009](adr/0009-skill-templates-and-project-profiles.md) fixes the ownership
-and safety boundary; exact schemas and commands remain separate approval
-decisions.
+**Status:** Published on 2026-10-22.
 
-Planned capabilities:
+This release generates project-appropriate canonical skills and workspace
+assets from an explicitly selected, versioned profile.
+[ADR 0009](adr/0009-skill-templates-and-project-profiles.md) fixes the ownership
+and safety boundary. ADR 0010 and ADR 0011 define the implemented schema,
+planning, execution, and recovery contracts.
+
+Delivered capabilities:
 
 - Create an editable skill-template draft without installing it.
 - List and inspect first-party templates and profiles shipped with the CLI.
@@ -182,7 +184,7 @@ Planned capabilities:
 - Apply the approved composition through journals, checkpoints, verification,
   and recovery.
 
-Accepted planning interfaces and reserved execution interfaces include:
+Implemented interfaces include:
 
 ```text
 engkit templates scaffold --output PATH --id TEMPLATE_ID --version VERSION
@@ -195,12 +197,12 @@ engkit project compose [--root PATH] --profile ID@VERSION [--set NAME=VALUE] --a
 engkit project recover [--root PATH] --approve PLAN_ID
 ```
 
-The first implementation will use a reviewed, versioned catalog packaged with
+The published implementation uses a reviewed, versioned catalog packaged with
 the CLI. Remote catalogs, arbitrary template imports, and automatic catalog
 updates remain deferred. Detection can recommend a profile but cannot select or
 apply one.
 
-The initial implementation slices are expected to be:
+The delivered implementation slices were:
 
 1. exact schemas and catalog layout;
 2. read-only catalog inspection, scaffold, and deterministic rendering;
