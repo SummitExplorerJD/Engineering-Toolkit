@@ -12,7 +12,7 @@ list`; this document records the human-reviewable boundary.
 | Capability | Codex | Claude Code | OpenCode |
 | --- | --- | --- | --- |
 | Project instructions | Native: `AGENTS.md` | Native: `CLAUDE.md` | Native: `AGENTS.md` |
-| Project skills | Native: `.agents/skills` | Native: `.claude/skills` | Not claimed by this adapter |
+| Project skills | Native: `.agents/skills` | Native: `.claude/skills` | Native: `.opencode/skills`; also discovers compatible `.agents/skills` and `.claude/skills` |
 | Project commands | Not claimed by this adapter | Not claimed separately from skills | Native: `.opencode/commands` |
 | Spec Kit integration | `codex`, skills under `.agents/skills` | `claude`, skills under `.claude/skills` | `opencode`, release-derived inventory required |
 | Approval or tool policy | Runtime-owned | Runtime-owned | Runtime-owned; repository configuration is not generated |
@@ -33,10 +33,11 @@ file granularity before any generated integration is applied.
 
 ## Rendering boundary
 
-Engineering Toolkit's adapter code does not render provider files. Official
-Spec Kit `v1.2.0` now owns the approved Codex `speckit-*` skills installed under
-the shared `.agents/skills` root. Any future Engineering Toolkit rendering must
-provide, for each generated file:
+The current adapter code remains read-only. The accepted `v0.2.2A` design adds
+no renderer or mutation entry point; it defines the contract a later
+implementation must satisfy. Official Spec Kit `v1.2.0` owns the approved Codex
+`speckit-*` skills installed under the shared `.agents/skills` root. Future
+Engineering Toolkit rendering must provide, for each generated file:
 
 - a deterministic preview and plan digest;
 - the owning adapter and upstream source;
@@ -48,7 +49,23 @@ provide, for each generated file:
 For Claude Code, a future `CLAUDE.md` should be a minimal navigation layer and
 must not duplicate canonical requirements or architecture. Codex and OpenCode
 already consume the repository-owned `AGENTS.md`, so an adapter must not create
-parallel instruction files for them.
+parallel instruction files for them. Skill synchronization is separate from
+project-instruction synchronization and does not create or edit `AGENTS.md` or
+`CLAUDE.md`.
+
+The initial derived skill targets are `.agents/skills/<id>` for Codex,
+`.claude/skills/<id>` for Claude Code, and `.opencode/skills/<id>` for OpenCode.
+Using OpenCode's isolated native root avoids making its compatibility discovery
+of `.agents/skills` an ownership claim over the canonical package. These paths
+were checked against the providers' official documentation on 2026-10-22:
+
+- [OpenAI Skills](https://developers.openai.com/api/docs/guides/tools-skills)
+- [Claude Code Skills](https://code.claude.com/docs/en/skills)
+- [OpenCode Agent Skills](https://opencode.ai/docs/skills/)
+
+Provider documentation remains release-sensitive. The adapter contract version
+and the evidence date are therefore plan inputs; implementation must update its
+conformance fixtures when a provider contract changes.
 
 ## Spec Kit boundary
 

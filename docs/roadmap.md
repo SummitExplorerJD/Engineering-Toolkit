@@ -338,11 +338,32 @@ successfully inspected the embedded pilot catalog.
 
 ### `v0.2.2`: selective provider synchronization
 
-**Status:** Planned
+**Status:** Design accepted; implementation not started
 
 - Render approved canonical skills selectively for Codex, Claude Code, and
   OpenCode.
 - Preview conflicts and report unsupported or lossy mappings.
 - Preserve canonical data and provider-owned files outside the approved scope.
 - Keep official Spec Kit interoperation explicit and independently owned.
+
+Planned implementation gates:
+
+1. **`v0.2.2A` — exact synchronization contract:** accepted in
+   [ADR 0012](adr/0012-selective-provider-synchronization.md). The plan schema,
+   provider targets, per-file ownership, mapping-quality rules, conflict
+   behavior, and Spec Kit boundary are specified. No runtime behavior is
+   implemented by this slice.
+2. **`v0.2.2B` — read-only rendering and planning:** implement deterministic
+   in-memory rendering, target inspection, conflict reporting, and immutable
+   plans. No provider file or ownership record is written.
+3. **`v0.2.2C` — approved transactional synchronization:** publish and remove
+   exact owned outputs through approval-bound journals, checkpoints,
+   verification, and recovery.
+4. **`v0.2.2D` — provider conformance and pilot:** validate the approved pilot
+   against Codex, Claude Code, and OpenCode on the supported platforms without
+   adopting provider-native or Spec Kit content.
+
+**Next gate:** Review and separately approve the exact `v0.2.2B` package,
+including CLI contract, Go package boundaries, JSON fixtures, test matrix,
+changed-file list, risks, and rollback plan.
 

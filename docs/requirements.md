@@ -126,6 +126,25 @@ conventions, workflows, source-layout policy, and optional integration requests.
 They shall not grant runtime permissions or bypass the existing plan, approval,
 ownership, conflict, journal, checkpoint, or recovery contracts.
 
+### FR-017: Selective provider synchronization
+
+The system shall render an explicitly selected canonical skill for an explicitly
+selected provider without making provider output canonical. Synchronization
+shall bind the canonical package digest, adapter contract, observed destination
+state, every intended output byte, and every prior Engineering Toolkit ownership
+record in a deterministic plan before mutation.
+
+The system shall own generated provider files individually rather than claiming
+a provider root or package directory. It shall create an absent output, replace
+or remove only an output whose observed digest matches its recorded ownership,
+and preserve changed, unrecorded, provider-native, and Spec Kit-owned content.
+Unsupported or lossy mappings shall remain reviewable but non-executable.
+
+Provider synchronization shall not execute skill resources, resolve
+dependencies, contact networks, access credentials, generate runtime permission
+policy, initialize or upgrade Spec Kit, or infer approval from a prior skill or
+project operation.
+
 ## 4. Non-functional requirements
 
 ### NFR-001: Portability
@@ -371,4 +390,29 @@ Errors shall distinguish user input, policy refusal, environmental failure, inte
   credential access, Git operation, or release operation.
 - Published template and profile versions are immutable; changed bytes require
   a new version and catalog digest.
+
+## 16. `v0.2.2A` provider-synchronization design acceptance criteria
+
+- Canonical packages remain the sole authored source; provider files are
+  deterministic derived output with per-file ownership and SHA-256 digests.
+- Codex, Claude Code, and OpenCode use explicit, independently selected adapter
+  targets; selecting one provider never enables another.
+- Plans bind the canonical package version and directory digest, adapter
+  contract version, observed target state, exact output bytes and digests,
+  conflicts, mapping quality, approvals, and verification steps.
+- Output creation, replacement, and removal fail closed when a path is a
+  symbolic link, special file, unowned existing file, changed owned file, or
+  file/directory collision.
+- Unsupported and lossy mappings are reported with stable codes and make a
+  plan non-executable; no canonical field or declared resource is silently
+  discarded.
+- Provider permission configuration remains runtime-owned. A non-empty
+  canonical permission request is not converted into repository policy.
+- Executable resources, dependency resolution, network access, credentials,
+  imports, and remote installation remain outside the initial synchronization
+  implementation.
+- Official Spec Kit files and manifests remain externally owned. Provider-root
+  overlap does not transfer directory ownership to Engineering Toolkit.
+- Planning, transactional execution, provider conformance testing, Git
+  operations, and release publication remain separately approved gates.
 

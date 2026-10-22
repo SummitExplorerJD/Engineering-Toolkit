@@ -300,3 +300,48 @@ recovery. The complete design is specified in
 [`composition-execution-v1alpha1.md`](composition-execution-v1alpha1.md) and
 [ADR 0011](adr/0011-transactional-project-composition.md).
 
+## 17. Selective provider-synchronization boundary
+
+Provider synchronization is a downstream projection of a valid canonical skill
+package. It never changes `skill.yaml`, `instructions.md`, or declared canonical
+resources. The core planning layer consumes canonical package bytes and an
+immutable adapter contract, then produces provider-specific bytes in memory.
+Filesystem inspection and eventual publication remain infrastructure concerns.
+
+The initial target layout is deliberately provider-specific:
+
+| Provider | Generated skill root | Shared instruction behavior |
+| --- | --- | --- |
+| Codex | `.agents/skills/SKILL_ID/` | Adds a derived `SKILL.md` beside the canonical package without owning the directory |
+| Claude Code | `.claude/skills/SKILL_ID/` | Creates an isolated derived skill package |
+| OpenCode | `.opencode/skills/SKILL_ID/` | Creates an isolated derived skill package and does not generate commands |
+
+Every generated file has a separate ownership record below
+`.engkit/providers/PROVIDER/SKILL_ID.json`. The record binds the adapter contract,
+canonical source digest, output path, and last published digest. It is
+operational evidence, not provider configuration and not a substitute for the
+canonical package.
+
+Planning classifies every mapping as `exact`, `lossy`, or `unsupported` and
+every destination as `create`, `unchanged`, `replace`, `remove`, `preserve`, or
+`conflict`. Only exact plans containing create, unchanged, replace, or removal
+of an exact previously owned digest may become executable. Replacement and
+removal never follow symbolic links and never claim an unrecorded file.
+
+`SKILL.md` contains only provider-supported discovery metadata and the rendered
+canonical instructions. Passive declared resources may be copied byte-for-byte
+when their relative layout is supported. Codex reuses canonical sibling
+resources without adopting them; isolated Claude Code and OpenCode targets use
+derived copies with individual ownership. Scripts, non-empty permission
+requests, unresolved dependencies, and provider-incompatible resources block
+the initial executable contract rather than being omitted. Provider runtime
+permission files are never generated.
+
+Official Spec Kit output remains externally owned even where it shares
+`.agents/skills` or another provider root. Synchronization owns individual
+planned paths only, never `.agents/skills`, `.claude/skills`,
+`.opencode/skills`, `.specify`, or an entire generated skill directory. The
+complete proposed contract is specified in
+[`provider-sync-plan-v1alpha1.md`](provider-sync-plan-v1alpha1.md) and
+[ADR 0012](adr/0012-selective-provider-synchronization.md).
+
