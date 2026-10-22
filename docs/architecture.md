@@ -308,6 +308,13 @@ resources. The core planning layer consumes canonical package bytes and an
 immutable adapter contract, then produces provider-specific bytes in memory.
 Filesystem inspection and eventual publication remain infrastructure concerns.
 
+The implemented `providersync` package owns only this read-only planning
+boundary. `skills` supplies stable canonical snapshots; the provider planner
+renders exact bytes, performs `Lstat`-style observations, validates optional
+per-file ownership evidence, and emits `engkit.provider-sync-plan/v1alpha1`.
+The CLI exposes it as `engkit skills plan-sync`. No executor depends on this
+package in `v0.2.2B`.
+
 The initial target layout is deliberately provider-specific:
 
 | Provider | Generated skill root | Shared instruction behavior |
@@ -321,6 +328,12 @@ Every generated file has a separate ownership record below
 canonical source digest, output path, and last published digest. It is
 operational evidence, not provider configuration and not a substitute for the
 canonical package.
+
+Because the Codex target overlaps the canonical package, a regular root
+`SKILL.md` is treated as provider-owned sidecar state. Canonical validation and
+snapshot hashing exclude only that exact file; symbolic links, special files,
+and every other undeclared package file remain invalid. Provider planning still
+observes and conflict-checks the sidecar independently.
 
 Planning classifies every mapping as `exact`, `lossy`, or `unsupported` and
 every destination as `create`, `unchanged`, `replace`, `remove`, `preserve`, or

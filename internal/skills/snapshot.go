@@ -134,6 +134,11 @@ func inventory(packageRoot string, packageState Package) (Snapshot, error) {
 		if !info.Mode().IsRegular() {
 			return fmt.Errorf("snapshot path %s is not a regular file", relative)
 		}
+		// The root SKILL.md is a provider-owned Codex sidecar and must not
+		// influence the immutable canonical package snapshot.
+		if relative == "SKILL.md" {
+			return nil
+		}
 		digest, err := fileDigest(filename)
 		if err != nil {
 			return fmt.Errorf("hash snapshot path %s: %w", relative, err)

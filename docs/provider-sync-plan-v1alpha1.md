@@ -2,12 +2,11 @@
 
 ## Purpose and boundary
 
-`engkit.provider-sync-plan/v1alpha1` is the proposed immutable preview for
-rendering one or more canonical skills to exactly one selected provider. This
-document defines the accepted `v0.2.2A` contract; no command currently creates
-or executes this plan.
+`engkit.provider-sync-plan/v1alpha1` is the immutable preview for rendering one
+or more canonical skills to exactly one selected provider. The accepted
+`v0.2.2B` implementation creates this plan in memory but does not execute it.
 
-The future read-only entry point is proposed as:
+The implemented read-only entry point is:
 
 ```text
 engkit skills plan-sync [--root PATH] --provider PROVIDER [--id SKILL_ID]
@@ -21,8 +20,8 @@ engkit skills sync [--root PATH] --provider PROVIDER [--id SKILL_ID] --approve P
 engkit skills recover-sync [--root PATH] --provider PROVIDER --approve PLAN_ID
 ```
 
-CLI spelling is part of the `v0.2.2B` implementation review and may change
-before code is added.
+This CLI spelling and the JSON schema are the experimental `v1alpha1`
+contract. Incompatible changes require an explicit schema revision.
 
 ## Canonical source and provider targets
 
@@ -169,7 +168,9 @@ execution retain their independent plans and approvals.
 
 ## Initial conformance cases
 
-The later implementation must prove at least:
+The read-only implementation proves cases 1 through 6 and deterministic plan
+construction. Cases requiring publication, stale-plan execution checks, and
+cross-platform release conformance remain gates `v0.2.2C` and `v0.2.2D`:
 
 1. deterministic exact rendering for the instruction-only `project-guide` pilot;
 2. selective output for one provider without touching the other two;

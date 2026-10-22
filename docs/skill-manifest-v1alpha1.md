@@ -22,9 +22,13 @@ stable schema, but every supported schema identifier remains explicit.
   assets/
 ```
 
-Only `skill.yaml` is excluded from the resource inventory. Every other regular
-file must be declared in `resources`. Symbolic links and special files are not
-valid canonical package content. Empty optional directories are allowed.
+`skill.yaml` is excluded from the resource inventory. The only other exception
+is a regular root `SKILL.md`, which is a provider-owned Codex sidecar managed by
+provider synchronization. It is excluded from canonical validation, snapshots,
+and package digests, but remains subject to separate ownership and conflict
+checks. Every other regular file must be declared in `resources`. A symlink or
+special file named `SKILL.md` is still invalid, as are symbolic links and
+special files elsewhere. Empty optional directories are allowed.
 
 ## 3. Manifest fields
 
@@ -49,7 +53,7 @@ than 1 MiB are rejected.
 | `ownership.maintainers` | No | Unique non-empty maintainer identifiers. |
 | `provenance.source` | Yes | Source identifier recorded without resolving it. |
 | `provenance.revision` | Yes | Source revision recorded without resolving it. |
-| `resources` | Yes | Integrity inventory of all package files except `skill.yaml`. |
+| `resources` | Yes | Integrity inventory of canonical package files except `skill.yaml` and the provider-owned root `SKILL.md` sidecar. |
 
 Input and output `type` values are `string`, `number`, `boolean`, `object`, and
 `array`. Each value requires `name`, `type`, and `description`. Only inputs may

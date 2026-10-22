@@ -406,6 +406,30 @@ func TestSkillMutationPlanCommandsAreReadOnly(t *testing.T) {
 	}
 }
 
+func TestProviderSynchronizationPlanCLIIsReadOnly(t *testing.T) {
+	root := testWorkspace(t)
+	writeCLISkill(t, filepath.Join(root, ".agents", "skills"), "release-review", "1.0.0", "# Review\n")
+
+	var first, second, stderr bytes.Buffer
+	args := []string{"skills", "plan-sync", "--root", root, "--provider", "opencode", "--id", "release-review"}
+	if code := Run(args, &first, &stderr); code != 0 {
+		t.Fatalf("Run(%v) code = %d, stderr = %q", args, code, stderr.String())
+	}
+	stderr.Reset()
+	if code := Run(args, &second, &stderr); code != 0 {
+		t.Fatalf("second Run(%v) code = %d, stderr = %q", args, code, stderr.String())
+	}
+	if first.String() != second.String() || !strings.Contains(first.String(), `"schema_version": "engkit.provider-sync-plan/v1alpha1"`) || !strings.Contains(first.String(), `"executable": true`) {
+		t.Fatalf("unexpected provider plan output: first=%q second=%q", first.String(), second.String())
+	}
+	if _, err := os.Lstat(filepath.Join(root, ".opencode")); !os.IsNotExist(err) {
+		t.Fatalf("provider planning wrote .opencode: %v", err)
+	}
+	if _, err := os.Lstat(filepath.Join(root, ".engkit", "providers")); !os.IsNotExist(err) {
+		t.Fatalf("provider planning wrote ownership state: %v", err)
+	}
+}
+
 func TestSkillMutationCLI(t *testing.T) {
 	root := testWorkspace(t)
 	initializeWithCLI(t, root)

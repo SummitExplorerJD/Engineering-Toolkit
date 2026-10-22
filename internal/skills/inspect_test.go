@@ -58,6 +58,47 @@ func TestInspectAndValidateDoNotModifyPackage(t *testing.T) {
 	}
 }
 
+func TestCodexSidecarDoesNotChangeCanonicalSnapshot(t *testing.T) {
+	root := t.TempDir()
+	manifestPath := writeCanonicalPackage(t, root, "release-review", "# Release review\n", "")
+	packageRoot := filepath.Dir(manifestPath)
+
+	before, err := SnapshotCanonical(root, "release-review")
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeFile(t, filepath.Join(packageRoot, "SKILL.md"), "# Rendered for Codex\n")
+
+	inspection, err := Inspect(root, "release-review")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if inspection.Package.Classification != ClassificationCanonical {
+		t.Fatalf("package with Codex sidecar = %#v", inspection.Package)
+	}
+	after, err := SnapshotCanonical(root, "release-review")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if after.PackageSHA256 != before.PackageSHA256 {
+		t.Fatalf("canonical digest changed from %q to %q", before.PackageSHA256, after.PackageSHA256)
+	}
+	for _, file := range after.Files {
+		if file.Path == "SKILL.md" {
+			t.Fatal("Codex sidecar was included in the canonical snapshot")
+		}
+	}
+
+	writeFile(t, filepath.Join(packageRoot, "SKILL.md"), "# Locally changed provider output\n")
+	changed, err := SnapshotCanonical(root, "release-review")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if changed.PackageSHA256 != before.PackageSHA256 {
+		t.Fatalf("changed sidecar altered canonical digest from %q to %q", before.PackageSHA256, changed.PackageSHA256)
+	}
+}
+
 func TestValidateRejectsUnknownFieldsTraversalAndUndeclaredFiles(t *testing.T) {
 	root := t.TempDir()
 	manifestPath := writeCanonicalPackage(t, root, "unsafe-skill", "# Unsafe\n", "unknown_field: true\n")

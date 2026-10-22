@@ -338,7 +338,7 @@ successfully inspected the embedded pilot catalog.
 
 ### `v0.2.2`: selective provider synchronization
 
-**Status:** Design accepted; implementation not started
+**Status:** Read-only planning implemented locally; transactional execution not started
 
 - Render approved canonical skills selectively for Codex, Claude Code, and
   OpenCode.
@@ -353,9 +353,10 @@ Planned implementation gates:
    provider targets, per-file ownership, mapping-quality rules, conflict
    behavior, and Spec Kit boundary are specified. No runtime behavior is
    implemented by this slice.
-2. **`v0.2.2B` — read-only rendering and planning:** implement deterministic
+2. **`v0.2.2B` — read-only rendering and planning:** implemented. Deterministic
    in-memory rendering, target inspection, conflict reporting, and immutable
-   plans. No provider file or ownership record is written.
+   plans are available through `engkit skills plan-sync`. No provider file or
+   ownership record is written.
 3. **`v0.2.2C` — approved transactional synchronization:** publish and remove
    exact owned outputs through approval-bound journals, checkpoints,
    verification, and recovery.
@@ -363,7 +364,7 @@ Planned implementation gates:
    against Codex, Claude Code, and OpenCode on the supported platforms without
    adopting provider-native or Spec Kit content.
 
-**Next gate:** Review and separately approve the exact `v0.2.2B` package,
-including CLI contract, Go package boundaries, JSON fixtures, test matrix,
-changed-file list, risks, and rollback plan.
+**Next gate:** Review and separately approve the exact `v0.2.2C` transaction
+contract before adding any provider-file publication, ownership-record writes,
+journals, checkpoints, locks, recovery, or mutation CLI.
 

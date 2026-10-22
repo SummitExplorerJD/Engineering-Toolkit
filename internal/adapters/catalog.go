@@ -74,6 +74,7 @@ var catalog = []Adapter{
 		SpecKitArtifactRoot: ".opencode/commands",
 		Capabilities: []Capability{
 			{Name: "project_instructions", Support: SupportNative, Path: "AGENTS.md", Notes: "OpenCode V2 discovers AGENTS.md and does not use CLAUDE.md as a fallback."},
+			{Name: "project_skills", Support: SupportNative, Path: ".opencode/skills", Notes: "Native project skills use SKILL.md; compatibility discovery of .agents and .claude does not transfer ownership."},
 			{Name: "custom_commands", Support: SupportNative, Path: ".opencode/commands", Notes: "Project command definitions are Markdown files under the provider directory."},
 			{Name: "spec_kit_workflows", Support: SupportViaSpecKit, Path: ".opencode/commands", Notes: "The exact generated inventory must be confirmed against the pinned Spec Kit release."},
 			{Name: "approval_policy", Support: SupportRuntimeOnly, Path: "opencode.json", Notes: "OpenCode tool permissions can allow, deny, or ask; engkit does not generate them in this milestone."},

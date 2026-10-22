@@ -231,6 +231,12 @@ func validateResources(packageRoot string, manifest Manifest) []Diagnostic {
 		if relative == "skill.yaml" {
 			return nil
 		}
+		// SKILL.md is a provider-owned Codex sidecar. It is validated and
+		// conflict-checked by provider synchronization, not by the canonical
+		// resource inventory.
+		if relative == "SKILL.md" {
+			return nil
+		}
 		digest, err := fileDigest(filename)
 		if err != nil {
 			return err

@@ -416,3 +416,24 @@ Errors shall distinguish user input, policy refusal, environmental failure, inte
 - Planning, transactional execution, provider conformance testing, Git
   operations, and release publication remain separately approved gates.
 
+## 17. `v0.2.2B` provider-synchronization planning acceptance criteria
+
+- `engkit skills plan-sync` selects exactly one of `codex`, `claude`, or
+  `opencode` and optionally one canonical skill ID.
+- Planning is deterministic, offline, and read-only; it writes neither provider
+  output nor `.engkit/providers` ownership records.
+- Plans bind stable canonical snapshots, adapter contract and evidence date,
+  destination observations, rendered digests, mapping findings, affected
+  paths, risks, required approvals, and verification steps.
+- Existing unowned, changed owned, symbolic-link, junction, special-file, and
+  colliding targets fail closed with stable conflict codes.
+- A regular root `SKILL.md` is a Codex provider sidecar, excluded from canonical
+  validation and package digests but separately governed by provider ownership.
+- Passive resources are referenced in place for Codex and copied in memory for
+  isolated Claude Code and OpenCode plans. Scripts, permission requests, and
+  unresolved dependencies make plans non-executable.
+- Official Spec Kit and unrelated provider-native packages remain external and
+  byte-for-byte untouched.
+- Provider publication, removal, transaction evidence, recovery, conformance,
+  Git operations, and release publication remain separately approved gates.
+

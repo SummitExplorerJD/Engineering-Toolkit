@@ -48,3 +48,19 @@ func TestGetRejectsUnsupportedProvider(t *testing.T) {
 		t.Fatal("expected unsupported provider error")
 	}
 }
+
+func TestOpenCodeCatalogDeclaresIsolatedProjectSkills(t *testing.T) {
+	adapter, err := Get("opencode")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, capability := range adapter.Capabilities {
+		if capability.Name == "project_skills" {
+			if capability.Support != SupportNative || capability.Path != ".opencode/skills" {
+				t.Fatalf("unexpected OpenCode project skills capability: %#v", capability)
+			}
+			return
+		}
+	}
+	t.Fatal("OpenCode project_skills capability is missing")
+}

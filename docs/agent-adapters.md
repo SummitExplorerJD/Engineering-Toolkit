@@ -33,11 +33,12 @@ file granularity before any generated integration is applied.
 
 ## Rendering boundary
 
-The current adapter code remains read-only. The accepted `v0.2.2A` design adds
-no renderer or mutation entry point; it defines the contract a later
-implementation must satisfy. Official Spec Kit `v1.2.0` owns the approved Codex
-`speckit-*` skills installed under the shared `.agents/skills` root. Future
-Engineering Toolkit rendering must provide, for each generated file:
+The current adapter code remains read-only. The `v0.2.2B` planner renders exact
+provider bytes in memory, inspects targets and ownership records, reports
+conflicts, and emits a deterministic approval-bound plan. It creates no
+provider file or ownership record. Official Spec Kit `v1.2.0` owns the approved
+Codex `speckit-*` skills installed under the shared `.agents/skills` root. Future
+Engineering Toolkit planning provides, for each generated file:
 
 - a deterministic preview and plan digest;
 - the owning adapter and upstream source;
