@@ -358,3 +358,32 @@ complete proposed contract is specified in
 [`provider-sync-plan-v1alpha1.md`](provider-sync-plan-v1alpha1.md) and
 [ADR 0012](adr/0012-selective-provider-synchronization.md).
 
+## 18. Provider-synchronization transaction boundary
+
+The accepted `v0.2.2C1` design adds a future execution boundary without merging
+provider mutation into canonical skill logic. A provider transaction consumes
+one rebuilt executable plan for one provider and one skill. It stages exact
+bytes, publishes file-level transitions with retained backups, verifies the
+complete provider view, and publishes per-file ownership last.
+
+The transaction uses the existing canonical skill lock followed by a
+provider-and-skill lock. This freezes the canonical source and establishes one
+lock order across modules. Canonical skill update and removal must refuse while
+any supported provider ownership path is present or ambiguous; explicit unsync
+removes projections before canonical mutation, and later sync recreates only
+the selected provider views. No module automatically cascades across approval
+scopes.
+
+Durable state is namespaced below `.engkit/{plans,journals,checkpoints,
+recovery}/provider-sync/PROVIDER/SKILL_ID/`. Recovery compares the persisted
+plan, journal, checkpoint, locks, staging, backups, live output, and ownership
+record. It never trusts a directory or checkpoint alone and never deletes or
+adopts ambiguous content.
+
+This boundary retains per-file ownership: parent provider directories remain
+unowned and successful unsync leaves empty directories in place. The exact
+contract is specified in
+[`provider-sync-execution-v1alpha1.md`](provider-sync-execution-v1alpha1.md)
+and [ADR 0013](adr/0013-transactional-provider-synchronization.md). No runtime
+executor exists until the separate `v0.2.2C2` implementation gate is approved.
+

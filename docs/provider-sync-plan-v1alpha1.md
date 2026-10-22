@@ -12,12 +12,14 @@ The implemented read-only entry point is:
 engkit skills plan-sync [--root PATH] --provider PROVIDER [--id SKILL_ID]
 ```
 
-The future mutation and recovery entry points remain reserved for separately
-approved slices:
+The accepted transaction design reserves these mutation, removal-planning, and
+recovery entry points for a separately approved implementation:
 
 ```text
-engkit skills sync [--root PATH] --provider PROVIDER [--id SKILL_ID] --approve PLAN_ID
-engkit skills recover-sync [--root PATH] --provider PROVIDER --approve PLAN_ID
+engkit skills sync [--root PATH] --provider PROVIDER --id SKILL_ID --approve PLAN_ID
+engkit skills plan-unsync [--root PATH] --provider PROVIDER --id SKILL_ID
+engkit skills unsync [--root PATH] --provider PROVIDER --id SKILL_ID --approve PLAN_ID
+engkit skills recover-sync [--root PATH] --provider PROVIDER --id SKILL_ID --approve PLAN_ID
 ```
 
 This CLI spelling and the JSON schema are the experimental `v1alpha1`
@@ -30,6 +32,12 @@ conflicting, and invalid packages remain inspectable but cannot produce an
 executable plan. A non-empty `compatibility.providers` list must include the
 selected provider. An absent or empty list does not claim parity and requires
 the adapter to evaluate every mapping.
+
+For `operation: synchronize`, `sources` and `mappings` describe canonical
+snapshots. For `operation: remove`, both arrays are empty: authority comes only
+from the selected provider and skill identity, the exact observed ownership
+record digest, and its exact owned output digests. Removal never depends on a
+canonical package remaining present.
 
 Initial output roots are:
 
@@ -148,12 +156,15 @@ symbolic link. A symbolic link, junction, special file, escaping path,
 file/directory collision, unowned file, changed owned file, malformed ownership
 record, or overlapping ownership record is blocking.
 
-Future execution must rebuild the plan immediately before mutation and require
+Execution must rebuild the plan immediately before mutation and require
 the caller's `--approve` value to equal the rebuilt `plan_id`. Publication must
 use same-filesystem staging, atomic replacement only for exact owned files,
 durable JSONL journal events, an atomically replaced JSON checkpoint, complete
-digest verification, and explicit recovery. Those mechanics require the
-separate `v0.2.2C` design and implementation approval.
+digest verification, and explicit recovery. The accepted mechanics and
+cross-operation lock boundary are specified in
+[`provider-sync-execution-v1alpha1.md`](provider-sync-execution-v1alpha1.md)
+and [ADR 0013](adr/0013-transactional-provider-synchronization.md). No executor
+is implemented by the design slice.
 
 ## Spec Kit boundary
 
@@ -170,7 +181,7 @@ execution retain their independent plans and approvals.
 
 The read-only implementation proves cases 1 through 6 and deterministic plan
 construction. Cases requiring publication, stale-plan execution checks, and
-cross-platform release conformance remain gates `v0.2.2C` and `v0.2.2D`:
+cross-platform release conformance remain gates `v0.2.2C2` and `v0.2.2D`:
 
 1. deterministic exact rendering for the instruction-only `project-guide` pilot;
 2. selective output for one provider without touching the other two;

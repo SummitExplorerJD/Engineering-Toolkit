@@ -437,3 +437,33 @@ Errors shall distinguish user input, policy refusal, environmental failure, inte
 - Provider publication, removal, transaction evidence, recovery, conformance,
   Git operations, and release publication remain separately approved gates.
 
+## 18. `v0.2.2C1` provider-synchronization execution design acceptance criteria
+
+- Initial execution is restricted to one explicit provider and one canonical
+  skill per approved transaction; multi-skill plans remain read-only.
+- Sync, unsync, and recovery have separate explicit commands and exact plan-ID
+  approval. Unsync authority comes only from a valid ownership record and exact
+  observed owned digests.
+- Provider transactions acquire the canonical skill lock before a
+  provider-and-skill lock. Normal execution never infers stale-lock authority
+  from age or process existence.
+- Canonical skill update and removal fail while any supported provider
+  ownership path is present or ambiguous, including malformed, linked, or
+  unreadable records. Providers are unsynchronized and later resynchronized
+  through separately approved operations; no cascade is implicit.
+- Exact rendered bytes and the next ownership record are staged on the
+  workspace filesystem. Outputs publish in stable order with retained backups,
+  full output verification, and ownership publication last.
+- Durable plans, JSONL journals, JSON checkpoints, same-filesystem staging,
+  retained backups, and explicit recovery are required. Cross-device fallback
+  is prohibited.
+- Recovery validates all durable and live evidence, completes or restores only
+  exact known states, and refuses while preserving ambiguous content and locks.
+- Ownership remains per file. Successful unsync leaves empty directories in
+  place and defines no automatic cleanup or backup retention policy.
+- Provider CLIs, networks, credentials, resources, dependency resolution,
+  runtime permission configuration, Spec Kit mutation, Git operations, and
+  release publication remain outside the executor.
+- Design acceptance does not authorize implementation. The exact code package,
+  changed files, tests, risks, and rollback plan require separate approval.
+

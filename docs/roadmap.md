@@ -338,7 +338,7 @@ successfully inspected the embedded pilot catalog.
 
 ### `v0.2.2`: selective provider synchronization
 
-**Status:** Read-only planning implemented locally; transactional execution not started
+**Status:** Read-only planning implemented; transaction design accepted; execution not started
 
 - Render approved canonical skills selectively for Codex, Claude Code, and
   OpenCode.
@@ -357,14 +357,19 @@ Planned implementation gates:
    in-memory rendering, target inspection, conflict reporting, and immutable
    plans are available through `engkit skills plan-sync`. No provider file or
    ownership record is written.
-3. **`v0.2.2C` — approved transactional synchronization:** publish and remove
-   exact owned outputs through approval-bound journals, checkpoints,
-   verification, and recovery.
-4. **`v0.2.2D` — provider conformance and pilot:** validate the approved pilot
+3. **`v0.2.2C1` — transactional synchronization design:** accepted in
+   [ADR 0013](adr/0013-transactional-provider-synchronization.md). It defines
+   single-skill sync and unsync, dual locking, ownership-last publication,
+   durable evidence, verification, and recovery. No executor is implemented.
+4. **`v0.2.2C2` — approved transactional implementation:** add the separately
+   reviewed executor, CLI routing, canonical-mutation interlock, and automated
+   failure-injection coverage.
+5. **`v0.2.2D` — provider conformance and pilot:** validate the approved pilot
    against Codex, Claude Code, and OpenCode on the supported platforms without
    adopting provider-native or Spec Kit content.
 
-**Next gate:** Review and separately approve the exact `v0.2.2C` transaction
-contract before adding any provider-file publication, ownership-record writes,
-journals, checkpoints, locks, recovery, or mutation CLI.
+**Next gate:** Review and separately approve the exact `v0.2.2C2`
+implementation package, including module boundaries, schema structs, CLI
+routing, canonical-skill interlock, failure-injection matrix, changed-file
+list, risks, and rollback plan.
 
