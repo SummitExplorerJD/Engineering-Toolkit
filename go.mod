@@ -1,6 +1,6 @@
 module github.com/SummitExplorerJD/Engineering-Toolkit
 
-go 1.26.9
+go 1.27.3
 
 require (
 	github.com/ncruces/go-sqlite3 v0.35.4
