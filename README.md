@@ -4,7 +4,7 @@ Engineering Toolkit is a cross-platform command-line application for creating an
 
 ## Status
 
-Release `v0.2.1` is published and is the current stable release.
+Release `v0.2.2` is published and is the current stable release.
 CI and the release workflow validate six targets across Windows, Linux, and
 macOS on `amd64` and `arm64`. The CLI can inspect and initialize workspace
 state, rebuild the optional context index, describe supported agent
@@ -14,17 +14,18 @@ executed. User-scoped bootstrap installers provide exact versions, mandatory
 checksums, explicit upgrades, recoverable replacement, and opt-in PATH changes.
 
 `v0.2.0` added the provider-neutral canonical skill contract and guarded local
-skill lifecycle. `v0.2.1` adds strict offline template and profile catalogs,
+skill lifecycle. `v0.2.1` added strict offline template and profile catalogs,
 bounded template scaffolding, deterministic rendering and recommendations, and
 approved transactional project creation, workspace composition, and recovery.
 The embedded catalog includes `project-guide@0.1.0` and the
 `go-service@0.1.0` pilot profile.
-The in-development `v0.2.2C2` slice adds deterministic provider synchronization
-planning and explicitly approved transactional sync, unsync, and recovery for
-Codex, Claude Code, and OpenCode. Provider outputs remain derived from canonical
-skills and are tracked through per-file ownership records. Production TUF activation, platform
-signing, package-manager distribution, automatic updates, self-replacement,
-provider conformance certification, and execution of skill resources remain deferred.
+`v0.2.2` adds deterministic provider synchronization planning and explicitly
+approved transactional sync, unsync, and recovery for Codex, Claude Code, and
+OpenCode. Provider outputs remain derived from canonical skills and are tracked
+through per-file ownership records. The built-in pilot passed offline provider
+conformance on all six release targets. Native provider discovery, production
+TUF activation, platform signing, package-manager distribution, automatic
+updates, self-replacement, and execution of skill resources remain deferred.
 
 ## Design principles
 
@@ -63,6 +64,7 @@ provider conformance certification, and execution of skill resources remain defe
 - [v0.1.1 release notes](docs/release-notes/v0.1.1.md)
 - [v0.2.0 release notes](docs/release-notes/v0.2.0.md)
 - [v0.2.1 release notes](docs/release-notes/v0.2.1.md)
+- [v0.2.2 release notes](docs/release-notes/v0.2.2.md)
 - [Security policy](SECURITY.md)
 - [Architecture decisions](docs/adr/)
 - [Agent conventions](.agents/conventions/)

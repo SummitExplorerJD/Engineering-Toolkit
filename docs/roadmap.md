@@ -338,8 +338,8 @@ successfully inspected the embedded pilot catalog.
 
 ### `v0.2.2`: selective provider synchronization
 
-**Status:** Transactional implementation complete; D1 conformance harness
-implemented locally; six-platform execution and D2 native discovery pending
+**Status:** Published in `v0.2.2`; D1 conformance complete; D2 native discovery
+pending separate approval
 
 - Render approved canonical skills selectively for Codex, Claude Code, and
   OpenCode.
@@ -371,14 +371,20 @@ Planned implementation gates:
    `v1alpha1`](provider-conformance-v1alpha1.md). The D1 harness validates exact
    pilot bytes, transactions, preservation, and equivalence through native
    binaries on the six supported release targets without invoking provider
-   runtimes. Its local implementation is complete, but the gate remains open
-   until the release-candidate workflow passes on all six targets and their
-   portable evidence compares equal. D2 native Codex, Claude Code, and OpenCode
-   discovery requires a later approval for exact versions, commands,
-   authentication, network behavior, evidence, and cleanup.
+   runtimes. D1 passed on Windows, Linux, and macOS for AMD64 and ARM64, and the
+   aggregate portable-evidence comparison passed. D2 native Codex, Claude Code,
+   and OpenCode discovery requires a later approval for exact versions,
+   commands, authentication, network behavior, evidence, and cleanup.
 
-**Next gate:** Review the D1 diff, then separately authorize any commit and push.
-After that, separately run the release-candidate workflow and require all six
-native scenarios plus the aggregate comparison to pass. D1 completion will not
-authorize D2 provider invocation or release publication.
+**Published evidence:** Candidate `v0.2.2-rc.2` and stable `v0.2.2` passed the
+release workflow on all six targets, including provider lifecycle tests and the
+aggregate conformance comparison. The immutable `v0.2.2` tag points to commit
+`25c14d88e9871b78d674956d370a84768db9b90e`; its 12 release assets match the
+reviewed manifest and checksums. A local Windows upgrade reports
+`engkit v0.2.2` and successfully inspects the embedded catalog.
+
+**Next gate:** Prepare and separately approve D2 native discovery inputs before
+invoking any Codex, Claude Code, or OpenCode runtime. D1 completion and the
+`v0.2.2` release grant no provider installation, authentication, network, or
+credential authority.
 

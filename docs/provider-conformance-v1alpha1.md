@@ -3,11 +3,11 @@
 ## 1. Status and approval boundary
 
 This document defines the accepted contract for `v0.2.2D`. The D1 offline
-conformance implementation is present in the working tree, but D1 is not
-complete until the six-platform release-candidate workflow passes and its
-portable evidence compares equal. This boundary does not authorize provider
-CLI invocation, provider installation, authentication, network access,
-credential access, Git operations, or release publication.
+conformance gate is complete: candidate `v0.2.2-rc.2` and stable `v0.2.2`
+passed the native six-platform matrix and their portable evidence compared
+equal. This boundary does not authorize provider CLI invocation, provider
+installation, authentication, network access, credential access, or D2 native
+discovery.
 
 Implementation is split into two independently approved gates:
 
@@ -253,8 +253,14 @@ Focused static contract tests, PowerShell syntax checks, and a synthetic
 six-platform evidence comparison pass locally. Windows sandbox policy prevents
 the local end-to-end harness from exercising the executor's required atomic
 no-replace primitive, and the sandbox lacks symbolic-link privilege. Those
-cases are not waived: the native six-platform release-candidate run remains the
-mandatory completion evidence for D1.
+local restrictions were not treated as waivers: the required native scenarios
+passed on all six GitHub-hosted release targets, including macOS temporary-root
+normalization, and the aggregate portable-evidence comparison passed.
+
+The stable evidence is GitHub Actions run `39977017785` at commit
+`25c14d88e9871b78d674956d370a84768db9b90e`. The immutable `v0.2.2` release
+contains 12 uploaded assets whose digests match the reviewed package manifest
+and checksum file.
 
 ## 11. Rollback
 

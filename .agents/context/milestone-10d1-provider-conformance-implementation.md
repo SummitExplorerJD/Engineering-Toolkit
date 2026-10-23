@@ -41,9 +41,24 @@ publication or create symbolic-link fixtures, so those are not treated as local
 passes. D1 completes only after the release-candidate workflow succeeds on all
 six native targets and the aggregate portable comparison passes.
 
+## Completion evidence
+
+- Candidate `v0.2.2-rc.2` passed release workflow run `39975623529` after the
+  macOS test helper resolved the physical temporary root before validation.
+- Stable `v0.2.2` passed release workflow run `39977017785` on Windows, Linux,
+  and macOS for AMD64 and ARM64; the aggregate provider-conformance comparison
+  also passed.
+- The immutable release tag points to
+  `25c14d88e9871b78d674956d370a84768db9b90e` and contains 12 assets.
+- The downloaded stable ZIP digest is
+  `sha256:ae460b7f129b4daf5814b82ad4d9a0376c2514d37ea5d39669348a4b29f4f599`;
+  all internal checksum entries were independently verified.
+- A local Windows upgrade reports `engkit v0.2.2` from
+  `C:\Users\julit\AppData\Local\Programs\engkit\engkit.exe`, and embedded
+  catalog inspection succeeds.
+
 ## Deferred work
 
 - D2 native discovery with exact Codex, Claude Code, and OpenCode versions.
 - Provider installation, authentication, network access, and credentials.
-- Git commit, push, tags, release candidates, and stable release publication.
 - Public evidence schemas or production-package changes.
