@@ -358,6 +358,11 @@ func testNoReplace(oldname, newname string) error {
 func testWorkspace(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
+	resolvedRoot, err := filepath.EvalSymlinks(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	root = resolvedRoot
 	if err := os.Mkdir(filepath.Join(root, ".engkit"), 0o700); err != nil {
 		t.Fatal(err)
 	}
