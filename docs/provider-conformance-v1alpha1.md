@@ -2,10 +2,12 @@
 
 ## 1. Status and approval boundary
 
-This document defines the approved planning contract for `v0.2.2D`. It does
-not authorize implementation, provider CLI invocation, provider installation,
-authentication, network access, credential access, CI changes, Git operations,
-or release publication.
+This document defines the accepted contract for `v0.2.2D`. The D1 offline
+conformance implementation is present in the working tree, but D1 is not
+complete until the six-platform release-candidate workflow passes and its
+portable evidence compares equal. This boundary does not authorize provider
+CLI invocation, provider installation, authentication, network access,
+credential access, Git operations, or release publication.
 
 Implementation is split into two independently approved gates:
 
@@ -229,23 +231,34 @@ replace D1, change the canonical package, or grant future provider access.
 - clean retained backups or empty provider directories; or
 - authorize a commit, push, tag, release candidate, or stable release.
 
-## 10. Proposed implementation surface
+## 10. Implemented D1 surface
 
-A later D1 implementation packet may propose:
+The approved D1 implementation adds:
 
-- provider-conformance fixtures under the existing provider test packages;
-- a cross-platform PowerShell orchestration script under `scripts/`;
-- focused additions to `providersync`, `providersyncexec`, and CLI tests; and
-- a conformance step in the existing release-candidate matrix.
+- an exact reviewed golden `SKILL.md` and focused contract, refusal, collision,
+  and lifecycle tests in `internal/providersync` and `internal/providersyncexec`;
+- `scripts/test-provider-conformance.ps1`, which composes the embedded pilot and
+  exercises sync, unchanged replay, ownership verification, and unsync with the
+  native release binary in disposable workspaces;
+- `scripts/compare-provider-conformance.ps1`, which requires all six runtime
+  records and byte-identical portable projections; and
+- provider-conformance execution and evidence aggregation in the existing
+  release-candidate matrix.
 
-That packet must enumerate every file, test command, CI change, risk, and
-rollback step before implementation. No new production package or public schema
-is required by this plan.
+The evidence files are private test artifacts rather than a public Engineering
+Toolkit schema. The implementation adds no production package and does not
+change the public CLI contract.
+
+Focused static contract tests, PowerShell syntax checks, and a synthetic
+six-platform evidence comparison pass locally. Windows sandbox policy prevents
+the local end-to-end harness from exercising the executor's required atomic
+no-replace primitive, and the sandbox lacks symbolic-link privilege. Those
+cases are not waived: the native six-platform release-candidate run remains the
+mandatory completion evidence for D1.
 
 ## 11. Rollback
 
-Planning rollback removes this document and its milestone context, then restores
-the prior roadmap, requirements, architecture, adapter, and provider-plan text.
-D1 implementation rollback, once separately approved, removes only its fixtures,
-test harness, and CI wiring. It must not rewrite transaction evidence or delete
-user/provider content from any real workspace.
+D1 rollback removes only its fixtures, focused conformance tests, orchestration
+scripts, CI wiring, and implementation milestone context, then restores this
+document and the roadmap to their planning-only state. It must not rewrite
+transaction evidence or delete user/provider content from any real workspace.

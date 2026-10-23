@@ -338,8 +338,8 @@ successfully inspected the embedded pilot catalog.
 
 ### `v0.2.2`: selective provider synchronization
 
-**Status:** Transactional implementation complete; provider-conformance plan
-accepted; D1 implementation and D2 native discovery pending
+**Status:** Transactional implementation complete; D1 conformance harness
+implemented locally; six-platform execution and D2 native discovery pending
 
 - Render approved canonical skills selectively for Codex, Claude Code, and
   OpenCode.
@@ -366,16 +366,19 @@ Planned implementation gates:
    executor, CLI routing, canonical-mutation interlock, durable evidence,
    explicit recovery, and failure-injection coverage follow the accepted C1
    contract.
-5. **`v0.2.2D` — provider conformance and pilot:** planning is accepted in
+5. **`v0.2.2D` — provider conformance and pilot:** the contract is accepted in
    [provider conformance and pilot validation
-   `v1alpha1`](provider-conformance-v1alpha1.md). D1 will validate exact pilot
-   bytes, transactions, preservation, and equivalence through native binaries
-   on the six supported release targets without invoking provider runtimes. D2
-   native Codex, Claude Code, and OpenCode discovery requires a later approval
-   for exact versions, commands, authentication, network behavior, evidence,
-   and cleanup.
+   `v1alpha1`](provider-conformance-v1alpha1.md). The D1 harness validates exact
+   pilot bytes, transactions, preservation, and equivalence through native
+   binaries on the six supported release targets without invoking provider
+   runtimes. Its local implementation is complete, but the gate remains open
+   until the release-candidate workflow passes on all six targets and their
+   portable evidence compares equal. D2 native Codex, Claude Code, and OpenCode
+   discovery requires a later approval for exact versions, commands,
+   authentication, network behavior, evidence, and cleanup.
 
-**Next gate:** Review and separately approve the exact D1 implementation packet,
-including fixtures, tests, orchestration, CI changes, risks, and rollback. D1
-completion will not authorize D2 provider invocation or release publication.
+**Next gate:** Review the D1 diff, then separately authorize any commit and push.
+After that, separately run the release-candidate workflow and require all six
+native scenarios plus the aggregate comparison to pass. D1 completion will not
+authorize D2 provider invocation or release publication.
 

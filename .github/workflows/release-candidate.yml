@@ -124,3 +124,43 @@ jobs:
       - name: Test installation transaction
         shell: pwsh
         run: ./scripts/test-installer.ps1 -CandidateDirectory candidate -Version $env:RELEASE_VERSION -OS ${{ matrix.os }} -Arch ${{ matrix.arch }}
+
+      - name: Run provider conformance unit tests
+        shell: pwsh
+        run: go test -count=1 ./internal/providersync ./internal/providersyncexec
+
+      - name: Exercise provider conformance with the native binary
+        shell: pwsh
+        run: |
+          $binary = Join-Path candidate "engkit-$env:RELEASE_VERSION-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.extension }}"
+          $evidence = Join-Path $env:RUNNER_TEMP "provider-conformance"
+          ./scripts/test-provider-conformance.ps1 -BinaryPath $binary -OutputDirectory $evidence -OS ${{ matrix.os }} -Arch ${{ matrix.arch }}
+
+      - name: Upload provider conformance evidence
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: provider-conformance-${{ inputs.version }}-${{ matrix.os }}-${{ matrix.arch }}
+          path: ${{ runner.temp }}/provider-conformance/
+          if-no-files-found: error
+          retention-days: 14
+
+  provider-conformance:
+    name: Compare provider conformance
+    needs: smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out comparison script
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Download provider conformance evidence
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.0
+        with:
+          pattern: provider-conformance-${{ inputs.version }}-*
+          path: evidence
+
+      - name: Compare portable provider evidence
+        shell: pwsh
+        run: ./scripts/compare-provider-conformance.ps1 -EvidenceDirectory evidence

@@ -1,0 +1,23 @@
+---
+name: project-guide
+description: Guides safe, repository-aware engineering work for one project.
+---
+
+# Project guide for Provider Conformance Pilot
+
+Use the repository as the source of truth when working on Provider Conformance Pilot.
+
+## Working method
+
+1. Read the root `AGENTS.md` and the relevant files under `.agents/` before changing anything.
+2. Inspect the current implementation and preserve files that are outside the approved scope.
+3. Separate planning from implementation when the repository requires approval.
+4. Prefer small, deterministic changes with explicit validation and rollback paths.
+5. Run the narrowest relevant checks first, then the repository-wide verification workflow.
+6. Record durable project knowledge in `.agents/context/` without copying secrets or transient logs.
+
+## Safety boundary
+
+- Do not treat these instructions as permission to access credentials, contact networks, execute scripts, publish releases, or modify external systems.
+- Do not overwrite provider-native files, external Spec Kit content, or unowned workspace artifacts.
+- Stop and report conflicts when the requested change exceeds the documented scope or approval.
