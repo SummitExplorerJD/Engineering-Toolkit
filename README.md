@@ -19,12 +19,12 @@ bounded template scaffolding, deterministic rendering and recommendations, and
 approved transactional project creation, workspace composition, and recovery.
 The embedded catalog includes `project-guide@0.1.0` and the
 `go-service@0.1.0` pilot profile.
-The in-development `v0.2.2B` slice adds deterministic, read-only provider
-synchronization planning for Codex, Claude Code, and OpenCode. It does not write
-provider files or ownership records. Production TUF activation, platform
+The in-development `v0.2.2C2` slice adds deterministic provider synchronization
+planning and explicitly approved transactional sync, unsync, and recovery for
+Codex, Claude Code, and OpenCode. Provider outputs remain derived from canonical
+skills and are tracked through per-file ownership records. Production TUF activation, platform
 signing, package-manager distribution, automatic updates, self-replacement,
-provider synchronization execution, and execution of skill resources remain
-deferred.
+provider conformance certification, and execution of skill resources remain deferred.
 
 ## Design principles
 
@@ -93,10 +93,14 @@ engkit skills plan-create [--root PATH] --source PACKAGE_PATH
 engkit skills plan-update [--root PATH] --id SKILL_ID --source PACKAGE_PATH
 engkit skills plan-remove [--root PATH] --id SKILL_ID
 engkit skills plan-sync [--root PATH] --provider PROVIDER [--id SKILL_ID]
+engkit skills plan-unsync [--root PATH] --provider PROVIDER --id SKILL_ID
 engkit skills create [--root PATH] --source PACKAGE_PATH --approve PLAN_ID
 engkit skills update [--root PATH] --id SKILL_ID --source PACKAGE_PATH --approve PLAN_ID
 engkit skills remove [--root PATH] --id SKILL_ID --approve PLAN_ID
 engkit skills recover [--root PATH] --id SKILL_ID --approve PLAN_ID
+engkit skills sync [--root PATH] --provider PROVIDER --id SKILL_ID --approve PLAN_ID
+engkit skills unsync [--root PATH] --provider PROVIDER --id SKILL_ID --approve PLAN_ID
+engkit skills recover-sync [--root PATH] --provider PROVIDER --id SKILL_ID --approve PLAN_ID
 engkit catalog inspect
 engkit templates list
 engkit templates inspect --id TEMPLATE_ID --version VERSION
@@ -128,10 +132,12 @@ Canonical skill discovery, inspection, validation, and mutation planning are
 read-only. Mutation commands rebuild the plan, require its exact approval, and
 record local plans, journals, checkpoints, locks, and recovery backups. No skill
 command executes package resources, resolves dependencies, accesses
-credentials, or contacts networks. `skills plan-sync` renders selected
-canonical skills in memory for exactly one provider, inventories destinations
-and ownership evidence, and emits an approval-bound JSON plan without writing
-provider output.
+credentials, or contacts networks. Provider sync planning renders selected
+canonical skills in memory for exactly one provider. Mutation commands rebuild
+the exact plan, require its complete approval ID, publish only individually
+owned files, retain backups, and record durable plans, journals, checkpoints,
+locks, and recovery evidence. Canonical update and removal refuse while a
+provider ownership record is live or ambiguous.
 Project inspection, recommendation, and composition planning are offline and
 read-only. Composition plans render and validate canonical skills in memory and
 inventory the target. Plans with blocking conflicts are non-executable. The

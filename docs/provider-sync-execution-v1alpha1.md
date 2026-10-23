@@ -2,11 +2,11 @@
 
 ## 1. Status and boundary
 
-This document defines the accepted `v0.2.2C1` transaction design. No executor
-or mutation CLI is implemented by this design slice. Implementation,
-conformance, Git operations, and release publication require separate approval.
+This document defines the accepted `v0.2.2C1` transaction design implemented by
+the `v0.2.2C2` executor and mutation CLI. Provider conformance, Git operations,
+and release publication remain separate approval gates.
 
-The future executor will apply only exact, executable provider plans for one
+The executor applies only exact, executable provider plans for one
 canonical skill and one explicitly selected provider. It will never execute a
 skill resource, invoke a provider CLI, contact a network, access credentials,
 resolve dependencies, initialize Spec Kit, or generate provider runtime policy.
@@ -217,9 +217,10 @@ live destination is absent. A refused recovery retains both locks.
 - Recovery performs no rendering, network request, provider invocation,
   canonical mutation, or ownership discovery beyond persisted evidence.
 
-## 10. Implementation verification gate
+## 10. Implementation and conformance verification gate
 
-The separately approved implementation must cover:
+The C2 automated suite and the separately approved D conformance gate must
+collectively cover:
 
 - exact and mismatched approvals with zero pre-approval writes;
 - create, unchanged, replace, stale-output removal, and full unsync;

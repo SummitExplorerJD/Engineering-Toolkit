@@ -467,3 +467,22 @@ Errors shall distinguish user input, policy refusal, environmental failure, inte
 - Design acceptance does not authorize implementation. The exact code package,
   changed files, tests, risks, and rollback plan require separate approval.
 
+## 19. `v0.2.2C2` provider-synchronization implementation acceptance criteria
+
+- `skills plan-unsync`, `sync`, `unsync`, and `recover-sync` implement the
+  accepted single-provider, single-skill CLI contract and require exact plan-ID
+  approval before mutation.
+- The executor rebuilds approved plans before publication, stages exact bytes,
+  uses capability-checked no-replace publication, verifies all outputs, and
+  publishes ownership last.
+- Plans, JSONL journals, JSON checkpoints, dual locks, staging, and retained
+  backups are durable and namespaced by provider, skill, and plan ID.
+- Recovery completes an exact published final state, rolls back an exact known
+  partial state, and preserves evidence and locks when any state is ambiguous.
+- Canonical skill update and removal fail closed while any supported provider
+  ownership record is present, malformed, linked, or unreadable.
+- The implementation performs no provider CLI, network, credential, dependency,
+  script, Spec Kit, Git, or release action.
+- Provider conformance, pilot validation, Git operations, and publication remain
+  separately approved gates.
+

@@ -141,15 +141,91 @@ func NewPlan(root, provider, id string) (Plan, error) {
 		plan.AffectedPaths = append(plan.AffectedPaths, item)
 	}
 	sortPlan(&plan)
+	if len(plan.Sources) == 1 {
+		plan.SkillID = plan.Sources[0].ID
+	}
 	plan.Executable = len(plan.Sources) > 0 && len(plan.Conflicts) == 0
 	for _, mapping := range plan.Mappings {
 		if mapping.Quality != "exact" {
 			plan.Executable = false
 		}
 	}
+	if len(plan.Sources) > 1 {
+		plan.Executable = false
+		plan.Conflicts = append(plan.Conflicts, Finding{Severity: "blocking", Code: "execution.multi_skill_unsupported", Message: "initial provider execution requires exactly one selected canonical skill"})
+		sortPlan(&plan)
+	}
 	encoded, err := json.Marshal(plan)
 	if err != nil {
 		return Plan{}, fmt.Errorf("encode provider synchronization plan: %w", err)
+	}
+	digest := sha256.Sum256(encoded)
+	plan.PlanID = "sha256:" + hex.EncodeToString(digest[:])
+	return plan, nil
+}
+
+// NewUnsyncPlan builds a deterministic removal plan from exact ownership
+// evidence. It does not require the canonical package and never writes state.
+func NewUnsyncPlan(root, provider, id string) (Plan, error) {
+	workspaceRoot, err := resolveRoot(root)
+	if err != nil {
+		return Plan{}, err
+	}
+	adapter, err := adapterContract(provider)
+	if err != nil {
+		return Plan{}, err
+	}
+	id = strings.TrimSpace(id)
+	if id == "" {
+		return Plan{}, errors.New("canonical skill identifier is required")
+	}
+	plan := Plan{
+		SchemaVersion: PlanSchema, Operation: "remove", Root: filepath.ToSlash(workspaceRoot), Provider: adapter.Provider, SkillID: id, Adapter: adapter,
+		Sources: []SourceReference{}, Observations: []Observation{}, Mappings: []Mapping{}, Outputs: []Output{}, Conflicts: []Finding{}, AffectedPaths: []string{},
+		Risks:             []string{"removal authority depends on exact provider ownership evidence", "empty provider directories remain after successful unsynchronization"},
+		RequiredApprovals: []string{"provider-unsynchronization", "provider:" + adapter.Provider},
+		Verification:      []string{"verify every owned output is absent", "verify retained backups match prior digests", "verify the live ownership record is absent", "verify canonical and unowned provider files remain unchanged"},
+		RequiresApproval:  true,
+	}
+	recordPath := ownershipPath(adapter.Provider, id)
+	record, observation, findings, err := readOwnership(workspaceRoot, recordPath, adapter, id)
+	if err != nil {
+		return Plan{}, err
+	}
+	plan.Observations = append(plan.Observations, observation)
+	plan.Conflicts = append(plan.Conflicts, findings...)
+	plan.AffectedPaths = append(plan.AffectedPaths, recordPath)
+	if record == nil && len(findings) == 0 {
+		plan.Conflicts = append(plan.Conflicts, Finding{Severity: "blocking", Code: "ownership.record_missing", Path: recordPath, Message: "provider ownership record does not exist"})
+	}
+	if record != nil {
+		for _, prior := range record.Outputs {
+			observed, finding, err := inspectOutput(workspaceRoot, prior.Path)
+			if err != nil {
+				return Plan{}, err
+			}
+			observed.Ownership = "engkit"
+			plan.Observations = append(plan.Observations, observed)
+			action := "remove"
+			if finding != nil {
+				plan.Conflicts = append(plan.Conflicts, *finding)
+				action = "conflict"
+			} else if observed.State == "missing" {
+				plan.Conflicts = append(plan.Conflicts, Finding{Severity: "blocking", Code: "target.owned_missing", Path: prior.Path, Message: "recorded provider output is missing"})
+				action = "conflict"
+			} else if observed.SHA256 != prior.SHA256 {
+				plan.Conflicts = append(plan.Conflicts, Finding{Severity: "blocking", Code: "target.owned_changed", Path: prior.Path, Message: "recorded provider output changed outside Engineering Toolkit"})
+				action = "conflict"
+			}
+			plan.Outputs = append(plan.Outputs, Output{Path: prior.Path, Action: action, Owner: owner(adapter.Provider, id), BeforeSHA256: observed.SHA256})
+			plan.AffectedPaths = append(plan.AffectedPaths, prior.Path)
+		}
+	}
+	sortPlan(&plan)
+	plan.Executable = record != nil && len(plan.Conflicts) == 0
+	encoded, err := json.Marshal(plan)
+	if err != nil {
+		return Plan{}, fmt.Errorf("encode provider unsynchronization plan: %w", err)
 	}
 	digest := sha256.Sum256(encoded)
 	plan.PlanID = "sha256:" + hex.EncodeToString(digest[:])
@@ -243,6 +319,9 @@ func validateOwnership(record OwnershipRecord, adapter AdapterReference, id stri
 	if record.SkillVersion == "" || strings.HasPrefix(record.SkillVersion, "v") || !semver.IsValid("v"+record.SkillVersion) || !sha256Pattern.MatchString(record.PackageSHA256) || !sha256Pattern.MatchString(record.SynchronizationID) {
 		return errors.New("provider ownership record contains invalid source or synchronization identity")
 	}
+	if len(record.Outputs) == 0 {
+		return errors.New("provider ownership record contains no outputs")
+	}
 	seen := map[string]struct{}{}
 	prefix := adapter.TargetRoot + "/" + id + "/"
 	for _, output := range record.Outputs {
@@ -259,6 +338,31 @@ func validateOwnership(record OwnershipRecord, adapter AdapterReference, id stri
 		seen[key] = struct{}{}
 	}
 	return nil
+}
+
+// OwnershipBlockers returns supported provider ownership paths whose presence
+// or ambiguous ancestry must block canonical skill update and removal.
+func OwnershipBlockers(root, id string) ([]string, error) {
+	workspaceRoot, err := resolveRoot(root)
+	if err != nil {
+		return nil, err
+	}
+	if strings.TrimSpace(id) == "" {
+		return nil, errors.New("canonical skill identifier is required")
+	}
+	var blockers []string
+	for _, provider := range []string{"claude", "codex", "opencode"} {
+		relative := ownershipPath(provider, id)
+		observation, finding, err := inspectOutput(workspaceRoot, relative)
+		if err != nil {
+			return nil, err
+		}
+		if finding != nil || observation.State != "missing" {
+			blockers = append(blockers, relative)
+		}
+	}
+	sort.Strings(blockers)
+	return blockers, nil
 }
 
 func inspectOutput(root, relative string) (Observation, *Finding, error) {

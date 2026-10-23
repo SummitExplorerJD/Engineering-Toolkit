@@ -246,11 +246,14 @@ creation schema.
 This release is intended to render or synchronize approved canonical skills for
 Codex, Claude Code, and OpenCode after canonical project composition exists.
 
-Proposed commands, not yet public contracts:
+Implemented experimental `v1alpha1` commands include:
 
 ```text
-engkit skills plan-sync --provider PROVIDER
-engkit skills sync --provider PROVIDER --approve PLAN_ID
+engkit skills plan-sync [--root PATH] --provider PROVIDER [--id SKILL_ID]
+engkit skills plan-unsync [--root PATH] --provider PROVIDER --id SKILL_ID
+engkit skills sync [--root PATH] --provider PROVIDER --id SKILL_ID --approve PLAN_ID
+engkit skills unsync [--root PATH] --provider PROVIDER --id SKILL_ID --approve PLAN_ID
+engkit skills recover-sync [--root PATH] --provider PROVIDER --id SKILL_ID --approve PLAN_ID
 ```
 
 Required behavior:

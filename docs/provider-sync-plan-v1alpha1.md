@@ -4,7 +4,8 @@
 
 `engkit.provider-sync-plan/v1alpha1` is the immutable preview for rendering one
 or more canonical skills to exactly one selected provider. The accepted
-`v0.2.2B` implementation creates this plan in memory but does not execute it.
+`v0.2.2C2` keeps planning read-only and lets the separately invoked executor
+apply only one exact approved skill-and-provider plan.
 
 The implemented read-only entry point is:
 
@@ -12,8 +13,8 @@ The implemented read-only entry point is:
 engkit skills plan-sync [--root PATH] --provider PROVIDER [--id SKILL_ID]
 ```
 
-The accepted transaction design reserves these mutation, removal-planning, and
-recovery entry points for a separately approved implementation:
+The transactional implementation exposes these mutation, removal-planning, and
+recovery entry points:
 
 ```text
 engkit skills sync [--root PATH] --provider PROVIDER --id SKILL_ID --approve PLAN_ID
@@ -86,6 +87,7 @@ The plan contains these top-level fields:
 | `operation` | `synchronize` or `remove` |
 | `root` | Normalized absolute workspace root used for observation |
 | `provider` | Exactly `codex`, `claude`, or `opencode` |
+| `skill_id` | Exact canonical skill identity for executable single-skill plans |
 | `adapter` | Contract identifier, version, evidence date, and target root |
 | `sources` | Selected canonical identities, versions, directory digests, and manifest digests |
 | `observations` | Target path kinds and digests plus prior ownership-record digests |
@@ -164,7 +166,8 @@ digest verification, and explicit recovery. The accepted mechanics and
 cross-operation lock boundary are specified in
 [`provider-sync-execution-v1alpha1.md`](provider-sync-execution-v1alpha1.md)
 and [ADR 0013](adr/0013-transactional-provider-synchronization.md). No executor
-is implemented by the design slice.
+is invoked by planning; `providersyncexec` implements the separately approved
+mutation boundary.
 
 ## Spec Kit boundary
 
@@ -179,9 +182,10 @@ execution retain their independent plans and approvals.
 
 ## Initial conformance cases
 
-The read-only implementation proves cases 1 through 6 and deterministic plan
-construction. Cases requiring publication, stale-plan execution checks, and
-cross-platform release conformance remain gates `v0.2.2C2` and `v0.2.2D`:
+Planning proves cases 1 through 6 and deterministic plan construction. The C2
+transaction tests cover exact publication, replacement, stale-output removal,
+unsync, stale-plan checks, and recovery. Provider-runtime and release-platform
+conformance remain gate `v0.2.2D`:
 
 1. deterministic exact rendering for the instruction-only `project-guide` pilot;
 2. selective output for one provider without touching the other two;

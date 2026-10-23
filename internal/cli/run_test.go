@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/plan"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/providersync"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skillplan"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/workspace"
 )
@@ -430,6 +431,24 @@ func TestProviderSynchronizationPlanCLIIsReadOnly(t *testing.T) {
 	}
 }
 
+func TestProviderSynchronizationMutationCLI(t *testing.T) {
+	root := testWorkspace(t)
+	initializeWithCLI(t, root)
+	writeCLISkill(t, filepath.Join(root, ".agents", "skills"), "release-review", "1.0.0", "# Review\n")
+
+	syncPlan := providerPlanFromCLI(t, []string{"skills", "plan-sync", "--root", root, "--provider", "claude", "--id", "release-review"})
+	runCLI(t, []string{"skills", "sync", "--root", root, "--provider", "claude", "--id", "release-review", "--approve", syncPlan.PlanID}, `"status": "complete"`)
+	if _, err := os.Lstat(filepath.Join(root, ".claude", "skills", "release-review", "SKILL.md")); err != nil {
+		t.Fatalf("sync output is unavailable: %v", err)
+	}
+
+	unsyncPlan := providerPlanFromCLI(t, []string{"skills", "plan-unsync", "--root", root, "--provider", "claude", "--id", "release-review"})
+	runCLI(t, []string{"skills", "unsync", "--root", root, "--provider", "claude", "--id", "release-review", "--approve", unsyncPlan.PlanID}, `"status": "complete"`)
+	if _, err := os.Lstat(filepath.Join(root, ".claude", "skills", "release-review", "SKILL.md")); !os.IsNotExist(err) {
+		t.Fatalf("unsync output remains: %v", err)
+	}
+}
+
 func TestSkillMutationCLI(t *testing.T) {
 	root := testWorkspace(t)
 	initializeWithCLI(t, root)
@@ -499,10 +518,26 @@ func skillPlanFromCLI(t *testing.T, args []string) skillplan.Plan {
 	return preview
 }
 
+func providerPlanFromCLI(t *testing.T, args []string) providersync.Plan {
+	t.Helper()
+	var stdout, stderr bytes.Buffer
+	if code := Run(args, &stdout, &stderr); code != 0 {
+		t.Fatalf("Run(%v) code = %d, stderr = %q", args, code, stderr.String())
+	}
+	var preview providersync.Plan
+	if err := json.Unmarshal(stdout.Bytes(), &preview); err != nil {
+		t.Fatal(err)
+	}
+	return preview
+}
+
 func runCLI(t *testing.T, args []string, want string) {
 	t.Helper()
 	var stdout, stderr bytes.Buffer
 	if code := Run(args, &stdout, &stderr); code != 0 {
+		if strings.Contains(stderr.String(), "atomic no-replace publication is unsupported") {
+			t.Skipf("test filesystem does not support hard-link publication: %s", stderr.String())
+		}
 		t.Fatalf("Run(%v) code = %d, stderr = %q", args, code, stderr.String())
 	}
 	if !strings.Contains(stdout.String(), want) {

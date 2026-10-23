@@ -20,6 +20,7 @@ import (
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/plan"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/profiles"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/providersync"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/providersyncexec"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skillexec"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skillplan"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skills"
@@ -450,7 +451,7 @@ func parseSelection(value string) (string, string, error) {
 
 func runSkills(args []string, stdout, stderr io.Writer) error {
 	if len(args) == 0 {
-		return &usageError{message: "skills requires a subcommand: list, inspect, validate, plan-create, plan-update, plan-remove, plan-sync, create, update, remove, or recover"}
+		return &usageError{message: "skills requires a subcommand: list, inspect, validate, plan-create, plan-update, plan-remove, plan-sync, plan-unsync, create, update, remove, recover, sync, unsync, or recover-sync"}
 	}
 	switch args[0] {
 	case "list":
@@ -576,6 +577,93 @@ func runSkills(args []string, stdout, stderr io.Writer) error {
 			return &usageError{message: "skills plan-sync requires --provider"}
 		}
 		result, err := providersync.NewPlan(*root, *provider, *id)
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "plan-unsync":
+		flags := newFlagSet("skills plan-unsync", stderr)
+		root := flags.String("root", ".", "workspace root to inspect")
+		provider := flags.String("provider", "", "provider: codex, claude, or opencode")
+		id := flags.String("id", "", "normalized canonical skill identifier")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "skills plan-unsync does not accept positional arguments"}
+		}
+		if *provider == "" || *id == "" {
+			return &usageError{message: "skills plan-unsync requires --provider and --id"}
+		}
+		result, err := providersync.NewUnsyncPlan(*root, *provider, *id)
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "sync":
+		flags := newFlagSet("skills sync", stderr)
+		root := flags.String("root", ".", "initialized workspace root")
+		provider := flags.String("provider", "", "provider: codex, claude, or opencode")
+		id := flags.String("id", "", "normalized canonical skill identifier")
+		approved := flags.String("approve", "", "complete synchronization plan ID")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "skills sync does not accept positional arguments"}
+		}
+		if *provider == "" || *id == "" {
+			return &usageError{message: "skills sync requires --provider and --id"}
+		}
+		preview, err := providersync.NewPlan(*root, *provider, *id)
+		if err != nil {
+			return err
+		}
+		result, err := providersyncexec.Execute(preview, *approved, providersyncexec.Options{ProcessID: os.Getpid()})
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "unsync":
+		flags := newFlagSet("skills unsync", stderr)
+		root := flags.String("root", ".", "initialized workspace root")
+		provider := flags.String("provider", "", "provider: codex, claude, or opencode")
+		id := flags.String("id", "", "normalized canonical skill identifier")
+		approved := flags.String("approve", "", "complete unsynchronization plan ID")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "skills unsync does not accept positional arguments"}
+		}
+		if *provider == "" || *id == "" {
+			return &usageError{message: "skills unsync requires --provider and --id"}
+		}
+		preview, err := providersync.NewUnsyncPlan(*root, *provider, *id)
+		if err != nil {
+			return err
+		}
+		result, err := providersyncexec.Execute(preview, *approved, providersyncexec.Options{ProcessID: os.Getpid()})
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "recover-sync":
+		flags := newFlagSet("skills recover-sync", stderr)
+		root := flags.String("root", ".", "initialized workspace root")
+		provider := flags.String("provider", "", "provider: codex, claude, or opencode")
+		id := flags.String("id", "", "normalized canonical skill identifier")
+		approved := flags.String("approve", "", "complete interrupted provider plan ID")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "skills recover-sync does not accept positional arguments"}
+		}
+		if *provider == "" || *id == "" {
+			return &usageError{message: "skills recover-sync requires --provider and --id"}
+		}
+		result, err := providersyncexec.Recover(*root, *provider, *id, *approved, providersyncexec.Options{ProcessID: os.Getpid()})
 		if err != nil {
 			return err
 		}
@@ -924,10 +1012,14 @@ var usageLines = []string{
 	"skills plan-update [--root PATH] --id SKILL_ID --source PACKAGE_PATH",
 	"skills plan-remove [--root PATH] --id SKILL_ID",
 	"skills plan-sync [--root PATH] --provider PROVIDER [--id SKILL_ID]",
+	"skills plan-unsync [--root PATH] --provider PROVIDER --id SKILL_ID",
 	"skills create [--root PATH] --source PACKAGE_PATH --approve PLAN_ID",
 	"skills update [--root PATH] --id SKILL_ID --source PACKAGE_PATH --approve PLAN_ID",
 	"skills remove [--root PATH] --id SKILL_ID --approve PLAN_ID",
 	"skills recover [--root PATH] --id SKILL_ID --approve PLAN_ID",
+	"skills sync [--root PATH] --provider PROVIDER --id SKILL_ID --approve PLAN_ID",
+	"skills unsync [--root PATH] --provider PROVIDER --id SKILL_ID --approve PLAN_ID",
+	"skills recover-sync [--root PATH] --provider PROVIDER --id SKILL_ID --approve PLAN_ID",
 	"catalog inspect",
 	"templates list",
 	"templates inspect --id TEMPLATE_ID --version VERSION",

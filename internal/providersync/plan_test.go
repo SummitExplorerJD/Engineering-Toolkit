@@ -196,6 +196,77 @@ func TestNewPlanAllCanonicalSkillsAreSorted(t *testing.T) {
 	if len(plan.Sources) != 2 || plan.Sources[0].ID != "alpha" || plan.Sources[1].ID != "zeta" {
 		t.Fatalf("sources are not sorted: %#v", plan.Sources)
 	}
+	if plan.Executable {
+		t.Fatal("multi-skill plan unexpectedly executable")
+	}
+	assertConflictCode(t, plan, "execution.multi_skill_unsupported")
+}
+
+func TestPrepareBindsExactBytesAndOwnership(t *testing.T) {
+	root := t.TempDir()
+	writeCanonical(t, root, "project-guide", "Guides safe project work.", "# Project guide\n", "", nil)
+	prepared, err := Prepare(root, "opencode", "project-guide")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(prepared.Files) != 1 || prepared.Files[0].SHA256 != digestBytes(prepared.Files[0].Data) {
+		t.Fatalf("unexpected materialization: %#v", prepared.Files)
+	}
+	if prepared.Ownership.SynchronizationID != prepared.Plan.PlanID || len(prepared.Ownership.Outputs) != 1 || prepared.Ownership.Outputs[0].SHA256 != prepared.Files[0].SHA256 {
+		t.Fatalf("ownership does not bind materialization: %#v", prepared.Ownership)
+	}
+}
+
+func TestNewUnsyncPlanUsesOnlyExactOwnership(t *testing.T) {
+	root := t.TempDir()
+	writeCanonical(t, root, "project-guide", "Guides safe project work.", "# Project guide\n", "", nil)
+	prepared, err := Prepare(root, "claude", "project-guide")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, file := range prepared.Files {
+		writeFile(t, filepath.Join(root, filepath.FromSlash(file.Path)), string(file.Data))
+	}
+	writeJSON(t, filepath.Join(root, ".engkit", "providers", "claude", "project-guide.json"), prepared.Ownership)
+
+	plan, err := NewUnsyncPlan(root, "claude", "project-guide")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !plan.Executable || plan.Operation != "remove" || len(plan.Sources) != 0 || len(plan.Outputs) != len(prepared.Files) {
+		t.Fatalf("unexpected unsync plan: %#v", plan)
+	}
+	for _, output := range plan.Outputs {
+		if output.Action != "remove" {
+			t.Fatalf("unsync output = %#v", output)
+		}
+	}
+
+	writeFile(t, filepath.Join(root, filepath.FromSlash(prepared.Files[0].Path)), "changed\n")
+	changed, err := NewUnsyncPlan(root, "claude", "project-guide")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if changed.Executable {
+		t.Fatal("changed owned output produced executable unsync plan")
+	}
+	assertConflictCode(t, changed, "target.owned_changed")
+}
+
+func TestOwnershipBlockersFailClosed(t *testing.T) {
+	root := t.TempDir()
+	blockers, err := OwnershipBlockers(root, "project-guide")
+	if err != nil || len(blockers) != 0 {
+		t.Fatalf("empty blockers = %#v, %v", blockers, err)
+	}
+	writeFile(t, filepath.Join(root, ".engkit", "providers", "codex", "project-guide.json"), "malformed")
+	blockers, err = OwnershipBlockers(root, "project-guide")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(blockers) != 1 || blockers[0] != ".engkit/providers/codex/project-guide.json" {
+		t.Fatalf("blockers = %#v", blockers)
+	}
 }
 
 type resourceInput struct {

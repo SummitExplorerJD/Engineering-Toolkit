@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/approval"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/providersync"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skillplan"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skills"
 )
@@ -36,6 +38,15 @@ func Execute(preview skillplan.Plan, approvedPlanID string, options Options) (re
 	}
 	if fresh.PlanID != preview.PlanID {
 		return Result{}, errors.New("skill state changed after planning; generate and approve a new plan")
+	}
+	if preview.Kind == "skill.update" || preview.Kind == "skill.remove" {
+		blockers, err := providersync.OwnershipBlockers(root, preview.SkillID)
+		if err != nil {
+			return Result{}, fmt.Errorf("inspect provider ownership: %w", err)
+		}
+		if len(blockers) > 0 {
+			return Result{}, fmt.Errorf("canonical skill has provider ownership; unsynchronize before mutation: %s", strings.Join(blockers, ", "))
+		}
 	}
 	key, err := planKey(preview.PlanID)
 	if err != nil {

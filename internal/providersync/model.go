@@ -57,6 +57,7 @@ type Plan struct {
 	Operation         string            `json:"operation"`
 	Root              string            `json:"root"`
 	Provider          string            `json:"provider"`
+	SkillID           string            `json:"skill_id,omitempty"`
 	Adapter           AdapterReference  `json:"adapter"`
 	Sources           []SourceReference `json:"sources"`
 	Observations      []Observation     `json:"observations"`
@@ -85,6 +86,23 @@ type OwnershipRecord struct {
 	PackageSHA256     string            `json:"package_sha256"`
 	SynchronizationID string            `json:"synchronization_plan_id"`
 	Outputs           []OwnershipOutput `json:"outputs"`
+}
+
+// MaterializedFile is one exact provider output held in memory until an
+// approved executor stages it. Data is intentionally excluded from JSON plans.
+type MaterializedFile struct {
+	Path       string
+	SourcePath string
+	SHA256     string
+	Data       []byte
+}
+
+// Prepared binds a deterministic plan to the exact bytes and ownership record
+// that an executor may stage after approval.
+type Prepared struct {
+	Plan      Plan
+	Files     []MaterializedFile
+	Ownership OwnershipRecord
 }
 
 type renderedFile struct {

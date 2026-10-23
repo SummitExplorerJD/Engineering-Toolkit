@@ -338,7 +338,7 @@ successfully inspected the embedded pilot catalog.
 
 ### `v0.2.2`: selective provider synchronization
 
-**Status:** Read-only planning implemented; transaction design accepted; execution not started
+**Status:** Transactional implementation complete; provider conformance and pilot pending
 
 - Render approved canonical skills selectively for Codex, Claude Code, and
   OpenCode.
@@ -361,15 +361,14 @@ Planned implementation gates:
    [ADR 0013](adr/0013-transactional-provider-synchronization.md). It defines
    single-skill sync and unsync, dual locking, ownership-last publication,
    durable evidence, verification, and recovery. No executor is implemented.
-4. **`v0.2.2C2` — approved transactional implementation:** add the separately
-   reviewed executor, CLI routing, canonical-mutation interlock, and automated
-   failure-injection coverage.
+4. **`v0.2.2C2` — approved transactional implementation:** implemented. The
+   executor, CLI routing, canonical-mutation interlock, durable evidence,
+   explicit recovery, and failure-injection coverage follow the accepted C1
+   contract.
 5. **`v0.2.2D` — provider conformance and pilot:** validate the approved pilot
    against Codex, Claude Code, and OpenCode on the supported platforms without
    adopting provider-native or Spec Kit content.
 
-**Next gate:** Review and separately approve the exact `v0.2.2C2`
-implementation package, including module boundaries, schema structs, CLI
-routing, canonical-skill interlock, failure-injection matrix, changed-file
-list, risks, and rollback plan.
+**Next gate:** Review the `v0.2.2C2` implementation evidence, then separately
+approve `v0.2.2D` provider conformance and pilot validation.
 

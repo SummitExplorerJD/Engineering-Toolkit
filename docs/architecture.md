@@ -308,12 +308,11 @@ resources. The core planning layer consumes canonical package bytes and an
 immutable adapter contract, then produces provider-specific bytes in memory.
 Filesystem inspection and eventual publication remain infrastructure concerns.
 
-The implemented `providersync` package owns only this read-only planning
-boundary. `skills` supplies stable canonical snapshots; the provider planner
+The `providersync` package owns deterministic planning and exact byte
+materialization. `skills` supplies stable canonical snapshots; the provider planner
 renders exact bytes, performs `Lstat`-style observations, validates optional
 per-file ownership evidence, and emits `engkit.provider-sync-plan/v1alpha1`.
-The CLI exposes it as `engkit skills plan-sync`. No executor depends on this
-package in `v0.2.2B`.
+The CLI exposes read-only sync and unsync planning separately from execution.
 
 The initial target layout is deliberately provider-specific:
 
@@ -360,7 +359,7 @@ complete proposed contract is specified in
 
 ## 18. Provider-synchronization transaction boundary
 
-The accepted `v0.2.2C1` design adds a future execution boundary without merging
+The `v0.2.2C2` implementation adds an execution boundary without merging
 provider mutation into canonical skill logic. A provider transaction consumes
 one rebuilt executable plan for one provider and one skill. It stages exact
 bytes, publishes file-level transitions with retained backups, verifies the
@@ -384,6 +383,8 @@ This boundary retains per-file ownership: parent provider directories remain
 unowned and successful unsync leaves empty directories in place. The exact
 contract is specified in
 [`provider-sync-execution-v1alpha1.md`](provider-sync-execution-v1alpha1.md)
-and [ADR 0013](adr/0013-transactional-provider-synchronization.md). No runtime
-executor exists until the separate `v0.2.2C2` implementation gate is approved.
+and [ADR 0013](adr/0013-transactional-provider-synchronization.md). The
+`providersyncexec` package implements this boundary; CLI routing remains a thin
+layer. It invokes no provider runtime, network, credential, script, dependency,
+or Spec Kit operation.
 

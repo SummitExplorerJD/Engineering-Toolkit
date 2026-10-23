@@ -98,6 +98,40 @@ func TestExecuteUpdateAndRemoveRetainBackups(t *testing.T) {
 	assertBackupVersion(t, root, result.BackupPath, "1.1.0")
 }
 
+func TestExecuteUpdateAndRemoveRefuseProviderOwnershipWithoutWriting(t *testing.T) {
+	for _, operation := range []string{"update", "remove"} {
+		t.Run(operation, func(t *testing.T) {
+			root := initializedWorkspace(t)
+			writeSkill(t, filepath.Join(root, ".agents", "skills"), "release-review", "1.0.0", "# Current\n")
+			ownership := filepath.Join(root, ".engkit", "providers", "codex", "release-review.json")
+			if err := os.MkdirAll(filepath.Dir(ownership), 0o700); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(ownership, []byte("malformed"), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			var preview skillplan.Plan
+			var err error
+			if operation == "update" {
+				source := writeSkill(t, t.TempDir(), "release-review", "1.1.0", "# Updated\n")
+				preview, err = skillplan.NewUpdate(root, "release-review", source)
+			} else {
+				preview, err = skillplan.NewRemove(root, "release-review")
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err := Execute(preview, preview.PlanID, testOptions()); err == nil || !strings.Contains(err.Error(), "unsynchronize before mutation") {
+				t.Fatalf("Execute() error = %v", err)
+			}
+			if _, err := os.Stat(filepath.Join(root, ".engkit", "plans", "skills")); !errors.Is(err, os.ErrNotExist) {
+				t.Fatalf("provider interlock wrote execution state: %v", err)
+			}
+			assertSkillVersion(t, root, "release-review", "1.0.0")
+		})
+	}
+}
+
 func TestRecoverRestoresInterruptedUpdate(t *testing.T) {
 	root := initializedWorkspace(t)
 	writeSkill(t, filepath.Join(root, ".agents", "skills"), "release-review", "1.0.0", "# Current\n")
