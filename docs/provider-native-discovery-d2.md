@@ -2,9 +2,9 @@
 
 ## 1. Status and authority
 
-**Status:** D2-I inventory completed on one Windows x64 host. The first
-OpenCode D2-S attempt was blocked by the host sandbox before provider
-invocation; Codex and Claude Code remain untested.
+**Status:** D2-I inventory completed on one Windows x64 host. A separately
+approved OpenCode `1.17.13` D2-S run passed on 2026-10-23. Codex remains
+blocked and Claude Code remains uninstalled and untested.
 
 This packet defines the evidence required to prove that an exact installed
 version of Codex, Claude Code, or OpenCode discovers the synchronized
@@ -113,16 +113,16 @@ evidence and that exact row receives separate approval.
 | Executable SHA-256 | `f6dbf48cb70f62649c645f26c87dc9bf84cc36986202dfad8e12fb5b8ca70312` | Not available | `1d312c76504369c14deadb2676746bdb55779c6e396b0e8d43e2858ad4186d03` |
 | Exact version | `0.163.0-alpha.10.2` | Not installed | `1.17.13` |
 | Supported host | Windows `10.0.26220`, x64 | Not evaluated | Windows `10.0.26220`, x64 |
-| Discovery command | Blocked: no bounded local diagnostic identified | Not available | Candidate: `opencode debug skill`; not executed |
-| Authentication required | TBD | TBD | TBD |
-| Network required | TBD | TBD | TBD |
-| Credential sources read | TBD | TBD | TBD |
-| Automatic update disabled | Not established | Not applicable | Yes for D2-I; must be repeated for D2-S |
-| Tools/scripts executable by command | TBD | TBD | TBD |
-| Timeout | TBD | Not applicable | Proposed: 10 seconds |
-| Output capture and redaction | TBD | Not applicable | Bounded stdout/stderr with secret redaction |
-| Cleanup and rollback | TBD | TBD | TBD |
-| D2-S approval | Blocked | Not available | One attempt approved; environment blocked before invocation |
+| Discovery command | Blocked: no bounded local diagnostic identified | Not available | `opencode --pure debug skill`; executed successfully |
+| Authentication required | TBD | TBD | No authentication requested or observed |
+| Network required | TBD | TBD | No provider network access was required to complete the observed run; no OS firewall rule was installed |
+| Credential sources read | TBD | TBD | No global provider-state metadata changed; credential contents were not inspected |
+| Automatic update disabled | Not established | Not applicable | Yes; update, pruning, model fetch, default plugins, Claude compatibility, external skills, and LSP download were disabled |
+| Tools/scripts executable by command | TBD | TBD | The local diagnostic listed skill metadata and content; it did not start a model session or execute skill instructions |
+| Timeout | TBD | Not applicable | 10 seconds |
+| Output capture and redaction | TBD | Not applicable | Bounded stdout/stderr; raw stdout retained only in memory and recorded by length and SHA-256 |
+| Cleanup and rollback | TBD | TBD | Transactional unsync completed; target, ownership record, and permitted generated `.gitignore` are absent |
+| D2-S approval | Blocked | Not available | Passed on Windows x64 with OpenCode `1.17.13` on 2026-10-23 |
 
 ### 4.1 First OpenCode D2-S attempt
 
@@ -153,6 +153,49 @@ later attempt must use a reviewed host where Engineering Toolkit's atomic
 no-replace capability succeeds, while preserving the same OpenCode executable,
 environment, diagnostic, timeout, evidence, and rollback boundaries unless a
 new approval explicitly changes them.
+
+### 4.2 Successful OpenCode D2-S result
+
+A later, separately approved OpenCode-only run completed on 2026-10-23 with
+released `engkit v0.2.2`, OpenCode `1.17.13`, and the executable SHA-256
+recorded in the provider table. The host was Microsoft Windows
+`10.0.26220`, AMD64. The run used `opencode --pure debug skill`, a ten-second
+timeout, an in-memory OpenCode database, disposable XDG roots, and the reviewed
+switches that disable background and external-skill behavior. It did not start
+a model session or request authentication.
+
+The synchronization plan
+`sha256:7245155c87c151c767c742489228dfe077d632fc47da77e8f65deb4d14bd4953`
+completed and published one derived `project-guide` target with SHA-256
+`12d9b2f7107108b8323ea648cf049a5377d6270a6742f95f157b8d691eef3bd1`.
+The bounded provider diagnostic exited with code 0 after 2,903 milliseconds,
+produced no stderr, and reported exactly one `project-guide`. Its name,
+description, resolved location, instruction marker, content length, and content
+SHA-256 matched the synchronized package. Captured stdout was not persisted;
+its 18,794-character projection has SHA-256
+`88f7dd99a550a41779dce34a3d1c1d6ff98480cbddf899528a6f40adba6b60eb`.
+
+OpenCode deterministically created `.opencode/.gitignore` while initializing
+the project root. The harness accepted only that exact 63-byte file with
+SHA-256
+`663a068e76d264d0bc6740f5450b6c4193c7b41ecf5e0dc222485b8a17404d95`;
+any other workspace change remained a failure. Global OpenCode state metadata
+was unchanged, while isolated runtime state was recorded beneath the disposable
+run root.
+
+Transactional unsync used plan
+`sha256:fb9e2cfe822174096bf9fc7001e99c15324065f3cdc80ce60576ba8e8085671f`
+and completed successfully. The provider target, ownership record, and
+permitted generated `.gitignore` were absent after cleanup. The ignored private
+evidence file has SHA-256
+`89ea90482d4527dd2855fd9137c7c95c56e8d534a4ab344cc8af4173d0983e1a`.
+It is not a repository artifact because it contains host-specific absolute
+paths and state metadata.
+
+This result proves native discovery only for the exact OpenCode version,
+executable, host, command, and boundaries recorded above. It grants no standing
+authority for another OpenCode run and no authority for Codex, Claude Code,
+provider installation, authentication, or network access.
 
 Prefer a documented local diagnostic that lists discovered skill metadata
 without starting a model session. A prompt-based fallback is admissible only

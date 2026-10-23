@@ -338,8 +338,8 @@ successfully inspected the embedded pilot catalog.
 
 ### `v0.2.2`: selective provider synchronization
 
-**Status:** Published in `v0.2.2`; D1 conformance complete; D2 native discovery
-pending separate approval
+**Status:** Published in `v0.2.2`; D1 conformance complete; OpenCode D2 native
+discovery passed on Windows x64; Codex and Claude Code D2 remain pending
 
 - Render approved canonical skills selectively for Codex, Claude Code, and
   OpenCode.
@@ -372,8 +372,9 @@ Planned implementation gates:
    pilot bytes, transactions, preservation, and equivalence through native
    binaries on the six supported release targets without invoking provider
    runtimes. D1 passed on Windows, Linux, and macOS for AMD64 and ARM64, and the
-   aggregate portable-evidence comparison passed. D2 native Codex, Claude Code,
-   and OpenCode discovery requires a later approval for exact versions,
+   aggregate portable-evidence comparison passed. A separately approved
+   OpenCode `1.17.13` D2 native-discovery smoke passed on Windows x64. Codex and
+   Claude Code discovery still require later approval for exact versions,
    commands, authentication, network behavior, evidence, and cleanup.
 
 **Published evidence:** Candidate `v0.2.2-rc.2` and stable `v0.2.2` passed the
@@ -385,14 +386,14 @@ reviewed manifest and checksums. A local Windows upgrade reports
 
 **Next gate:** The
 [`D2 native-discovery approval packet`](provider-native-discovery-d2.md)
-records the completed Windows x64 D2-I inventory. An approved OpenCode `1.17.13`
-D2-S attempt stopped before provider invocation because the host sandbox denied
-Engineering Toolkit's required atomic no-replace hard-link probe. Exact-plan
-recovery rolled the transaction back without publishing provider output or
-ownership. The next gate is to select and separately approve a host where that
-filesystem capability succeeds before repeating `opencode debug skill`. Codex
-`0.163.0-alpha.10.2` remains blocked pending a bounded non-mutating discovery
-surface, and Claude Code is not installed. D1, D2-I, the blocked attempt, the
-packet, and the `v0.2.2` release grant no provider installation,
-authentication, network, credential, configuration, or further D2-S authority.
+records the completed Windows x64 D2-I inventory, the first environment-blocked
+OpenCode attempt, and a later successful OpenCode `1.17.13` D2-S run. Native
+discovery found the synchronized `project-guide` with exact metadata and
+content, preserved global provider state, accepted only OpenCode's deterministic
+`.opencode/.gitignore` initialization side effect, and completed transactional
+cleanup. Codex `0.163.0-alpha.10.2` remains blocked pending a bounded
+non-mutating discovery surface, and Claude Code is not installed. Any further
+provider inventory, installation, or D2 execution requires separate approval;
+the OpenCode result grants no standing provider, authentication, network,
+credential, or configuration authority.
 

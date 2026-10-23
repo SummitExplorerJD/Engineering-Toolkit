@@ -195,10 +195,12 @@ failure blocks the gate.
 
 ## 8. D2 native discovery smoke
 
-D2 execution remains unauthorized. The draft
+D2 has no blanket execution authority. The
 [`D2 native-discovery approval packet`](provider-native-discovery-d2.md)
-separates local inventory from provider smoke execution. Before execution, its
-provider record must contain, for each provider:
+separates local inventory from provider smoke execution and records one
+separately approved OpenCode `1.17.13` run that passed on Windows x64. Codex
+remains blocked and Claude Code remains uninstalled. Before any new execution,
+the provider record must contain, for that exact provider and host:
 
 - exact provider name and installed version;
 - supported host operating systems and architectures;
@@ -218,9 +220,10 @@ change provider configuration, initialize Spec Kit, or adopt ownership.
 Native discovery results are provider-version-specific evidence. They do not
 replace D1, change the canonical package, or grant future provider access.
 
-The draft packet contains unresolved version and command fields. It authorizes
-neither D2-I inventory probes nor D2-S native discovery until their exact
-inputs receive separate approval.
+The packet still contains unresolved fields for Codex and Claude Code. The
+successful OpenCode result is version-specific evidence, not reusable
+authorization. No additional D2-I inventory probe or D2-S native discovery run
+is authorized until its exact inputs receive separate approval.
 
 ## 9. Non-goals
 
