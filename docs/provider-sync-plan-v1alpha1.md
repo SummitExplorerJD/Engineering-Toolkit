@@ -184,8 +184,9 @@ execution retain their independent plans and approvals.
 
 Planning proves cases 1 through 6 and deterministic plan construction. The C2
 transaction tests cover exact publication, replacement, stale-output removal,
-unsync, stale-plan checks, and recovery. Provider-runtime and release-platform
-conformance remain gate `v0.2.2D`:
+unsync, stale-plan checks, and recovery. The D1 offline harness consolidates
+pilot, lifecycle, preservation, and release-platform conformance; D2 native
+provider discovery remains a later independent approval gate:
 
 1. deterministic exact rendering for the instruction-only `project-guide` pilot;
 2. selective output for one provider without touching the other two;
@@ -195,4 +196,10 @@ conformance remain gate `v0.2.2D`:
 6. non-executable plans for scripts, permissions, dependencies, and lossy fields;
 7. exact update and removal using a valid prior ownership record;
 8. stale-plan rejection after canonical or destination changes; and
-9. identical plan IDs and rendered bytes on Windows, Linux, and macOS.
+9. stable repeated plan IDs within one unchanged workspace and identical
+   rendered bytes, relative output paths, findings, and output digests on
+   Windows, Linux, and macOS.
+
+The complete fixture, six-target matrix, evidence, pass criteria, and D1/D2
+boundary are defined in
+[`provider-conformance-v1alpha1.md`](provider-conformance-v1alpha1.md).

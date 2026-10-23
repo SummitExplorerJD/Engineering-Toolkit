@@ -31,14 +31,16 @@ An existing path means “configured or shared”, not “owned by Engineering
 Toolkit”. Provider roots can contain user-created assets and must be reviewed at
 file granularity before any generated integration is applied.
 
-## Rendering boundary
+## Rendering and execution boundary
 
-The current adapter code remains read-only. The `v0.2.2B` planner renders exact
-provider bytes in memory, inspects targets and ownership records, reports
-conflicts, and emits a deterministic approval-bound plan. It creates no
-provider file or ownership record. Official Spec Kit `v1.2.0` owns the approved
-Codex `speckit-*` skills installed under the shared `.agents/skills` root. Future
-Engineering Toolkit planning provides, for each generated file:
+The `v0.2.2B` planner remains read-only: it renders exact provider bytes in
+memory, inspects targets and ownership records, reports conflicts, and emits a
+deterministic approval-bound plan. The separately approved `v0.2.2C2` executor
+can publish or remove one exact provider projection for one canonical skill
+through explicit plan-ID approval, durable transaction evidence, verification,
+and recovery. It does not invoke a provider runtime. Official Spec Kit `v1.2.0`
+owns the approved Codex `speckit-*` skills installed under the shared
+`.agents/skills` root. Engineering Toolkit provides, for each generated file:
 
 - a deterministic preview and plan digest;
 - the owning adapter and upstream source;
@@ -58,7 +60,8 @@ The initial derived skill targets are `.agents/skills/<id>` for Codex,
 `.claude/skills/<id>` for Claude Code, and `.opencode/skills/<id>` for OpenCode.
 Using OpenCode's isolated native root avoids making its compatibility discovery
 of `.agents/skills` an ownership claim over the canonical package. These paths
-were checked against the providers' official documentation on 2026-10-22:
+were checked against the providers' official documentation on 2026-10-22 and
+rechecked for the `v0.2.2D` planning baseline on 2026-10-23:
 
 - [OpenAI Skills](https://developers.openai.com/api/docs/guides/tools-skills)
 - [Claude Code Skills](https://code.claude.com/docs/en/skills)
@@ -67,6 +70,21 @@ were checked against the providers' official documentation on 2026-10-22:
 Provider documentation remains release-sensitive. The adapter contract version
 and the evidence date are therefore plan inputs; implementation must update its
 conformance fixtures when a provider contract changes.
+
+## Conformance boundary
+
+`v0.2.2D` separates deterministic contract conformance from native provider
+discovery. The offline D1 harness uses disposable workspaces and the public
+Engineering Toolkit CLI to validate exact bytes, provider isolation,
+transaction behavior, ownership, preservation, and six-platform equivalence.
+It invokes no provider CLI and therefore makes no claim about a particular
+provider release discovering the generated package.
+
+Native Codex, Claude Code, and OpenCode discovery is the separate D2 gate. It
+requires an exact runtime version, bounded command, authentication and network
+assessment, evidence rule, and cleanup plan before execution. The complete
+planning contract is [provider conformance and pilot validation
+`v1alpha1`](provider-conformance-v1alpha1.md).
 
 ## Spec Kit boundary
 

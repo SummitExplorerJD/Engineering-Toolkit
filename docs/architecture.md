@@ -388,3 +388,33 @@ and [ADR 0013](adr/0013-transactional-provider-synchronization.md). The
 layer. It invokes no provider runtime, network, credential, script, dependency,
 or Spec Kit operation.
 
+## 19. Provider-conformance boundary
+
+Provider conformance is verification around the existing adapter and
+transaction boundaries, not a fourth provider integration layer. The D1 harness
+creates disposable workspaces from the embedded pilot catalog, drives the
+public composition and provider-sync CLI, and compares exact portable outputs.
+Production packages continue to own rendering and transaction policy; the
+harness owns only fixtures, orchestration, assertions, and evidence capture.
+
+Static contract checks validate provider paths and `SKILL.md` discovery
+metadata before publication. Lifecycle checks validate sync, unchanged replay,
+unsync, refusals, ownership, recovery boundaries, and preservation. The same
+scenario runs through native binaries on Windows, Linux, and macOS for AMD64
+and ARM64. Cross-platform comparison excludes only operational evidence fields
+whose existing contracts are intentionally machine-local; it never excludes
+rendered bytes, relative paths, findings, or generated-file digests. Plan IDs
+remain exact approval identifiers within one resolved workspace and are not
+treated as cross-host content identifiers.
+
+Native provider discovery is a separate D2 boundary outside the automated
+offline harness. A provider CLI adapter is not added to the modular monolith.
+Any discovery smoke invokes an external runtime only after a separate approval
+binds the exact executable version, command, authentication, network behavior,
+workspace, evidence, timeout, and cleanup. Runtime results remain diagnostic
+evidence and never become canonical state or ownership authority.
+
+The full conformance plan is specified in
+[`provider-conformance-v1alpha1.md`](provider-conformance-v1alpha1.md). It adds
+no public schema and changes no accepted adapter or transaction contract.
+

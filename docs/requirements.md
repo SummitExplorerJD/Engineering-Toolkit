@@ -486,3 +486,33 @@ Errors shall distinguish user input, policy refusal, environmental failure, inte
 - Provider conformance, pilot validation, Git operations, and publication remain
   separately approved gates.
 
+## 20. `v0.2.2D` provider-conformance planning acceptance criteria
+
+- Conformance uses the immutable `project-guide@0.1.0` pilot created from the
+  explicit `go-service@0.1.0` profile in a fresh disposable workspace.
+- Offline D1 tests validate exact `SKILL.md` paths, frontmatter, instructions,
+  line endings, output digests, plan IDs, ownership, sync, unchanged replay,
+  unsync, refusal behavior, and preservation for Codex, Claude Code, and
+  OpenCode.
+- Selecting one provider creates no output or ownership for another provider;
+  canonical packages, unrelated provider-native files, official-style Spec Kit
+  sentinels, and out-of-scope workspace files remain byte-for-byte unchanged.
+- Windows, Linux, and macOS on AMD64 and ARM64 run the same native conformance
+  scenario. Rendered bytes, relative paths, findings, and generated-file
+  digests are identical across the six targets. Root-bound plan IDs are stable
+  when repeated in one unchanged workspace but are not compared across hosts.
+- A skipped platform, unsupported publication primitive, changed golden output,
+  ambiguous provider contract, or preservation failure blocks conformance.
+- D1 performs no provider invocation, provider installation, authentication,
+  network access, credential access, skill execution, Spec Kit action, Git
+  operation, or release operation.
+- Native provider discovery is a separate D2 approval gate. It must bind exact
+  provider versions, commands, host support, authentication and network
+  behavior, evidence, timeouts, cleanup, and rollback before execution.
+- D1 and D2 evidence do not adopt provider-native or Spec Kit content and do not
+  change the canonical package, adapter contract, public CLI, or persisted
+  schemas.
+- Planning acceptance does not authorize the D1 harness, CI changes, native D2
+  smoke tests, Git operations, or publication. Each requires its own exact
+  implementation or execution packet.
+
