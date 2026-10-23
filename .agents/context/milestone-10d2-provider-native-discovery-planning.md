@@ -18,16 +18,25 @@ network, configuration, or workspace mutation was authorized.
 - Every run uses one disposable workspace, one canonical pilot, and one
   provider, then verifies byte preservation and bounded cleanup.
 
-## Current state
+## D2-I evidence
 
-Codex, Claude Code, and OpenCode executable paths, digests, versions, and exact
-discovery commands remain unresolved because the approved planning slice did
-not invoke provider runtimes. Every D2-S record is therefore `Not approved`.
+D2-I completed on Windows `10.0.26220`, x64, without a model session,
+authentication, installation, or requested network access:
+
+- Codex `0.163.0-alpha.10.2` was identified by exact path and executable
+  digest. Its version and help probes attempted denied `.codex/tmp` alias
+  maintenance, and `debug --help` attempted TUI startup. Codex D2-S is blocked
+  until a bounded non-mutating discovery surface is accepted.
+- Claude Code was not installed and no Claude command ran.
+- OpenCode `1.17.13` was identified by exact path and executable digest. With
+  update and other background behaviors disabled, its help advertised
+  `opencode debug skill` as a local skill-listing diagnostic. The diagnostic
+  was not run, and OpenCode D2-S remains unapproved.
 
 ## Next approval gate
 
-Review and explicitly approve the D2-I host and exact version/help probes in
-[`docs/provider-native-discovery-d2.md`](../../docs/provider-native-discovery-d2.md).
-D2-I results must be recorded and reviewed before any D2-S execution packet can
-be approved.
+Review and explicitly approve an OpenCode-only D2-S execution packet containing
+the exact disposable workspace setup, `opencode debug skill` invocation,
+environment, timeout, evidence, cleanup, and rollback. Codex and Claude Code
+remain outside that approval.
 

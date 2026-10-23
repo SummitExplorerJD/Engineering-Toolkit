@@ -2,8 +2,8 @@
 
 ## 1. Status and authority
 
-**Status:** Draft planning packet. No provider command or native discovery smoke
-is authorized by this document.
+**Status:** D2-I inventory completed on one Windows x64 host; D2-S remains
+unapproved.
 
 This packet defines the evidence required to prove that an exact installed
 version of Codex, Claude Code, or OpenCode discovers the synchronized
@@ -43,16 +43,16 @@ Upstream documentation is mutable. Before each D2-S approval, record the exact
 review date and recheck the documentation relevant to the installed version.
 Documentation changes do not silently change Engineering Toolkit output.
 
-## 3. D2-I inventory proposal
+## 3. D2-I inventory evidence
 
 D2-I must run from an ordinary shell outside any disposable provider session.
 It captures text only and writes no provider configuration.
 
-| Provider | Path-only host probe | Proposed version probe | Proposed help probe | Current state |
+| Provider | Path-only host probe | Version probe | Help probe | D2-I result |
 | --- | --- | --- | --- | --- |
-| Codex | `Get-Command codex -All` | `codex --version` | `codex --help` | Version and exact discovery surface unresolved |
-| Claude Code | `Get-Command claude -All` | `claude --version` | `claude --help` | Version and exact discovery surface unresolved |
-| OpenCode | `Get-Command opencode -All` | `opencode --version` | `opencode --help` and, only if advertised, `opencode debug --help` | Version and exact discovery surface unresolved |
+| Codex | `Get-Command codex -All` | `codex --version` | `codex --help`; `codex debug --help` was rejected before TUI startup | `blocked` for D2-S pending a non-mutating discovery surface |
+| Claude Code | `Get-Command claude -All` | Not run | Not run | `not installed`; installation is not authorized |
+| OpenCode | `Get-Command opencode -All` | `opencode --version` | `opencode --help`; `opencode debug --help`; `opencode debug skill --help` | `eligible` for a separately approved D2-S design |
 
 Before running a version or help probe, review whether that exact executable
 can auto-update, contact the network, initialize state, or read credentials.
@@ -72,6 +72,35 @@ Required D2-I evidence for each provider:
 Secrets, tokens, account identifiers, prompts from unrelated sessions, and
 provider configuration contents must not be captured in evidence.
 
+The inventory ran on Microsoft Windows `10.0.26220`, x64, on 2026-10-23. Every
+probe had a ten-second timeout and ran in an environment where external network
+access was restricted. No model session, authentication flow, provider
+installation, skill, or workspace mutation was requested.
+
+Observed results:
+
+- Codex resolved to
+  `C:\Users\julit\AppData\Local\OpenAI\Codex\bin\896a0166b774037a\codex.exe`
+  with SHA-256
+  `f6dbf48cb70f62649c645f26c87dc9bf84cc36986202dfad8e12fb5b8ca70312`
+  and reported `codex-cli 0.163.0-alpha.10.2`. Version and top-level help exited
+  successfully, but both attempted stale temporary-alias cleanup under
+  `.codex/tmp` and were denied by the sandbox. `codex debug --help` then
+  attempted interactive TUI startup and exited with code 1. The active Codex
+  session also made two concurrent metadata changes under the observed state
+  roots, so the run cannot prove a clean Codex before/after state boundary.
+- Claude Code did not resolve through `Get-Command claude -All`. No Claude
+  command ran and no installation was attempted.
+- OpenCode resolved through Node launchers to
+  `C:\Program Files\nodejs\node_modules\opencode-ai\bin\opencode.exe`, whose
+  SHA-256 is
+  `1d312c76504369c14deadb2676746bdb55779c6e396b0e8d43e2858ad4186d03`,
+  and reported version `1.17.13`. Its update, pruning, model-fetch, default
+  plugin, and LSP-download behaviors were disabled for the probes. Top-level
+  help advertised `opencode debug skill` as the local skill-listing surface,
+  and the bounded `debug --help` probe produced no OpenCode state-file metadata
+  changes. The diagnostic itself was not run.
+
 ## 4. D2-S provider records
 
 No row is executable until every `TBD` field is replaced with observed D2-I
@@ -79,20 +108,20 @@ evidence and that exact row receives separate approval.
 
 | Field | Codex | Claude Code | OpenCode |
 | --- | --- | --- | --- |
-| Executable path | TBD | TBD | TBD |
-| Executable SHA-256 | TBD | TBD | TBD |
-| Exact version | TBD | TBD | TBD |
-| Supported host | TBD | TBD | TBD |
-| Discovery command | TBD | TBD | TBD |
+| Executable path | `C:\Users\julit\AppData\Local\OpenAI\Codex\bin\896a0166b774037a\codex.exe` | Not installed | `C:\Program Files\nodejs\node_modules\opencode-ai\bin\opencode.exe` |
+| Executable SHA-256 | `f6dbf48cb70f62649c645f26c87dc9bf84cc36986202dfad8e12fb5b8ca70312` | Not available | `1d312c76504369c14deadb2676746bdb55779c6e396b0e8d43e2858ad4186d03` |
+| Exact version | `0.163.0-alpha.10.2` | Not installed | `1.17.13` |
+| Supported host | Windows `10.0.26220`, x64 | Not evaluated | Windows `10.0.26220`, x64 |
+| Discovery command | Blocked: no bounded local diagnostic identified | Not available | Candidate: `opencode debug skill`; not executed |
 | Authentication required | TBD | TBD | TBD |
 | Network required | TBD | TBD | TBD |
 | Credential sources read | TBD | TBD | TBD |
-| Automatic update disabled | TBD | TBD | TBD |
+| Automatic update disabled | Not established | Not applicable | Yes for D2-I; must be repeated for D2-S |
 | Tools/scripts executable by command | TBD | TBD | TBD |
-| Timeout | TBD | TBD | TBD |
-| Output capture and redaction | TBD | TBD | TBD |
+| Timeout | TBD | Not applicable | Proposed: 10 seconds |
+| Output capture and redaction | TBD | Not applicable | Bounded stdout/stderr with secret redaction |
 | Cleanup and rollback | TBD | TBD | TBD |
-| D2-S approval | Not approved | Not approved | Not approved |
+| D2-S approval | Blocked | Not available | Not approved |
 
 Prefer a documented local diagnostic that lists discovered skill metadata
 without starting a model session. A prompt-based fallback is admissible only
