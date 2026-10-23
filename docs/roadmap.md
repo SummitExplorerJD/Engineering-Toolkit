@@ -383,8 +383,11 @@ aggregate conformance comparison. The immutable `v0.2.2` tag points to commit
 reviewed manifest and checksums. A local Windows upgrade reports
 `engkit v0.2.2` and successfully inspects the embedded catalog.
 
-**Next gate:** Prepare and separately approve D2 native discovery inputs before
-invoking any Codex, Claude Code, or OpenCode runtime. D1 completion and the
-`v0.2.2` release grant no provider installation, authentication, network, or
-credential authority.
+**Next gate:** The draft
+[`D2 native-discovery approval packet`](provider-native-discovery-d2.md)
+separates D2-I local inventory from D2-S provider smoke execution. Review and
+separately approve the exact D2-I host and version/help probes before invoking
+any Codex, Claude Code, or OpenCode runtime. D1 completion, the packet, and the
+`v0.2.2` release grant no provider installation, authentication, network,
+credential, configuration, or D2-S authority.
 

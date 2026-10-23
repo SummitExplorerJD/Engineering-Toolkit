@@ -195,8 +195,10 @@ failure blocks the gate.
 
 ## 8. D2 native discovery smoke
 
-D2 is intentionally not authorized by this planning slice. Before execution,
-prepare a separate approval packet containing, for each provider:
+D2 execution remains unauthorized. The draft
+[`D2 native-discovery approval packet`](provider-native-discovery-d2.md)
+separates local inventory from provider smoke execution. Before execution, its
+provider record must contain, for each provider:
 
 - exact provider name and installed version;
 - supported host operating systems and architectures;
@@ -215,6 +217,10 @@ change provider configuration, initialize Spec Kit, or adopt ownership.
 
 Native discovery results are provider-version-specific evidence. They do not
 replace D1, change the canonical package, or grant future provider access.
+
+The draft packet contains unresolved version and command fields. It authorizes
+neither D2-I inventory probes nor D2-S native discovery until their exact
+inputs receive separate approval.
 
 ## 9. Non-goals
 
