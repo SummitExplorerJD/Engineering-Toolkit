@@ -31,12 +31,24 @@ authentication, installation, or requested network access:
 - OpenCode `1.17.13` was identified by exact path and executable digest. With
   update and other background behaviors disabled, its help advertised
   `opencode debug skill` as a local skill-listing diagnostic. The diagnostic
-  was not run, and OpenCode D2-S remains unapproved.
+  was approved for one D2-S attempt.
+
+## First D2-S attempt
+
+The OpenCode-only attempt created and validated the canonical pilot in a
+disposable workspace, but provider synchronization stopped at the required
+atomic no-replace capability probe because the host sandbox denied hard-link
+creation. OpenCode was not invoked, and no provider output or ownership record
+was published.
+
+Recovery with the exact approved synchronization plan completed as
+`rolled_back`; provider target, ownership, and lock paths are absent. The
+ignored workspace and private evidence remain available for inspection. This
+is an environment block rather than a provider pass or failure.
 
 ## Next approval gate
 
-Review and explicitly approve an OpenCode-only D2-S execution packet containing
-the exact disposable workspace setup, `opencode debug skill` invocation,
-environment, timeout, evidence, cleanup, and rollback. Codex and Claude Code
-remain outside that approval.
+Select and review a host where Engineering Toolkit's atomic no-replace
+capability is available, then separately approve repeating the OpenCode-only
+D2-S attempt there. Codex and Claude Code remain outside that approval.
 

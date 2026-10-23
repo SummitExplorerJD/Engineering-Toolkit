@@ -385,11 +385,14 @@ reviewed manifest and checksums. A local Windows upgrade reports
 
 **Next gate:** The
 [`D2 native-discovery approval packet`](provider-native-discovery-d2.md)
-records the completed Windows x64 D2-I inventory. OpenCode `1.17.13` exposes a
-candidate local `opencode debug skill` diagnostic; its exact D2-S workspace,
-command, environment, evidence, cleanup, and rollback require separate
-approval. Codex `0.163.0-alpha.10.2` remains blocked pending a bounded
-non-mutating discovery surface, and Claude Code is not installed. D1, D2-I,
-the packet, and the `v0.2.2` release grant no provider installation,
-authentication, network, credential, configuration, or D2-S authority.
+records the completed Windows x64 D2-I inventory. An approved OpenCode `1.17.13`
+D2-S attempt stopped before provider invocation because the host sandbox denied
+Engineering Toolkit's required atomic no-replace hard-link probe. Exact-plan
+recovery rolled the transaction back without publishing provider output or
+ownership. The next gate is to select and separately approve a host where that
+filesystem capability succeeds before repeating `opencode debug skill`. Codex
+`0.163.0-alpha.10.2` remains blocked pending a bounded non-mutating discovery
+surface, and Claude Code is not installed. D1, D2-I, the blocked attempt, the
+packet, and the `v0.2.2` release grant no provider installation,
+authentication, network, credential, configuration, or further D2-S authority.
 

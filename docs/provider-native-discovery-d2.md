@@ -2,8 +2,9 @@
 
 ## 1. Status and authority
 
-**Status:** D2-I inventory completed on one Windows x64 host; D2-S remains
-unapproved.
+**Status:** D2-I inventory completed on one Windows x64 host. The first
+OpenCode D2-S attempt was blocked by the host sandbox before provider
+invocation; Codex and Claude Code remain untested.
 
 This packet defines the evidence required to prove that an exact installed
 version of Codex, Claude Code, or OpenCode discovers the synchronized
@@ -121,7 +122,37 @@ evidence and that exact row receives separate approval.
 | Timeout | TBD | Not applicable | Proposed: 10 seconds |
 | Output capture and redaction | TBD | Not applicable | Bounded stdout/stderr with secret redaction |
 | Cleanup and rollback | TBD | TBD | TBD |
-| D2-S approval | Blocked | Not available | Not approved |
+| D2-S approval | Blocked | Not available | One attempt approved; environment blocked before invocation |
+
+### 4.1 First OpenCode D2-S attempt
+
+The approved OpenCode-only attempt ran on 2026-10-23 with released
+`engkit v0.2.2` and OpenCode `1.17.13`. It used the exact executable and digest
+recorded above, a ten-second provider timeout, restricted network access, and
+the reviewed environment switches that disable updates, pruning, model fetch,
+default plugins, Claude compatibility, and LSP downloads.
+
+The disposable workspace was
+`.engkit-test-temp/d2-opencode-634e0559f8df433c9625330da1a92121/workspace`.
+Project creation, canonical `project-guide@0.1.0` validation, and deterministic
+OpenCode synchronization planning succeeded. Synchronization then failed while
+testing the required atomic no-replace hard-link primitive: the host sandbox
+returned `Access is denied`. No provider output or ownership record was
+published, and `opencode debug skill` was never invoked.
+
+The exact synchronization plan
+`sha256:55a9e8d1646437149c51d5f48f9d635e601a897d887be67ee338e8acbdc984f1`
+was passed to `engkit skills recover-sync`. Recovery completed with status
+`rolled_back`; the target, ownership record, and locks are absent. Transaction
+recovery evidence remains in the disposable workspace. The private D2 evidence
+file has SHA-256
+`768cdeccf49af9af3658456c12465270be53a0bc18505cf8b7bb5841a81da545`.
+
+This is an environment-blocked attempt, not an OpenCode conformance result. A
+later attempt must use a reviewed host where Engineering Toolkit's atomic
+no-replace capability succeeds, while preserving the same OpenCode executable,
+environment, diagnostic, timeout, evidence, and rollback boundaries unless a
+new approval explicitly changes them.
 
 Prefer a documented local diagnostic that lists discovered skill metadata
 without starting a model session. A prompt-based fallback is admissible only
