@@ -397,3 +397,49 @@ provider inventory, installation, or D2 execution requires separate approval;
 the OpenCode result grants no standing provider, authentication, network,
 credential, or configuration authority.
 
+### `v0.3.0`: diagnostics, unified initialization, and local intelligence
+
+**Status:** Design in progress; no implementation approved
+
+This release introduces a safe operational front door and optional local
+decision assistance without changing the canonical filesystem, approval, or
+transaction model.
+
+Planned implementation gates:
+
+1. **`v0.3.0A` — requirements and architecture:** define doctor, unified init,
+   context retrieval, advisory local models, MCP harness access, catalog growth,
+   security limits, portability, and acceptance criteria. This gate changes
+   documentation only.
+2. **`v0.3.0B` — doctor contract and implementation:** add read-only probes,
+   stable findings, machine-readable output, scoped help, and cross-platform
+   tests. No repair or installation action is included.
+3. **`v0.3.0C1` — unified-init contract:** finalize target classification,
+   aliases to existing plan types, ambiguous-state refusal, and exact CLI
+   behavior. This gate changes no executor.
+4. **`v0.3.0C2` — unified-init implementation:** add the facade while reusing
+   existing planning, approval, transaction, evidence, and recovery paths.
+5. **`v0.3.0D1` — MCP contract and dependency decision:** validate the protocol
+   implementation strategy, exact tool schemas, standard-input/output behavior,
+   cancellation, output isolation, and harness configuration.
+6. **`v0.3.0D2` — read-only MCP implementation:** expose approved application
+   ports only; add protocol and host-conformance tests without mutation tools.
+7. **`v0.3.0E1` — local-intelligence contract and inventory:** validate the
+   local Ollama endpoint and explicitly selected candidate tags, prompt and
+   response schemas, privacy filters, size limits, deadlines, and deterministic
+   fallback. Local daemon or model invocation requires separate approval.
+8. **`v0.3.0E2` — advisory implementation:** add bounded context retrieval and
+   non-authoritative recommendations. Model output cannot approve or execute a
+   plan.
+9. **`v0.3.0F` — first-party catalog expansion:** inventory and independently
+   approve each new template and profile before packaging it. No marketplace or
+   remote package execution is included.
+10. **`v0.3.0RC` — release qualification:** validate Windows, Linux, and macOS
+    on AMD64 and ARM64, including optional-integration absence and failure paths,
+    before any candidate or stable publication.
+
+Every gate requires its own affected-file inventory, tests, risks, rollback,
+and approval. Completing the documentation gate does not authorize Go changes,
+dependencies, schema publication, SQLite migrations, local network access,
+model calls, MCP execution, Git operations, or release publication.
+

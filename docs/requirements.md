@@ -145,6 +145,69 @@ dependencies, contact networks, access credentials, generate runtime permission
 policy, initialize or upgrade Spec Kit, or infer approval from a prior skill or
 project operation.
 
+### FR-018: Unified initialization entry point
+
+The system shall provide a discoverable top-level initialization entry point
+that inspects one explicit target and selects one existing initialization or
+composition lifecycle without weakening its contract. Planning shall remain
+read-only. Applying an initialization shall rebuild the selected operation and
+require approval of its complete current plan.
+
+The unified entry point shall distinguish an absent or empty new-project target,
+an existing uninitialized workspace, and an initialized workspace. It shall
+refuse ambiguous requests and shall not silently chain independently approved
+workspace initialization and profile composition operations.
+
+### FR-019: Workspace doctor
+
+The system shall provide a read-only doctor operation that reports CLI,
+platform, workspace, configuration, persisted-artifact, contextual-index,
+catalog, provider-projection, local-intelligence, and MCP readiness through
+versioned machine-readable findings. Each finding shall identify its stable
+code, scope, severity, observed evidence, and an actionable remediation that
+does not execute automatically.
+
+Doctor shall distinguish unavailable optional capabilities from invalid required
+state. It shall not install software, download models, rebuild indexes, recover
+transactions, modify configuration, invoke agent runtimes, or contact non-local
+services.
+
+### FR-020: Local decision assistance
+
+The system may use an explicitly enabled local model adapter to rank contextual
+results, classify read-only evidence, explain conflicts, and recommend exact
+profile, template, skill, or verification selections. Model output shall be
+advisory and shall not be canonical state, an approval, an executable plan, or
+authority to mutate a workspace.
+
+The initial adapter shall support an explicitly configured loopback Ollama
+endpoint and an allowlist of exact model tags. It shall not install or start
+Ollama, pull models, discover remote endpoints, access credentials, invoke
+tools, or fall back to a remote model. A deterministic non-model path shall
+remain available for every correctness-critical operation.
+
+### FR-021: MCP harness interface
+
+The system shall provide an optional Model Context Protocol server over standard
+input and output so an explicitly launched agent harness can call bounded
+Engineering Toolkit use cases. The initial tool set shall be read-only and
+shall delegate to application ports used by the CLI rather than reading SQLite,
+provider directories, or internal storage directly.
+
+MCP requests shall select an explicit workspace root, enforce the same path and
+schema validation as the CLI, return versioned structured results, serialize
+writes to standard output according to the protocol, and keep diagnostics on
+standard error. The initial server shall not open a listening socket, expose
+mutation tools, execute skill resources, access credentials, or grant approval.
+
+### FR-022: First-party catalog growth
+
+The system shall support incremental addition of independently reviewed,
+versioned first-party templates and profiles. Each addition shall use the
+existing exact-version, immutable digest, bounded rendering, and offline catalog
+contracts. A catalog expansion shall not imply remote discovery, automatic
+installation, executable resources, or permission grants.
+
 ## 4. Non-functional requirements
 
 ### NFR-001: Portability
@@ -197,6 +260,21 @@ Core policy and domain behavior shall be testable without invoking provider CLIs
 ### NFR-010: Observability
 
 Errors shall distinguish user input, policy refusal, environmental failure, integration failure, and internal defects. Diagnostic output shall be actionable and safe to share.
+
+### NFR-011: Local intelligence isolation
+
+Local-model prompts shall be constructed from bounded, explicitly selected,
+non-secret context. Requests shall have size limits, deadlines, cancellation,
+and deterministic failure behavior. Model unavailability, malformed output, or
+timeout shall degrade to an actionable diagnostic or deterministic fallback and
+shall not block correctness-critical read-only or planning operations.
+
+### NFR-012: Protocol isolation
+
+The MCP transport, local-model client, SQLite projection, and provider adapters
+shall remain infrastructure modules behind application-owned interfaces. Core
+domain tests shall not require an MCP client, Ollama daemon, model download,
+SQLite database, provider CLI, credential, or network connection.
 
 ## 5. Initial non-goals
 
@@ -515,4 +593,28 @@ Errors shall distinguish user input, policy refusal, environmental failure, inte
 - Planning acceptance does not authorize the D1 harness, CI changes, native D2
   smoke tests, Git operations, or publication. Each requires its own exact
   implementation or execution packet.
+
+## 21. `v0.3.0A` local-intelligence and harness design acceptance criteria
+
+- `doctor`, unified `init`, local advice, and MCP have explicit boundaries,
+  versioned outputs, failure behavior, and independently approved implementation
+  slices.
+- Unified initialization selects at most one existing transaction lifecycle and
+  never collapses two approval scopes into one implicit operation.
+- Doctor is read-only and emits stable findings without installing, repairing,
+  rebuilding, recovering, downloading, or invoking provider runtimes.
+- Filesystem artifacts remain canonical; SQLite is a freshness-checked,
+  rebuildable retrieval projection and is never exposed as an MCP storage API.
+- Local-model output is advisory, non-canonical, and unable to approve or execute
+  a plan. Correctness-critical behavior has a deterministic model-free path.
+- The initial Ollama boundary is loopback-only, explicitly enabled, bounded by
+  timeout and input limits, and restricted to configured exact model tags.
+- The initial MCP server uses standard input/output, exposes only read-only
+  application use cases, opens no listening socket, and grants no approval or
+  mutation authority.
+- First-party catalog growth remains incremental, offline, exact-versioned, and
+  independently reviewed; this design slice adds no catalog package implicitly.
+- Dependency selection, public schema implementation, SQLite migration, network
+  access, model execution, MCP execution, catalog content, Git operations, and
+  release publication require separate approval.
 

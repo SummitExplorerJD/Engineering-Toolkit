@@ -267,6 +267,40 @@ Required behavior:
 - Preserve clear ownership boundaries between Engineering Toolkit, providers,
   users, and official Spec Kit assets.
 
+### `v0.3.0`: diagnostics, unified initialization, and local intelligence
+
+**Status:** Design proposed; implementation requires separate approval.
+
+The release is divided so deterministic onboarding and diagnostics remain
+useful without Ollama or an MCP host:
+
+- A read-only `doctor` reports stable, actionable findings without fixing them.
+- A top-level `init` facade selects one existing safe lifecycle and preserves
+  its complete plan and approval boundary.
+- A standard-input/output MCP adapter exposes only approved application use
+  cases to an explicitly launched agent harness.
+- An optional loopback Ollama adapter can rank context and explain choices but
+  cannot create authority, approve plans, or mutate workspaces.
+- The SQLite index accelerates bounded retrieval but remains optional,
+  freshness-checked, and rebuildable from canonical files.
+- First-party templates and profiles expand through individually reviewed,
+  immutable catalog versions rather than a remote marketplace.
+
+Proposed interfaces, not yet implemented, include:
+
+```text
+engkit doctor [--root PATH] [--scope SCOPE]
+engkit init plan --target PATH [--profile ID@VERSION] [--set NAME=VALUE]
+engkit init apply --target PATH [--profile ID@VERSION] [--set NAME=VALUE] --approve PLAN_ID
+engkit advise --root PATH --goal TEXT [--model MODEL_TAG]
+engkit mcp serve --transport stdio --root PATH
+```
+
+The candidate local-model allowlist begins with the exact user-selected tags
+`phi4-mini:latest`, `qwen3.5:0.8b`, and `granite4:3b`. Their actual local
+availability and suitability must be inventoried before implementation; a name
+in documentation does not trigger a pull or select a default.
+
 ## 4. Deferred capabilities
 
 The following remain outside the planned `v0.2.x` core unless separately

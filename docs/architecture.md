@@ -418,3 +418,103 @@ The full conformance plan is specified in
 [`provider-conformance-v1alpha1.md`](provider-conformance-v1alpha1.md). It adds
 no public schema and changes no accepted adapter or transaction contract.
 
+## 20. Diagnostics boundary
+
+Doctor is an application-level read model assembled from narrow probes. Core
+and workspace probes validate platform facts, configuration, canonical
+artifacts, transaction evidence, and ownership records. Optional probes describe
+SQLite freshness, local-model readiness, provider projections, and MCP
+configuration. A probe returns versioned findings and cannot repair the state it
+observes.
+
+Findings use stable codes and separate `pass`, `warning`, `error`, and
+`unavailable` outcomes. An unavailable optional integration does not make a
+healthy workspace invalid. Remediation is descriptive data for a user or
+automation to review; it is never a shell command executed by doctor. The exact
+proposed contract is documented in
+[`doctor-init-v1alpha1.md`](doctor-init-v1alpha1.md).
+
+## 21. Unified initialization boundary
+
+The top-level initialization entry point is a facade over existing workspace and
+composition use cases. It inspects one target and selects at most one operation:
+new-project creation for an absent or empty destination with an exact profile,
+workspace initialization for an existing uninitialized directory without a
+profile, or composition for an initialized workspace with an exact profile.
+
+An existing non-empty uninitialized workspace plus a requested profile is
+deliberately not converted into a compound transaction. The user first approves
+workspace initialization and later approves composition. The facade reuses the
+selected plan schema, approval digest, executor, journal, checkpoint, recovery,
+and verification contract rather than creating an alternate mutation path.
+
+## 22. Context and local-intelligence boundary
+
+Canonical filesystem artifacts remain the source of truth. A context port
+returns bounded excerpts with source paths, content digests, and freshness
+evidence. The current SQLite implementation may satisfy retrieval when its
+source inventory is current; otherwise the application refuses stale indexed
+claims or uses an explicit canonical-filesystem fallback. Neither local advice
+nor MCP receives a raw database handle.
+
+Deterministic policy evaluates compatibility, conflicts, ownership, and
+executable-plan rules before any model call. An optional adviser may rank
+already eligible choices, classify non-authoritative evidence, or explain a
+result. Its structured response is an advisory report, not a plan. Selecting a
+recommendation creates normal explicit inputs for a later deterministic planner
+and requires the same approval as a manually selected input.
+
+The initial Ollama adapter is infrastructure behind an application-owned
+adviser interface. It accepts only an explicitly enabled loopback HTTP endpoint
+and one configured exact model tag from an allowlist. Requests exclude known
+secret-bearing artifacts, use bounded context, disable tool execution, apply
+deadlines, and never discover, install, start, or pull a model. The permitted
+initial tags are user-configurable candidates:
+
+```text
+phi4-mini:latest
+qwen3.5:0.8b
+granite4:3b
+```
+
+Availability and compatibility are observed by doctor; the presence of a tag in
+configuration is not proof that it is installed or suitable. The full proposed
+boundary is documented in
+[`local-intelligence-mcp-v1alpha1.md`](local-intelligence-mcp-v1alpha1.md) and
+[ADR 0014](adr/0014-local-intelligence-and-ollama.md).
+
+## 23. MCP harness boundary
+
+The MCP server is another presentation adapter beside the CLI. It translates
+protocol requests into the same application ports and returns their versioned
+results. It does not import storage implementations into protocol handlers and
+does not give a harness direct access to SQLite, canonical files, ownership
+records, or transaction internals.
+
+The first transport is standard input/output. Protocol frames are the only data
+written to standard output; logs and diagnostics go to standard error. The
+server opens no socket and inherits no authority merely because a harness
+started it. The initial tools are read-only diagnostics, inspection, search,
+catalog, recommendation, skill validation, and plan inspection. Mutation tools,
+elicited approval, resources, prompts, subscriptions, and remote transports are
+deferred to separately accepted contracts.
+
+This architecture interprets *harness* as the agent host that launches and
+communicates with the MCP process, including a compatible Codex, Claude Code, or
+OpenCode environment. Provider-specific discovery files remain adapter-owned
+projections and are not part of the protocol core. See
+[ADR 0015](adr/0015-mcp-harness-boundary.md).
+
+## 24. First-party catalog growth boundary
+
+Catalog growth uses the existing embedded, offline, digest-bound catalog. Each
+template or profile is an independent immutable version with its own review,
+tests, compatibility evidence, and release decision. Candidate families such as
+architecture review, testing strategy, release review, security review,
+documentation maintenance, generic projects, services, libraries, and CLI
+applications are inventory categories rather than accepted packages.
+
+No catalog milestone enables remote marketplaces, floating versions, automatic
+selection, executable skill resources, or permission grants. Local intelligence
+may recommend only entries already accepted into the packaged catalog.
+
