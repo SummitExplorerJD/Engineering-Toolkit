@@ -158,6 +158,12 @@ an existing uninitialized workspace, and an initialized workspace. It shall
 refuse ambiguous requests and shall not silently chain independently approved
 workspace initialization and profile composition operations.
 
+The entry point shall require an explicit target and an exact profile version
+when composition is requested. It shall return the selected existing plan
+without a wrapper or changed plan ID, rebuild that plan before apply, and
+delegate mutation and recovery to the selected existing executor. It shall not
+own a new persisted plan type, journal, checkpoint, lock, or recovery command.
+
 ### FR-019: Workspace doctor
 
 The system shall provide a read-only doctor operation that reports CLI,
@@ -617,4 +623,31 @@ SQLite database, provider CLI, credential, or network connection.
 - Dependency selection, public schema implementation, SQLite migration, network
   access, model execution, MCP execution, catalog content, Git operations, and
   release publication require separate approval.
+
+## 22. `v0.3.0C1` unified-initialization design acceptance criteria
+
+- `engkit init plan` and `engkit init apply` require one explicit `--target`;
+  composition also requires one exact `--profile ID@VERSION` and validates
+  repeatable typed `--set` values through the existing planner.
+- Classification deterministically distinguishes absent, empty, uninitialized,
+  initialized, invalid, linked, unreadable, and partial-state targets without
+  writing, repairing, cleaning, or inferring a profile.
+- The facade selects exactly one existing lifecycle: workspace initialization,
+  new-project composition, or existing-workspace composition. An absent target
+  without a profile, an initialized target without a profile, and a non-empty
+  uninitialized target with a profile are refused.
+- Partial or invalid `.engkit` state and unsafe filesystem targets fail closed
+  and preserve evidence for doctor or specialized recovery.
+- Planning emits the selected existing plan unchanged, including its schema and
+  plan ID. Apply repeats classification, rebuilds that plan from current state,
+  and requires its exact approval.
+- The facade owns no plan schema, journal, checkpoint, lock, staging directory,
+  backup, ownership record, or recovery command; specialized commands remain
+  supported and authoritative.
+- Planning and help are read-only and non-interactive. The facade does not use
+  SQLite, Ollama, MCP, provider runtimes, credentials, network access, Spec Kit,
+  Git, or release services.
+- Design acceptance does not authorize implementation. Exact code changes,
+  tests, risks, rollback, Git operations, and publication require separate
+  approvals.
 

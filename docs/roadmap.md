@@ -399,7 +399,7 @@ credential, or configuration authority.
 
 ### `v0.3.0`: diagnostics, unified initialization, and local intelligence
 
-**Status:** `v0.3.0A` completed; `v0.3.0B` implemented locally; later gates not approved
+**Status:** `v0.3.0A` and `v0.3.0C1` completed; `v0.3.0B` implemented; later gates not approved
 
 This release introduces a safe operational front door and optional local
 decision assistance without changing the canonical filesystem, approval, or
@@ -416,9 +416,10 @@ Planned implementation gates:
    and tests. Ollama detection is limited to executable presence in `PATH`; no
    daemon, model, repair, installation, provider-runtime, or network action is
    included.
-3. **`v0.3.0C1` — unified-init contract:** finalize target classification,
-   aliases to existing plan types, ambiguous-state refusal, and exact CLI
-   behavior. This gate changes no executor.
+3. **`v0.3.0C1` — unified-init contract:** completed. The accepted contract
+   fixes explicit target classification, exact aliases to existing plans and
+   plan IDs, ambiguous-state refusal, non-interactive CLI behavior, and
+   specialized recovery authority. This gate changes no executor or schema.
 4. **`v0.3.0C2` — unified-init implementation:** add the facade while reusing
    existing planning, approval, transaction, evidence, and recovery paths.
 5. **`v0.3.0D1` — MCP contract and dependency decision:** validate the protocol

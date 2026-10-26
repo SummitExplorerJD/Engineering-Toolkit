@@ -448,6 +448,22 @@ workspace initialization and later approves composition. The facade reuses the
 selected plan schema, approval digest, executor, journal, checkpoint, recovery,
 and verification contract rather than creating an alternate mutation path.
 
+Classification is deterministic and filesystem-only. The facade requires an
+explicit target, treats an empty directory as having zero entries, and treats
+partial or invalid `.engkit` state as ambiguous rather than uninitialized. It
+does not consult SQLite, a model, MCP, or provider discovery. Absent targets
+without a profile, initialized targets without a profile, unsafe paths, and
+compound requests fail before a lifecycle is selected.
+
+The selected planner's JSON and plan ID pass through unchanged. Apply repeats
+classification, rebuilds the plan from current state, and invokes the matching
+existing executor with exact approval. The facade adds no envelope schema,
+journal, checkpoint, lock, staging area, recovery command, or migration.
+Specialized commands remain public and are the recovery authority. The exact
+contract is specified in
+[`doctor-init-v1alpha1.md`](doctor-init-v1alpha1.md) and
+[ADR 0016](adr/0016-unified-initialization-facade.md).
+
 ## 22. Context and local-intelligence boundary
 
 Canonical filesystem artifacts remain the source of truth. A context port
