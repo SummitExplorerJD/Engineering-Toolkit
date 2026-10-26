@@ -33,8 +33,49 @@ func TestVersionJSON(t *testing.T) {
 	}
 }
 
+func TestDoctorEmitsStructuredResultAndHealthExitCode(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	code := Run([]string{"doctor", "--scope", "core"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("Run() code = %d, stderr = %q", code, stderr.String())
+	}
+	var healthy struct {
+		SchemaVersion string `json:"schema_version"`
+		Summary       struct {
+			Healthy bool `json:"healthy"`
+		} `json:"summary"`
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &healthy); err != nil {
+		t.Fatal(err)
+	}
+	if healthy.SchemaVersion != "engkit.doctor-result/v1alpha1" || !healthy.Summary.Healthy {
+		t.Fatalf("doctor result = %#v", healthy)
+	}
+
+	stdout.Reset()
+	stderr.Reset()
+	missing := filepath.Join(t.TempDir(), "missing")
+	code = Run([]string{"doctor", "--root", missing, "--scope", "workspace"}, &stdout, &stderr)
+	if code != 1 || stderr.Len() != 0 {
+		t.Fatalf("unhealthy Run() code = %d, stderr = %q", code, stderr.String())
+	}
+	var unhealthy struct {
+		Summary struct {
+			Healthy        bool `json:"healthy"`
+			RequiredErrors int  `json:"required_errors"`
+		} `json:"summary"`
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &unhealthy); err != nil {
+		t.Fatal(err)
+	}
+	if unhealthy.Summary.Healthy || unhealthy.Summary.RequiredErrors == 0 {
+		t.Fatalf("unhealthy doctor result = %#v", unhealthy)
+	}
+}
+
 func TestScopedHelpSucceeds(t *testing.T) {
 	for _, args := range [][]string{
+		{"doctor", "--help"},
 		{"skills", "--help"},
 		{"skills", "list", "--help"},
 		{"workspace", "help"},

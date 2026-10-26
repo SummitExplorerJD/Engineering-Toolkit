@@ -79,6 +79,7 @@ when the target ecosystem supports it.
 
 ```text
 engkit version [--json]
+engkit doctor [--root PATH] [--scope core|workspace|integrations|all]
 engkit workspace inspect [--root PATH]
 engkit workspace plan-init [--root PATH]
 engkit workspace init [--root PATH] --approve PLAN_ID

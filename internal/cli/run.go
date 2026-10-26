@@ -15,6 +15,7 @@ import (
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/catalog"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/composition"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/compositionexec"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/doctor"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/execution"
 	sqliteindex "github.com/SummitExplorerJD/Engineering-Toolkit/internal/index/sqlite"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/plan"
@@ -51,6 +52,8 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		return 0
 	case "version":
 		err = runVersion(args[1:], stdout, stderr)
+	case "doctor":
+		err = runDoctor(args[1:], stdout, stderr)
 	case "workspace":
 		err = runWorkspace(args[1:], stdout, stderr)
 	case "context":
@@ -78,6 +81,9 @@ func Run(args []string, stdout, stderr io.Writer) int {
 	if err == nil {
 		return 0
 	}
+	if errors.Is(err, doctor.ErrUnhealthy) {
+		return 1
+	}
 	var usageErr *usageError
 	if errors.As(err, &usageErr) {
 		fmt.Fprintln(stderr, usageErr)
@@ -85,6 +91,29 @@ func Run(args []string, stdout, stderr io.Writer) int {
 	}
 	fmt.Fprintf(stderr, "engkit: %v\n", err)
 	return 1
+}
+
+func runDoctor(args []string, stdout, stderr io.Writer) error {
+	flags := newFlagSet("doctor", stderr)
+	root := flags.String("root", ".", "workspace root to inspect")
+	scope := flags.String("scope", doctor.ScopeAll, "diagnostic scope: core, workspace, integrations, or all")
+	if err := flags.Parse(args); err != nil {
+		return &usageError{message: err.Error()}
+	}
+	if flags.NArg() != 0 {
+		return &usageError{message: "doctor does not accept positional arguments"}
+	}
+	result, err := doctor.Inspect(context.Background(), doctor.Options{Root: *root, Scope: *scope, Version: Version})
+	if err != nil {
+		return &usageError{message: err.Error()}
+	}
+	if err := writeJSON(stdout, result); err != nil {
+		return err
+	}
+	if !result.Summary.Healthy {
+		return doctor.ErrUnhealthy
+	}
+	return nil
 }
 
 func runCatalog(args []string, stdout, stderr io.Writer) error {
@@ -996,6 +1025,7 @@ func writeJSON(writer io.Writer, value any) error {
 
 var usageLines = []string{
 	"version [--json]",
+	"doctor [--root PATH] [--scope core|workspace|integrations|all]",
 	"workspace inspect [--root PATH]",
 	"workspace plan-init [--root PATH]",
 	"workspace init [--root PATH] --approve PLAN_ID",

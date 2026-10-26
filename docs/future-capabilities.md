@@ -269,12 +269,15 @@ Required behavior:
 
 ### `v0.3.0`: diagnostics, unified initialization, and local intelligence
 
-**Status:** Design proposed; implementation requires separate approval.
+**Status:** Design accepted; read-only doctor implemented locally; remaining
+gates require separate approval.
 
 The release is divided so deterministic onboarding and diagnostics remain
 useful without Ollama or an MCP host:
 
-- A read-only `doctor` reports stable, actionable findings without fixing them.
+- The implemented read-only `doctor` reports stable, actionable findings
+  without fixing them. It detects an Ollama executable in `PATH` but does not
+  contact the daemon or inspect installed models.
 - A top-level `init` facade selects one existing safe lifecycle and preserves
   its complete plan and approval boundary.
 - A standard-input/output MCP adapter exposes only approved application use
@@ -286,10 +289,15 @@ useful without Ollama or an MCP host:
 - First-party templates and profiles expand through individually reviewed,
   immutable catalog versions rather than a remote marketplace.
 
-Proposed interfaces, not yet implemented, include:
+Implemented interface:
 
 ```text
-engkit doctor [--root PATH] [--scope SCOPE]
+engkit doctor [--root PATH] [--scope core|workspace|integrations|all]
+```
+
+Proposed interfaces that are not yet implemented include:
+
+```text
 engkit init plan --target PATH [--profile ID@VERSION] [--set NAME=VALUE]
 engkit init apply --target PATH [--profile ID@VERSION] [--set NAME=VALUE] --approve PLAN_ID
 engkit advise --root PATH --goal TEXT [--model MODEL_TAG]

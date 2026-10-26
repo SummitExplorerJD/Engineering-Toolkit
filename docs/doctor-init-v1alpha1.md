@@ -2,20 +2,21 @@
 
 ## 1. Status and scope
 
-This document proposes the `v0.3.0B` doctor and `v0.3.0C` unified-init
-contracts. It does not authorize implementation, a public schema commitment,
-dependency changes, workspace mutation, Git operations, or publication.
+The `v0.3.0B` doctor contract is implemented locally. The `v0.3.0C`
+unified-init contract remains proposed and requires separate implementation
+approval. This document does not authorize dependency changes, workspace
+mutation, Git operations, or publication.
 
 ## 2. Doctor command
 
-The proposed command is:
+The implemented command is:
 
 ```text
 engkit doctor [--root PATH] [--scope core|workspace|integrations|all]
 ```
 
 JSON is the canonical initial output. A later human-readable renderer may consume
-the same result but shall not own policy. The proposed result schema is
+the same result but shall not own policy. The result schema is
 `engkit.doctor-result/v1alpha1`.
 
 Each finding contains:
@@ -27,19 +28,23 @@ Each finding contains:
 - an actionable remediation description; and
 - references to affected paths using workspace-relative paths where possible.
 
-Initial probes cover:
+Implemented probes cover:
 
 | Scope | Checks |
 | --- | --- |
 | Core | CLI version, operating system, architecture, path primitives, catalog integrity |
 | Workspace | root classification, config schema, canonical skill validity, plan/journal/checkpoint consistency, locks and recovery state |
 | Context | SQLite presence, schema support, source inventory, freshness, rebuildability |
-| Integrations | provider ownership health, configured MCP readiness, Ollama endpoint configuration and selected-model availability |
+| Integrations | provider ownership health, Ollama executable presence in `PATH`, and current MCP feature availability |
 
 Doctor is read-only. It does not rebuild context, remove locks, recover a
 transaction, rewrite configuration, invoke provider runtimes, start or install
 Ollama, pull a model, or contact a non-loopback endpoint. A remediation may name
 an existing command, but the user runs and approves that command separately.
+
+The initial implementation does not contact the Ollama endpoint and therefore
+does not claim daemon or model availability. Those checks remain in the
+separately approved local-intelligence inventory gate.
 
 Exit behavior is proposed as `0` when required checks contain no errors, `1`
 when one or more required checks fail, and `2` for invalid command input or an
