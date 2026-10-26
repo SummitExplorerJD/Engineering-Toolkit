@@ -3,10 +3,10 @@
 ## 1. Status and authority
 
 This document defines the approved `v0.3.0D1` contract for the first
-Engineering Toolkit Model Context Protocol server. It is an implementation
-contract, not implementation authority. Adding the selected dependency,
-changing `go.mod`, executing the server, configuring a harness, or publishing
-the capability requires a separately approved `v0.3.0D2` packet.
+Engineering Toolkit Model Context Protocol server. The `v0.3.0D2`
+implementation is now present locally and remains unpublished. Configuring a
+harness, committing or pushing the implementation, and publishing the
+capability remain separate approval boundaries.
 
 The server is a read-only presentation adapter over application-owned use
 cases. Canonical filesystem artifacts remain authoritative. SQLite remains an

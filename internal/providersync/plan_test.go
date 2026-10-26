@@ -52,6 +52,22 @@ func TestNewPlanIsDeterministicSelectiveAndReadOnly(t *testing.T) {
 	}
 }
 
+func TestValidateIdentityRejectsChangedProviderPlan(t *testing.T) {
+	root := t.TempDir()
+	writeCanonical(t, root, "project-guide", "Guidance.", "Review safely.\n", "", nil)
+	preview, err := NewPlan(root, "opencode", "project-guide")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := ValidateIdentity(preview); err != nil {
+		t.Fatal(err)
+	}
+	preview.Operation = "changed"
+	if err := ValidateIdentity(preview); err == nil {
+		t.Fatal("ValidateIdentity(changed) succeeded")
+	}
+}
+
 func TestNewPlanCopiesPassiveResourcesOnlyForIsolatedProviders(t *testing.T) {
 	root := t.TempDir()
 	resources := map[string]resourceInput{"references/guide.md": {kind: "reference", data: "# Guide\n"}}

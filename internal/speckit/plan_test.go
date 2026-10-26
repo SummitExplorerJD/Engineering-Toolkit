@@ -46,6 +46,20 @@ func TestNewPlanIsDeterministicAndNonExecutable(t *testing.T) {
 	}
 }
 
+func TestValidateIdentityRejectsChangedSpecKitPlan(t *testing.T) {
+	preview, err := NewPlan(t.TempDir(), "codex", "v0.12.11")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := ValidateIdentity(preview); err != nil {
+		t.Fatal(err)
+	}
+	preview.Kind = "changed"
+	if err := ValidateIdentity(preview); err == nil {
+		t.Fatal("ValidateIdentity(changed) succeeded")
+	}
+}
+
 func TestNewPlanRequiresPinnedRelease(t *testing.T) {
 	for _, version := range []string{"", "main", "0.12.11", "v1"} {
 		if _, err := NewPlan(t.TempDir(), "claude", version); err == nil {

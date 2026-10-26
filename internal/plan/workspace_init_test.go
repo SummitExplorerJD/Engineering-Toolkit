@@ -36,6 +36,20 @@ func TestWorkspaceInitPlanIsDeterministic(t *testing.T) {
 	}
 }
 
+func TestValidateIdentityRejectsChangedWorkspacePlan(t *testing.T) {
+	preview, err := NewWorkspaceInit(workspace.Inspection{Root: "C:/work/project"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := ValidateIdentity(preview); err != nil {
+		t.Fatal(err)
+	}
+	preview.Kind = "changed"
+	if err := ValidateIdentity(preview); err == nil {
+		t.Fatal("ValidateIdentity(changed) succeeded")
+	}
+}
+
 func TestWorkspaceInitPlanIsEmptyWhenInitialized(t *testing.T) {
 	got, err := NewWorkspaceInit(workspace.Inspection{
 		Root:      "/work/project",

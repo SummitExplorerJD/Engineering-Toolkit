@@ -400,7 +400,7 @@ credential, or configuration authority.
 ### `v0.3.0`: diagnostics, unified initialization, and local intelligence
 
 **Status:** `v0.3.0A`, `v0.3.0C1`, and `v0.3.0D1` completed;
-`v0.3.0B` and `v0.3.0C2` implemented locally; `v0.3.0D2` and later gates are
+`v0.3.0B`, `v0.3.0C2`, and `v0.3.0D2` implemented locally; later gates are
 not approved
 
 This release introduces a safe operational front door and optional local
@@ -430,8 +430,13 @@ Planned implementation gates:
    eight read-only tools, strict bounded schemas, application ownership, error
    mapping, output isolation, conformance requirements, and the official Go MCP
    SDK pinned to `v1.8.0`. It adds no code or dependency.
-6. **`v0.3.0D2` — read-only MCP implementation:** expose approved application
-   ports only; add protocol and host-conformance tests without mutation tools.
+6. **`v0.3.0D2` — read-only MCP implementation:** implemented locally. The
+   explicit-root standard-input/output server exposes the eight approved
+   application operations, advertises tools only, rejects invalid or oversized
+   requests and results, and includes protocol, application-equivalence,
+   cancellation, path, plan-identity, and cross-platform coverage. It adds no
+   mutation, approval, recovery, provider-runtime, local-model, or network
+   capability.
 7. **`v0.3.0E1` — local-intelligence contract and inventory:** validate the
    local Ollama endpoint and explicitly selected candidate tags, prompt and
    response schemas, privacy filters, size limits, deadlines, and deterministic

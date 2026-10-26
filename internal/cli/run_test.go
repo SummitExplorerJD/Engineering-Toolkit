@@ -79,6 +79,8 @@ func TestScopedHelpSucceeds(t *testing.T) {
 		{"init", "--help"},
 		{"init", "plan", "--help"},
 		{"init", "apply", "--help"},
+		{"mcp", "--help"},
+		{"mcp", "serve", "--help"},
 		{"skills", "--help"},
 		{"skills", "list", "--help"},
 		{"workspace", "help"},
@@ -93,6 +95,21 @@ func TestScopedHelpSucceeds(t *testing.T) {
 		}
 		if !strings.Contains(stdout.String(), "Usage:") || stderr.Len() != 0 {
 			t.Fatalf("Run(%v) stdout = %q, stderr = %q", args, stdout.String(), stderr.String())
+		}
+	}
+}
+
+func TestMCPServeRequiresExplicitTransportAndRoot(t *testing.T) {
+	for _, args := range [][]string{
+		{"mcp"},
+		{"mcp", "unknown"},
+		{"mcp", "serve"},
+		{"mcp", "serve", "--transport", "http", "--root", "."},
+		{"mcp", "serve", "--transport", "stdio"},
+	} {
+		var stdout, stderr bytes.Buffer
+		if code := Run(args, &stdout, &stderr); code != 2 {
+			t.Fatalf("Run(%v) code = %d, stdout = %q, stderr = %q", args, code, stdout.String(), stderr.String())
 		}
 	}
 }

@@ -16,6 +16,7 @@ import (
 
 	_ "github.com/ncruces/go-sqlite3/driver"
 
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/contextsearch"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/workspace"
 )
 
@@ -46,19 +47,10 @@ type Status struct {
 }
 
 // SearchResult contains documentation-only indexed content.
-type SearchResult struct {
-	Path    string `json:"path"`
-	Kind    string `json:"kind"`
-	Snippet string `json:"snippet"`
-}
+type SearchResult = contextsearch.Result
 
 // SearchResponse is the stable JSON contract returned by context search.
-type SearchResponse struct {
-	SchemaVersion string         `json:"schema_version"`
-	Query         string         `json:"query"`
-	Fresh         bool           `json:"fresh"`
-	Results       []SearchResult `json:"results"`
-}
+type SearchResponse = contextsearch.Response
 
 // Rebuild creates a new database from canonical files and replaces the prior projection.
 func Rebuild(ctx context.Context, root string, now func() time.Time) (RebuildResult, error) {

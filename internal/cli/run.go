@@ -15,10 +15,12 @@ import (
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/catalog"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/composition"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/compositionexec"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/contextsearch"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/doctor"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/execution"
 	sqliteindex "github.com/SummitExplorerJD/Engineering-Toolkit/internal/index/sqlite"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/initfacade"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/mcpserver"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/plan"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/profiles"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/providersync"
@@ -57,6 +59,8 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		err = runDoctor(args[1:], stdout, stderr)
 	case "init":
 		err = runInit(args[1:], stdout, stderr)
+	case "mcp":
+		err = runMCP(args[1:], stderr)
 	case "workspace":
 		err = runWorkspace(args[1:], stdout, stderr)
 	case "context":
@@ -94,6 +98,38 @@ func Run(args []string, stdout, stderr io.Writer) int {
 	}
 	fmt.Fprintf(stderr, "engkit: %v\n", err)
 	return 1
+}
+
+func runMCP(args []string, stderr io.Writer) error {
+	if len(args) == 0 {
+		return &usageError{message: "mcp requires the serve subcommand"}
+	}
+	if args[0] != "serve" {
+		return &usageError{message: fmt.Sprintf("unknown mcp subcommand %q", args[0])}
+	}
+	flags := newFlagSet("mcp serve", stderr)
+	transport := flags.String("transport", "", "protocol transport; only stdio is supported")
+	root := flags.String("root", "", "explicit workspace root")
+	if err := flags.Parse(args[1:]); err != nil {
+		return &usageError{message: err.Error()}
+	}
+	if flags.NArg() != 0 {
+		return &usageError{message: "mcp serve does not accept positional arguments"}
+	}
+	if *transport != "stdio" {
+		return &usageError{message: "mcp serve requires --transport stdio"}
+	}
+	if *root == "" {
+		return &usageError{message: "mcp serve requires --root"}
+	}
+	server, err := mcpserver.New(*root, mcpserver.Dependencies{
+		Version:       Version,
+		ContextSearch: contextsearch.SearchFunc(sqliteindex.Search),
+	})
+	if err != nil {
+		return err
+	}
+	return server.RunStdio(context.Background())
 }
 
 func runInit(args []string, stdout, stderr io.Writer) error {
@@ -1123,6 +1159,7 @@ var usageLines = []string{
 	"doctor [--root PATH] [--scope core|workspace|integrations|all]",
 	"init plan --target PATH [--profile PROFILE_ID@VERSION] [--set NAME=VALUE]",
 	"init apply --target PATH [--profile PROFILE_ID@VERSION] [--set NAME=VALUE] --approve PLAN_ID",
+	"mcp serve --transport stdio --root PATH",
 	"workspace inspect [--root PATH]",
 	"workspace plan-init [--root PATH]",
 	"workspace init [--root PATH] --approve PLAN_ID",

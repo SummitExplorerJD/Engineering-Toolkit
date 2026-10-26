@@ -4,13 +4,14 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"path/filepath"
 
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/workspace"
 )
 
-const planSchema = "engkit.plan/v1alpha1"
+const PlanSchema = "engkit.plan/v1alpha1"
 
 // Operation describes one proposed filesystem mutation. It is data only.
 type Operation struct {
@@ -42,7 +43,7 @@ type digestBody struct {
 // NewWorkspaceInit creates a deterministic preview and never writes to disk.
 func NewWorkspaceInit(snapshot workspace.Inspection) (Plan, error) {
 	body := digestBody{
-		SchemaVersion:    planSchema,
+		SchemaVersion:    PlanSchema,
 		Kind:             "workspace.init",
 		Root:             snapshot.Root,
 		RequiresApproval: true,
@@ -69,6 +70,24 @@ func NewWorkspaceInit(snapshot workspace.Inspection) (Plan, error) {
 		Operations:       body.Operations,
 		Verification:     body.Verification,
 	}, nil
+}
+
+// ValidateIdentity confirms that the plan ID matches its canonical body.
+func ValidateIdentity(value Plan) error {
+	body := digestBody{
+		SchemaVersion: value.SchemaVersion, Kind: value.Kind, Root: value.Root,
+		RequiresApproval: value.RequiresApproval, Operations: value.Operations,
+		Verification: value.Verification,
+	}
+	encoded, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("encode plan digest body: %w", err)
+	}
+	digest := sha256.Sum256(encoded)
+	if value.PlanID != "sha256:"+hex.EncodeToString(digest[:]) {
+		return errors.New("workspace initialization plan ID does not match its canonical body")
+	}
+	return nil
 }
 
 func workspaceInitOperations(alreadyInitialized bool) []Operation {

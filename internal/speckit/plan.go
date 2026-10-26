@@ -150,6 +150,26 @@ func NewPlan(root, provider, version string) (Plan, error) {
 	}, nil
 }
 
+// ValidateIdentity confirms that the plan ID matches its canonical body.
+func ValidateIdentity(value Plan) error {
+	body := digestBody{
+		SchemaVersion: value.SchemaVersion, Kind: value.Kind, Root: value.Root,
+		Integration: value.Integration, UpstreamVersion: value.UpstreamVersion,
+		Source: value.Source, Command: value.Command, PotentialPaths: value.PotentialPaths,
+		RequiredReviews: value.RequiredReviews, RemovalStrategy: value.RemovalStrategy,
+		RequiresApproval: value.RequiresApproval, Executable: value.Executable,
+	}
+	encoded, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("encode Spec Kit plan digest body: %w", err)
+	}
+	digest := sha256.Sum256(encoded)
+	if value.PlanID != "sha256:"+hex.EncodeToString(digest[:]) {
+		return errors.New("Spec Kit plan ID does not match its canonical body")
+	}
+	return nil
+}
+
 func resolveRoot(root string) (string, error) {
 	if strings.TrimSpace(root) == "" {
 		return "", errors.New("workspace root is required")

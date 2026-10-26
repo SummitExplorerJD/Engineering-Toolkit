@@ -164,6 +164,21 @@ func NewPlan(root, provider, id string) (Plan, error) {
 	return plan, nil
 }
 
+// ValidateIdentity confirms that the plan ID matches its canonical body.
+func ValidateIdentity(value Plan) error {
+	want := value.PlanID
+	value.PlanID = ""
+	encoded, err := json.Marshal(value)
+	if err != nil {
+		return fmt.Errorf("encode provider synchronization plan: %w", err)
+	}
+	digest := sha256.Sum256(encoded)
+	if want != "sha256:"+hex.EncodeToString(digest[:]) {
+		return errors.New("provider synchronization plan ID does not match its canonical body")
+	}
+	return nil
+}
+
 // NewUnsyncPlan builds a deterministic removal plan from exact ownership
 // evidence. It does not require the canonical package and never writes state.
 func NewUnsyncPlan(root, provider, id string) (Plan, error) {

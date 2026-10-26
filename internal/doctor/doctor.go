@@ -384,7 +384,7 @@ func inspectIntegrations(state workspaceState, lookPath func(string) (string, er
 	} else {
 		findings = append(findings, finding("integration.ollama.executable", ScopeIntegrations, StatusUnavailable, false, "Ollama is not available in PATH.", "", nil, "Install Ollama independently or add the existing executable to PATH before enabling local intelligence."))
 	}
-	findings = append(findings, finding("integration.mcp.server", ScopeIntegrations, StatusUnavailable, false, "The read-only MCP server is not implemented in this build.", "", nil, "Complete the separately approved v0.3.0D implementation before configuring an MCP harness."))
+	findings = append(findings, finding("integration.mcp.server", ScopeIntegrations, StatusPass, false, "The read-only MCP stdio server is available.", "", []Evidence{{Name: "transport", Value: "stdio"}, {Name: "authority", Value: "read-only"}}, ""))
 	if !state.available || !state.inspection.HasEngkit {
 		findings = append(findings, finding("integration.provider-ownership", ScopeIntegrations, StatusUnavailable, false, "Provider ownership records were not checked.", ".engkit/providers", nil, "Select an initialized Engineering Toolkit workspace."))
 		return findings
