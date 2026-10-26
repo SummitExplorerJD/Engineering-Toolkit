@@ -18,6 +18,7 @@ import (
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/doctor"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/execution"
 	sqliteindex "github.com/SummitExplorerJD/Engineering-Toolkit/internal/index/sqlite"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/initfacade"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/plan"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/profiles"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/providersync"
@@ -54,6 +55,8 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		err = runVersion(args[1:], stdout, stderr)
 	case "doctor":
 		err = runDoctor(args[1:], stdout, stderr)
+	case "init":
+		err = runInit(args[1:], stdout, stderr)
 	case "workspace":
 		err = runWorkspace(args[1:], stdout, stderr)
 	case "context":
@@ -91,6 +94,98 @@ func Run(args []string, stdout, stderr io.Writer) int {
 	}
 	fmt.Fprintf(stderr, "engkit: %v\n", err)
 	return 1
+}
+
+func runInit(args []string, stdout, stderr io.Writer) error {
+	if len(args) == 0 {
+		return &usageError{message: "init requires a subcommand: plan or apply"}
+	}
+	if args[0] != "plan" && args[0] != "apply" {
+		return &usageError{message: fmt.Sprintf("unknown init subcommand %q", args[0])}
+	}
+
+	operation := args[0]
+	flags := newFlagSet("init "+operation, stderr)
+	target := flags.String("target", "", "explicit initialization target")
+	profile := flags.String("profile", "", "exact profile selection ID@VERSION")
+	values := stringMapFlag{}
+	flags.Var(&values, "set", "typed profile value NAME=VALUE; repeatable")
+	approved := ""
+	if operation == "apply" {
+		flags.StringVar(&approved, "approve", "", "complete selected plan ID approved for execution")
+	}
+	if err := flags.Parse(args[1:]); err != nil {
+		return &usageError{message: err.Error()}
+	}
+	if flags.NArg() != 0 {
+		return &usageError{message: "init " + operation + " does not accept positional arguments"}
+	}
+	if *target == "" {
+		return &usageError{message: "init " + operation + " requires --target"}
+	}
+	if *profile == "" && len(values) != 0 {
+		return &usageError{message: "init " + operation + " requires --profile when --set is used"}
+	}
+	if operation == "apply" && approved == "" {
+		return &usageError{message: "init apply requires --approve"}
+	}
+
+	profileID, profileVersion := "", ""
+	var err error
+	if *profile != "" {
+		profileID, profileVersion, err = parseSelection(*profile)
+		if err != nil {
+			return &usageError{message: err.Error()}
+		}
+	}
+	classification, err := initfacade.Classify(*target, *profile != "")
+	if err != nil {
+		return err
+	}
+
+	switch classification.Lifecycle {
+	case initfacade.WorkspaceInitialize:
+		snapshot, err := workspace.Inspect(classification.Target)
+		if err != nil {
+			return err
+		}
+		preview, err := plan.NewWorkspaceInit(snapshot)
+		if err != nil {
+			return err
+		}
+		if operation == "plan" {
+			return writeJSON(stdout, preview)
+		}
+		result, err := execution.Initialize(preview, approved, nil)
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case initfacade.ProjectCreate, initfacade.WorkspaceCompose:
+		loaded, catalogFS, err := catalog.Builtin()
+		if err != nil {
+			return err
+		}
+		var preview composition.Plan
+		if classification.Lifecycle == initfacade.ProjectCreate {
+			preview, err = composition.NewCreate(classification.Target, profileID, profileVersion, values, Version, loaded, catalogFS)
+		} else {
+			preview, err = composition.NewCompose(classification.Target, profileID, profileVersion, values, Version, loaded, catalogFS)
+		}
+		if err != nil {
+			return err
+		}
+		if operation == "plan" {
+			return writeJSON(stdout, preview)
+		}
+		result, err := compositionexec.Execute(preview, approved, loaded, catalogFS, compositionexec.Options{ProcessID: os.Getpid()})
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	default:
+		return errors.New("unified initialization selected an unsupported lifecycle")
+	}
 }
 
 func runDoctor(args []string, stdout, stderr io.Writer) error {
@@ -1026,6 +1121,8 @@ func writeJSON(writer io.Writer, value any) error {
 var usageLines = []string{
 	"version [--json]",
 	"doctor [--root PATH] [--scope core|workspace|integrations|all]",
+	"init plan --target PATH [--profile PROFILE_ID@VERSION] [--set NAME=VALUE]",
+	"init apply --target PATH [--profile PROFILE_ID@VERSION] [--set NAME=VALUE] --approve PLAN_ID",
 	"workspace inspect [--root PATH]",
 	"workspace plan-init [--root PATH]",
 	"workspace init [--root PATH] --approve PLAN_ID",
@@ -1096,6 +1193,17 @@ func writeScopedUsage(writer io.Writer, prefix []string) bool {
 	fmt.Fprintln(writer, "Usage:")
 	for _, line := range matched {
 		fmt.Fprintf(writer, "  engkit %s\n", line)
+	}
+	if strings.HasPrefix(wanted, "init") {
+		fmt.Fprintln(writer, `
+Selection:
+  absent or empty target + exact profile  -> new-project composition
+  existing uninitialized target           -> workspace initialization
+  initialized target + exact profile      -> existing-workspace composition
+  compound, incomplete, or ambiguous state -> refused
+
+Unified init emits the selected specialized plan unchanged. Recovery remains
+available through the specialized workspace and project commands.`)
 	}
 	return true
 }

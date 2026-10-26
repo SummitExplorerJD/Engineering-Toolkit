@@ -76,6 +76,9 @@ func TestDoctorEmitsStructuredResultAndHealthExitCode(t *testing.T) {
 func TestScopedHelpSucceeds(t *testing.T) {
 	for _, args := range [][]string{
 		{"doctor", "--help"},
+		{"init", "--help"},
+		{"init", "plan", "--help"},
+		{"init", "apply", "--help"},
 		{"skills", "--help"},
 		{"skills", "list", "--help"},
 		{"workspace", "help"},
@@ -90,6 +93,18 @@ func TestScopedHelpSucceeds(t *testing.T) {
 		}
 		if !strings.Contains(stdout.String(), "Usage:") || stderr.Len() != 0 {
 			t.Fatalf("Run(%v) stdout = %q, stderr = %q", args, stdout.String(), stderr.String())
+		}
+	}
+}
+
+func TestUnifiedInitHelpExplainsSelectionWithoutDiscovery(t *testing.T) {
+	for _, args := range [][]string{{"init", "--help"}, {"init", "plan", "--help"}, {"init", "apply", "--help"}} {
+		var stdout, stderr bytes.Buffer
+		if code := Run(args, &stdout, &stderr); code != 0 {
+			t.Fatalf("Run(%v) code = %d, stderr = %q", args, code, stderr.String())
+		}
+		if !strings.Contains(stdout.String(), "Selection:") || !strings.Contains(stdout.String(), "specialized plan unchanged") {
+			t.Fatalf("Run(%v) output = %q", args, stdout.String())
 		}
 	}
 }
@@ -261,6 +276,141 @@ func TestProjectCreateInstallsBuiltinPilotProfile(t *testing.T) {
 	}
 	if !strings.Contains(validationOutput.String(), `"valid": true`) {
 		t.Fatalf("unexpected validation output: %s", validationOutput.String())
+	}
+}
+
+func TestUnifiedInitPlansEqualSpecializedPlans(t *testing.T) {
+	parent := t.TempDir()
+	createTarget := filepath.Join(parent, "new-project")
+	workspaceTarget := testWorkspace(t)
+	composeTarget := testWorkspace(t)
+	initializeWithCLI(t, composeTarget)
+
+	tests := []struct {
+		name        string
+		unified     []string
+		specialized []string
+	}{
+		{
+			name:        "new project",
+			unified:     []string{"init", "plan", "--target", createTarget, "--profile", "go-service@0.1.0", "--set", "project_name=Unified"},
+			specialized: []string{"project", "plan-create", "--destination", createTarget, "--profile", "go-service@0.1.0", "--set", "project_name=Unified"},
+		},
+		{
+			name:        "workspace initialization",
+			unified:     []string{"init", "plan", "--target", workspaceTarget},
+			specialized: []string{"workspace", "plan-init", "--root", workspaceTarget},
+		},
+		{
+			name:        "workspace composition",
+			unified:     []string{"init", "plan", "--target", composeTarget, "--profile", "go-service@0.1.0", "--set", "project_name=Unified"},
+			specialized: []string{"project", "plan-compose", "--root", composeTarget, "--profile", "go-service@0.1.0", "--set", "project_name=Unified"},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			var unified, specialized, unifiedErr, specializedErr bytes.Buffer
+			if code := Run(test.unified, &unified, &unifiedErr); code != 0 {
+				t.Fatalf("Run(%v) code = %d, stderr = %q", test.unified, code, unifiedErr.String())
+			}
+			if code := Run(test.specialized, &specialized, &specializedErr); code != 0 {
+				t.Fatalf("Run(%v) code = %d, stderr = %q", test.specialized, code, specializedErr.String())
+			}
+			if unified.String() != specialized.String() {
+				t.Fatalf("unified plan differs from specialized plan\nunified: %s\nspecialized: %s", unified.String(), specialized.String())
+			}
+		})
+	}
+	if _, err := os.Lstat(createTarget); !os.IsNotExist(err) {
+		t.Fatalf("unified planning created target: %v", err)
+	}
+}
+
+func TestUnifiedInitApplyUsesExactApproval(t *testing.T) {
+	parent := t.TempDir()
+	target := filepath.Join(parent, "pilot")
+	arguments := []string{"--target", target, "--profile", "go-service@0.1.0", "--set", "project_name=Pilot"}
+	var planOutput, stderr bytes.Buffer
+	if code := Run(append([]string{"init", "plan"}, arguments...), &planOutput, &stderr); code != 0 {
+		t.Fatalf("plan code = %d, stderr = %q", code, stderr.String())
+	}
+	var preview struct {
+		PlanID string `json:"plan_id"`
+	}
+	if err := json.Unmarshal(planOutput.Bytes(), &preview); err != nil {
+		t.Fatal(err)
+	}
+
+	var output bytes.Buffer
+	stderr.Reset()
+	wrong := append(append([]string{"init", "apply"}, arguments...), "--approve", "sha256:"+strings.Repeat("0", 64))
+	if code := Run(wrong, &output, &stderr); code != 1 {
+		t.Fatalf("wrong approval code = %d, stdout = %q, stderr = %q", code, output.String(), stderr.String())
+	}
+	if _, err := os.Lstat(target); !os.IsNotExist(err) {
+		t.Fatalf("rejected apply created target: %v", err)
+	}
+
+	output.Reset()
+	stderr.Reset()
+	approved := append(append([]string{"init", "apply"}, arguments...), "--approve", preview.PlanID)
+	if code := Run(approved, &output, &stderr); code != 0 {
+		t.Fatalf("approved apply code = %d, stderr = %q", code, stderr.String())
+	}
+	if _, err := os.Stat(filepath.Join(target, ".engkit", "config.yaml")); err != nil {
+		t.Fatalf("approved apply did not create initialized project: %v", err)
+	}
+}
+
+func TestUnifiedInitApplyRejectsChangedClassification(t *testing.T) {
+	parent := t.TempDir()
+	target := filepath.Join(parent, "changed")
+	arguments := []string{"--target", target, "--profile", "go-service@0.1.0", "--set", "project_name=Changed"}
+	var planOutput, stderr bytes.Buffer
+	if code := Run(append([]string{"init", "plan"}, arguments...), &planOutput, &stderr); code != 0 {
+		t.Fatalf("plan code = %d, stderr = %q", code, stderr.String())
+	}
+	var preview struct {
+		PlanID string `json:"plan_id"`
+	}
+	if err := json.Unmarshal(planOutput.Bytes(), &preview); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Mkdir(target, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(target, "README.md"), []byte("# Changed\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	var output bytes.Buffer
+	apply := append(append([]string{"init", "apply"}, arguments...), "--approve", preview.PlanID)
+	if code := Run(apply, &output, &stderr); code != 1 {
+		t.Fatalf("changed classification code = %d, stdout = %q, stderr = %q", code, output.String(), stderr.String())
+	}
+	if _, err := os.Lstat(filepath.Join(target, ".engkit")); !os.IsNotExist(err) {
+		t.Fatalf("rejected changed classification wrote .engkit: %v", err)
+	}
+}
+
+func TestUnifiedInitRefusesCompoundAndInvalidInput(t *testing.T) {
+	root := testWorkspace(t)
+	for _, test := range []struct {
+		args []string
+		want int
+	}{
+		{args: []string{"init", "plan", "--target", root, "--profile", "go-service@0.1.0", "--set", "project_name=Blocked"}, want: 1},
+		{args: []string{"init", "plan", "--target", root, "--set", "project_name=Blocked"}, want: 2},
+		{args: []string{"init", "apply", "--target", root}, want: 2},
+		{args: []string{"init", "plan"}, want: 2},
+	} {
+		var stdout, stderr bytes.Buffer
+		if code := Run(test.args, &stdout, &stderr); code != test.want {
+			t.Fatalf("Run(%v) code = %d, want %d, stdout = %q, stderr = %q", test.args, code, test.want, stdout.String(), stderr.String())
+		}
+	}
+	if _, err := os.Lstat(filepath.Join(root, ".engkit")); !os.IsNotExist(err) {
+		t.Fatalf("refused unified init wrote .engkit: %v", err)
 	}
 }
 

@@ -80,6 +80,8 @@ when the target ecosystem supports it.
 ```text
 engkit version [--json]
 engkit doctor [--root PATH] [--scope core|workspace|integrations|all]
+engkit init plan --target PATH [--profile PROFILE_ID@VERSION] [--set NAME=VALUE]
+engkit init apply --target PATH [--profile PROFILE_ID@VERSION] [--set NAME=VALUE] --approve PLAN_ID
 engkit workspace inspect [--root PATH]
 engkit workspace plan-init [--root PATH]
 engkit workspace init [--root PATH] --approve PLAN_ID
@@ -123,6 +125,13 @@ The packaged pilot can be inspected with `engkit templates inspect --id
 project-guide --version 0.1.0` and `engkit profiles inspect --id go-service
 --version 0.1.0`. It creates the provider-neutral engineering workspace layer;
 it does not scaffold Go application code or execute the generated workflow.
+
+Unified initialization requires an explicit target and selects exactly one
+existing lifecycle. With an exact profile it creates an absent or empty project
+or composes into an initialized workspace; without a profile it initializes an
+existing uninitialized directory. Planning returns the unchanged specialized
+plan and applying requires that exact plan ID. Ambiguous and compound requests
+are refused, and recovery remains available through the specialized commands.
 
 The context database is derived, local, and ignored by generated `.engkit/.gitignore` rules. Deleting it does not remove canonical project artifacts; run `context rebuild` to recreate it.
 

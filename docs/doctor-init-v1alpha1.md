@@ -2,11 +2,10 @@
 
 ## 1. Status and scope
 
-The `v0.3.0B` doctor contract is implemented. The `v0.3.0C1` unified-init
-contract is accepted as a documentation-only design slice. Implementing the
-facade remains a separately approved `v0.3.0C2` gate. This document does not
-authorize dependency changes, workspace mutation, Git operations, or
-publication.
+The `v0.3.0B` doctor contract and `v0.3.0C2` unified-init facade are implemented.
+The facade follows the accepted `v0.3.0C1` contract and reuses existing planners
+and executors without adding a persisted schema or transaction mechanism. This
+document does not authorize dependency changes, Git operations, or publication.
 
 ## 2. Doctor command
 
@@ -157,19 +156,20 @@ adapters are neither consulted nor required for lifecycle selection. Symlink,
 junction, special-file, containment, ownership, and atomic-publication policy
 remain owned by the selected existing planner and executor.
 
-## 8. Validation plan for `v0.3.0C2`
+## 8. `v0.3.0C2` validation coverage
 
-- Table-driven classification tests for every row in the selection table,
+- Table-driven classification tests cover every row in the selection table,
   including partial `.engkit`, linked ancestors, and state changes.
-- Golden tests proving facade output and plan IDs equal the selected specialized
+- Equivalence tests prove facade output and plan IDs equal the selected specialized
   planner for identical inputs.
-- Tests proving planning writes no filesystem artifact and help performs no
+- Tests prove planning writes no filesystem artifact and help performs no
   discovery.
-- Tests proving apply rebuilds the plan, rejects stale approval, and cannot
+- Tests prove apply rebuilds the plan, rejects stale approval, and cannot
   chain lifecycles.
-- Tests proving specialized recovery remains sufficient after facade execution.
-- Windows, Linux, and macOS tests for supported architectures and path forms.
-- Existing workspace, composition, approval, and recovery suites remain green.
+- Specialized recovery remains authoritative because the facade invokes the
+  existing executors and creates no facade-owned state.
+- Cross-platform CI and release qualification remain required before
+  publication.
 
 ## 9. Rollback
 
