@@ -515,6 +515,22 @@ catalog, recommendation, skill validation, and plan inspection. Mutation tools,
 elicited approval, resources, prompts, subscriptions, and remote transports are
 deferred to separately accepted contracts.
 
+The presentation adapter owns protocol negotiation, input-schema enforcement,
+safe error translation, response bounds, and standard-output isolation.
+Application interfaces own doctor, workspace inspection, bounded context
+search, catalog inspection, profile recommendation, canonical skill inspection,
+and supported-plan inspection. Infrastructure implements those interfaces but
+is never passed into a protocol handler as a SQLite connection, database path,
+transaction store, or unrestricted filesystem handle.
+
+The accepted protocol implementation uses the official Go MCP SDK pinned to
+`v1.8.0`, explicit tools-only capabilities, fixed pre-serve registration, and
+standard-input/output transport. Optional SDK facilities are not activated.
+The exact command, schemas, size limits, error mapping, dependency gate, and
+conformance requirements are specified in
+[`mcp-server-v1alpha1.md`](mcp-server-v1alpha1.md) and
+[ADR 0017](adr/0017-use-official-go-mcp-sdk.md).
+
 This architecture interprets *harness* as the agent host that launches and
 communicates with the MCP process, including a compatible Codex, Claude Code, or
 OpenCode environment. Provider-specific discovery files remain adapter-owned

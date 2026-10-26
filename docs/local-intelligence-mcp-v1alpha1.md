@@ -2,10 +2,12 @@
 
 ## 1. Status and scope
 
-This document proposes the `v0.3.0D` and `v0.3.0E` contracts. It records the
-security and ownership boundary before dependency selection or implementation.
-It authorizes no network access, local model invocation, MCP execution, SQLite
-migration, schema publication, or workspace mutation.
+This document proposes the shared `v0.3.0D` and `v0.3.0E` security and ownership
+boundary. The exact `v0.3.0D1` MCP contract and dependency decision are now
+accepted in [`mcp-server-v1alpha1.md`](mcp-server-v1alpha1.md) and
+[ADR 0017](adr/0017-use-official-go-mcp-sdk.md). It authorizes no network
+access, local model invocation, MCP execution, SQLite migration, dependency
+change, schema implementation, or workspace mutation.
 
 ## 2. Decision pipeline
 
@@ -86,7 +88,7 @@ reserved for protocol messages and standard error for bounded diagnostics. The
 initial server opens no socket and exposes no mutation, approval, credential,
 model-pull, provider-runtime, or script-execution tool.
 
-Initial tools are proposed as:
+The initial tools accepted by `v0.3.0D1` are:
 
 | Tool | Delegated application operation |
 | --- | --- |
@@ -103,6 +105,11 @@ Tool schemas use bounded strings and arrays, reject unknown fields, and return
 versioned results. The MCP layer does not duplicate domain policy. Cancellation
 propagates through application contexts. A handler cannot change the configured
 root through a request path that escapes the validated workspace.
+
+The exact inputs, result ownership, limits, failure behavior, SDK selection,
+and conformance requirements are specified in
+[`mcp-server-v1alpha1.md`](mcp-server-v1alpha1.md). This summary does not
+override that contract.
 
 ## 6. Deferred MCP capabilities
 

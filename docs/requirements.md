@@ -651,3 +651,31 @@ SQLite database, provider CLI, credential, or network connection.
   tests, risks, rollback, Git operations, and publication require separate
   approvals.
 
+## 23. `v0.3.0D1` MCP contract and dependency acceptance criteria
+
+- The only initial command is `engkit mcp serve --transport stdio --root PATH`;
+  both flags are explicit, one process is bound to one validated root, and no
+  listening socket or network request is permitted.
+- Standard output is reserved exclusively for newline-delimited protocol
+  messages. Bounded safe diagnostics use standard error and disclose neither
+  request content, secrets, nor paths outside the bound root.
+- The fixed initial inventory contains only `engkit_doctor`,
+  `workspace_inspect`, `context_search`, `catalog_inspect`,
+  `profiles_recommend`, `skills_list`, `skills_validate`, and `plan_inspect`.
+- Tools delegate to application-owned read-only use cases and reuse their
+  versioned results. MCP handlers do not open SQLite, transaction stores,
+  provider projections, or CLI subprocesses directly.
+- Tool schemas reject unknown properties and bound strings, paths, arrays, plan
+  files, context results, diagnostics, and complete responses. Linked or
+  escaping paths, stale indexes, unknown schemas, and invalid plan identities
+  fail closed.
+- The server advertises tools only. Logging, resources, prompts, subscriptions,
+  completion, elicitation, sampling, server actions, mutation, approval,
+  recovery, model invocation, and provider-runtime invocation remain disabled.
+- The selected dependency is the official
+  `github.com/modelcontextprotocol/go-sdk` pinned to `v1.8.0`. Adding it and
+  accepting its reviewed module-graph delta require separate `v0.3.0D2`
+  approval.
+- The design adds no executable code, dependency, persistence, migration,
+  harness configuration, Git operation, or release action.
+

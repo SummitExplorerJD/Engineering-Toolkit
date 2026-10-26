@@ -399,7 +399,9 @@ credential, or configuration authority.
 
 ### `v0.3.0`: diagnostics, unified initialization, and local intelligence
 
-**Status:** `v0.3.0A` and `v0.3.0C1` completed; `v0.3.0B` and `v0.3.0C2` implemented locally; later gates not approved
+**Status:** `v0.3.0A`, `v0.3.0C1`, and `v0.3.0D1` completed;
+`v0.3.0B` and `v0.3.0C2` implemented locally; `v0.3.0D2` and later gates are
+not approved
 
 This release introduces a safe operational front door and optional local
 decision assistance without changing the canonical filesystem, approval, or
@@ -423,9 +425,11 @@ Planned implementation gates:
 4. **`v0.3.0C2` — unified-init implementation:** implemented locally. The
    read-only classifier and CLI facade reuse existing planning, approval,
    transaction, evidence, and recovery paths without a new persisted schema.
-5. **`v0.3.0D1` — MCP contract and dependency decision:** validate the protocol
-   implementation strategy, exact tool schemas, standard-input/output behavior,
-   cancellation, output isolation, and harness configuration.
+5. **`v0.3.0D1` — MCP contract and dependency decision:** completed. The
+   accepted contract fixes the explicit-root standard-input/output command,
+   eight read-only tools, strict bounded schemas, application ownership, error
+   mapping, output isolation, conformance requirements, and the official Go MCP
+   SDK pinned to `v1.8.0`. It adds no code or dependency.
 6. **`v0.3.0D2` — read-only MCP implementation:** expose approved application
    ports only; add protocol and host-conformance tests without mutation tools.
 7. **`v0.3.0E1` — local-intelligence contract and inventory:** validate the
