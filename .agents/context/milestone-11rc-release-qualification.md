@@ -35,10 +35,9 @@ surfaces.
 
 ## Remaining gates
 
-- Obtain separate approval before dispatching the manual release-candidate
-  workflow.
-- Review all six native evidence records and aggregate provider evidence.
-- Prepare exact release notes and publication inputs under a later approval.
+- Approve the exact documentation commit and push separately.
+- Run the stable `v0.3.0` workflow from the resulting reviewed commit.
+- Review the stable manifest, checksums, native evidence, and provider evidence.
 - Obtain separate Git, tag, release, and publication approvals.
 
 ## Observed local validation
@@ -60,5 +59,35 @@ On 2026-10-27:
 - `actionlint` was not installed and was not downloaded, so workflow execution
   remains the authoritative validation of runner expressions and job wiring.
 
-No GitHub Actions workflow, Ollama daemon, model, provider runtime, remote
-network service, Git operation, tag, or release was invoked.
+During local validation, no GitHub Actions workflow, Ollama daemon, model,
+provider runtime, remote network service, Git operation, tag, or release was
+invoked.
+
+## Accepted candidate evidence
+
+The manual `Release candidate` workflow run
+[`40537840017`](https://github.com/SummitExplorerJD/Engineering-Toolkit/actions/runs/40537840017)
+completed successfully on 2026-10-27 for `v0.3.0-rc.1` from commit
+`08dac40b4b7f7d2549ce318dcf5e446036347fda`. The run completed the build job,
+all six native smoke jobs, and aggregate provider-conformance comparison in
+10 minutes 25 seconds. The only annotation was a non-failing GitHub-hosted
+runner capacity notice for macOS ARM64.
+
+The run retained 13 temporary artifacts through 2026-11-10:
+
+- one candidate package with artifact digest
+  `sha256:22385f54badee13611514d774b793cbfb73cc653d0d731423227e40001416548`;
+- six platform-specific provider-conformance records; and
+- six `engkit.release-qualification/v1alpha1` records, one for each supported
+  operating-system and architecture tuple.
+
+Independent review confirmed 11 files inside the candidate package, 10 valid
+`SHA256SUMS` entries, six manifest binaries, two manifest installers, matching
+manifest sizes and hashes, CGO disabled, PE/ELF/Mach-O executable identities,
+and LF-only `install.sh`. Every qualification record names `v0.3.0-rc.1`,
+catalog `0.3.0`, the same three exact Go profiles, and all eight approved
+synthetic scenarios.
+
+Candidate acceptance does not authorize reuse of candidate binaries as stable
+assets. The stable workflow must rebuild version `v0.3.0` from the separately
+reviewed documentation commit. No tag or GitHub Release was created.

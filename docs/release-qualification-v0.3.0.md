@@ -3,8 +3,9 @@
 ## Status and authority
 
 This document defines the non-publishing qualification gate for `v0.3.0`. It
-does not authorize a workflow run, commit, push, tag, GitHub Release, installer
-execution outside an isolated test root, model invocation, or publication.
+was satisfied by `v0.3.0-rc.1` on 2026-10-27. It does not authorize a commit,
+push, stable workflow run, tag, GitHub Release, installer execution outside an
+isolated test root, model invocation, or publication.
 
 Qualification applies to the exact candidate commit and version. A replacement
 candidate must run the complete gate again and must not reuse evidence from a
@@ -78,6 +79,31 @@ Signing and notarization limitations, production TUF activation, exact release
 notes, tag creation, and publication remain separate decisions. Qualification
 does not convert an observed mutable Ollama tag into a general compatibility
 claim.
+
+### Accepted `v0.3.0-rc.1` evidence
+
+GitHub Actions run
+[`40537840017`](https://github.com/SummitExplorerJD/Engineering-Toolkit/actions/runs/40537840017)
+passed from commit `08dac40b4b7f7d2549ce318dcf5e446036347fda`:
+
+- the validation and build job passed tests, vet, vulnerability analysis, the
+  TUF staging rehearsal, packaging, and artifact upload;
+- Windows, Linux, and macOS passed natively on AMD64 and ARM64;
+- all six installer transactions, provider-conformance jobs, and `v0.3.0`
+  qualification smokes passed;
+- the aggregate provider-conformance comparison passed; and
+- 13 temporary artifacts were retained: one candidate package, six provider
+  records, and six release-qualification records.
+
+Independent inspection verified all candidate checksums, manifest hashes and
+sizes, six executable formats, two installers, LF-only `install.sh`, and six
+qualification records containing the same eight synthetic scenarios. The
+candidate package artifact digest is
+`sha256:22385f54badee13611514d774b793cbfb73cc653d0d731423227e40001416548`.
+
+This evidence qualifies the source and release process but does not make the
+`-rc.1` binaries stable assets. Stable publication requires a fresh `v0.3.0`
+build from the exact approved release commit and separate verification.
 
 ## Failure and rollback
 
