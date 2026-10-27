@@ -399,9 +399,9 @@ credential, or configuration authority.
 
 ### `v0.3.0`: diagnostics, unified initialization, and local intelligence
 
-**Status:** `v0.3.0A`, `v0.3.0C1`, and `v0.3.0D1` completed;
-`v0.3.0B`, `v0.3.0C2`, and `v0.3.0D2` implemented locally; later gates are
-not approved
+**Status:** `v0.3.0A`, `v0.3.0C1`, `v0.3.0D1`, and `v0.3.0E1` completed;
+`v0.3.0B`, `v0.3.0C2`, and `v0.3.0D2` implemented locally; `v0.3.0E2` and
+later gates are not approved
 
 This release introduces a safe operational front door and optional local
 decision assistance without changing the canonical filesystem, approval, or
@@ -437,10 +437,13 @@ Planned implementation gates:
    cancellation, path, plan-identity, and cross-platform coverage. It adds no
    mutation, approval, recovery, provider-runtime, local-model, or network
    capability.
-7. **`v0.3.0E1` — local-intelligence contract and inventory:** validate the
-   local Ollama endpoint and explicitly selected candidate tags, prompt and
-   response schemas, privacy filters, size limits, deadlines, and deterministic
-   fallback. Local daemon or model invocation requires separate approval.
+7. **`v0.3.0E1` — local-intelligence contract and inventory:** completed. The
+   fixed loopback endpoint and all three candidate tags were inventoried without
+   model invocation. The accepted contract fixes the initial profile-ranking
+   task, strict structured response, privacy filters, size limits, deadline,
+   model-digest evidence, and deterministic fallback. Installation and tag
+   presence are not compatibility claims; model smoke execution and
+   implementation remain separately gated.
 8. **`v0.3.0E2` — advisory implementation:** add bounded context retrieval and
    non-authoritative recommendations. Model output cannot approve or execute a
    plan.

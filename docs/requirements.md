@@ -186,11 +186,13 @@ profile, template, skill, or verification selections. Model output shall be
 advisory and shall not be canonical state, an approval, an executable plan, or
 authority to mutate a workspace.
 
-The initial adapter shall support an explicitly configured loopback Ollama
-endpoint and an allowlist of exact model tags. It shall not install or start
-Ollama, pull models, discover remote endpoints, access credentials, invoke
-tools, or fall back to a remote model. A deterministic non-model path shall
-remain available for every correctness-critical operation.
+The initial adapter shall use only the fixed loopback Ollama endpoint
+`http://127.0.0.1:11434` and an allowlist of exact model tags. Workspace files,
+environment variables, and command-line arguments shall not override that
+endpoint. The adapter shall not install or start Ollama, pull models, discover
+remote endpoints, access credentials, invoke tools, or fall back to a remote
+model. A deterministic non-model path shall remain available for every
+correctness-critical operation.
 
 ### FR-021: MCP harness interface
 
@@ -678,4 +680,37 @@ SQLite database, provider CLI, credential, or network connection.
   approval.
 - The design adds no executable code, dependency, persistence, migration,
   harness configuration, Git operation, or release action.
+
+## 24. `v0.3.0E1` local-intelligence contract acceptance criteria
+
+- The initial operation may rank only profile candidates already found eligible
+  by deterministic policy; model output cannot add a candidate, alter
+  compatibility, create a plan, select a profile, approve, or execute.
+- The Ollama endpoint is fixed at `http://127.0.0.1:11434`. The client disables
+  proxies and redirects, sends no credentials, follows no endpoint override,
+  performs no retry, and never installs, starts, pulls, mutates, or silently
+  substitutes a model.
+- Local intelligence is disabled by default. The initial allowlist contains
+  only `phi4-mini:latest`, `qwen3.5:0.8b`, and `granite4:3b`; no model is an
+  implicit default, and the observed local digest is result evidence.
+- The first model-backed operation requires a fresh SQLite projection and uses
+  no implicit canonical-file fallback. Missing, stale, unsupported, malformed,
+  oversized, cancelled, or timed-out model behavior preserves deterministic
+  profile ordering.
+- Goals, excerpts, requests, responses, deadlines, candidate counts, and result
+  strings have exact bounds owned by the local-intelligence contract. Secret
+  patterns, ignored state, credentials, environment values, private keys,
+  transaction data, and unapproved paths are excluded before prompt assembly.
+- Requests use a versioned prompt, no tools, no images, no thinking, no
+  streaming, temperature zero, immediate unload, and strict JSON Schema output.
+  Unknown fields and candidate identifiers fail closed.
+- `engkit.advice-result/v1alpha1` stores digests rather than raw goals, excerpts,
+  prompts, or model responses. It contains no approval field and is never an
+  executor input.
+- E1 inventory may establish executable, daemon, tag, size, and digest facts but
+  does not establish model compatibility. Each exact model digest requires a
+  separately approved synthetic smoke test before a compatibility claim.
+- E1 adds no executable code, dependency, public schema implementation,
+  configuration change, SQLite migration, model invocation, Git operation, or
+  release action.
 

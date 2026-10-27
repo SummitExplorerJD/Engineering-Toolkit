@@ -493,11 +493,15 @@ qwen3.5:0.8b
 granite4:3b
 ```
 
-Availability and compatibility are observed by doctor; the presence of a tag in
-configuration is not proof that it is installed or suitable. The full proposed
-boundary is documented in
+Doctor initially observes only executable presence; tag inventory and model
+compatibility are separately gated. The accepted E1 adapter fixes the endpoint
+at `http://127.0.0.1:11434`, disables proxies and redirects, resolves an
+allowlisted tag to an observed digest, and requests a bounded JSON Schema
+response without tools or thinking. Its first application operation ranks only
+profile candidates already found eligible by deterministic policy. Failure
+preserves deterministic ordering. The full boundary is documented in
 [`local-intelligence-mcp-v1alpha1.md`](local-intelligence-mcp-v1alpha1.md) and
-[ADR 0014](adr/0014-local-intelligence-and-ollama.md).
+[ADR 0018](adr/0018-use-bounded-ollama-adviser.md).
 
 ## 23. MCP harness boundary
 

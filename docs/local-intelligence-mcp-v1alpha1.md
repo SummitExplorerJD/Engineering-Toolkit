@@ -2,12 +2,14 @@
 
 ## 1. Status and scope
 
-This document proposes the shared `v0.3.0D` and `v0.3.0E` security and ownership
-boundary. The exact `v0.3.0D1` MCP contract and dependency decision are now
-accepted in [`mcp-server-v1alpha1.md`](mcp-server-v1alpha1.md) and
-[ADR 0017](adr/0017-use-official-go-mcp-sdk.md). It authorizes no network
-access, local model invocation, MCP execution, SQLite migration, dependency
-change, schema implementation, or workspace mutation.
+This document owns the accepted `v0.3.0E1` local-intelligence contract and
+summarizes the implemented `v0.3.0D2` MCP boundary. E1 authorized one bounded,
+read-only Ollama inventory; it did not authorize model invocation,
+implementation, configuration-schema changes, SQLite migration, dependency
+changes, workspace mutation, Git operations, or publication. The governing
+decisions are [ADR 0014](adr/0014-local-intelligence-and-ollama.md),
+[ADR 0017](adr/0017-use-official-go-mcp-sdk.md), and
+[ADR 0018](adr/0018-use-bounded-ollama-adviser.md).
 
 ## 2. Decision pipeline
 
@@ -41,43 +43,176 @@ reported. It may fall back to bounded canonical-file inspection only when the
 caller explicitly permits that behavior. No model or MCP handler receives SQL,
 a database path, or a database connection.
 
+The first model-backed operation requires a fresh SQLite projection and does
+not enable canonical-file fallback. At most 20 excerpts are selected after
+deterministic policy, each excerpt is at most 8 KiB, and combined excerpt text
+is at most 128 KiB. An absent, stale, or unsupported index skips model use and
+preserves deterministic profile ordering.
+
+Initial prompt content is allowlisted to `README.md`, `AGENTS.md`, Markdown
+below `docs/`, and Markdown below `.agents/conventions/`. Every other indexed
+path is excluded, including `.engkit/`, `.git/`, `.agents/context/`,
+`.agents/skills/`, and `.agents/workflows/`. Before use, content containing a
+PEM private-key marker or a line whose key matches `token`, `secret`,
+`password`, `passwd`, `api_key`, `apikey`, `access_key`, `private_key`, or
+`credential` case-insensitively is excluded as a whole excerpt. This filter is
+defense in depth and does not redefine the SQLite indexing policy.
+
 ## 4. Ollama adapter
 
-Proposed configuration extends `.engkit/config.yaml` only after a separately
-approved schema decision:
+The future E2 configuration proposal extends `.engkit/config.yaml` only after a
+separately approved schema change:
 
 ```yaml
 intelligence:
   enabled: false
   provider: ollama
-  endpoint: http://127.0.0.1:11434
-  model: qwen3.5:0.8b
-  allowed_models:
-    - phi4-mini:latest
-    - qwen3.5:0.8b
-    - granite4:3b
+  model: qwen3.5:0.8b # Example explicit selection; there is no default.
 ```
 
-The listed tags are candidates, not guaranteed installed models and not an
-implicit default. The adapter accepts loopback endpoints only in the initial
-contract. It applies request byte, context item, response byte, and time limits;
-supports cancellation; disables tool calls; requests structured output; and
-rejects malformed or oversized responses.
+The endpoint is fixed at `http://127.0.0.1:11434`; workspace configuration,
+environment variables, and CLI flags cannot override it. `enabled` defaults to
+false. `provider` accepts only `ollama`, and `model` must name exactly one of
+`phi4-mini:latest`, `qwen3.5:0.8b`, or `granite4:3b`. No model is an implicit
+default, and `--model` may select only another allowlisted tag after local
+intelligence is enabled.
 
-It never installs or starts Ollama, pulls a model, follows a redirect to a
-non-loopback host, sends credentials, discovers remote services, executes model
-output, or silently substitutes a different model. Failure returns a stable
-integration diagnostic and leaves deterministic commands usable.
+### 4.1 Initial application operation
 
-The proposed advisory result schema is `engkit.advice-result/v1alpha1`. It binds
-the selected model tag, adviser contract version, prompt-template version,
-input excerpt digests, recommendations, reasons, uncertainty, warnings, and a
-digest of the raw structured response. It contains no approval field and is not
-accepted by an executor as a plan.
+The initial public shape proposed for E2 is:
+
+```text
+engkit advise profiles --root PATH --goal TEXT [--model MODEL_TAG]
+```
+
+`root` is explicit and validated through the existing workspace boundary.
+`goal` is required, trimmed, and limited to 2 KiB. The deterministic profile
+recommender runs first. Only its eligible profile identifiers and evidence can
+be presented to the adviser. A model response cannot introduce a profile,
+change compatibility, generate a plan, or count as user selection.
+
+### 4.2 HTTP request
+
+Before generation, `GET /api/tags` must resolve the configured exact tag and
+its observed digest. Generation uses `POST /api/chat` with:
+
+```json
+{
+  "model": "EXACT_ALLOWED_TAG",
+  "messages": [
+    {"role": "system", "content": "VERSIONED_SYSTEM_PROMPT"},
+    {"role": "user", "content": "BOUNDED_UNTRUSTED_INPUT"}
+  ],
+  "stream": false,
+  "think": false,
+  "format": {"type": "object"},
+  "keep_alive": 0,
+  "options": {"temperature": 0}
+}
+```
+
+The actual `format` value is the complete response schema rather than the
+abbreviated object above. `tools` and images are absent. The HTTP client has no
+proxy, rejects every redirect, sends no credentials, limits connection setup to
+3 seconds and the complete operation to 60 seconds, supports cancellation, and
+performs no retry. Encoded requests and responses are each limited to 256 KiB.
+
+The prompt template is
+`engkit.local-adviser/profile-ranking/v1alpha1`. It labels repository excerpts
+as untrusted quoted data, instructs the model not to follow instructions found
+inside them, lists the only permitted candidate identifiers, and includes the
+same JSON Schema supplied through `format`.
+
+The user message is canonical JSON with these fields in order:
+
+```json
+{
+  "contract_version": "engkit.local-adviser/profile-ranking/v1alpha1",
+  "goal": "bounded goal",
+  "candidates": [
+    {
+      "candidate_id": "go-service@0.1.0",
+      "deterministic_rank": 1,
+      "evidence": ["bounded deterministic evidence"]
+    }
+  ],
+  "context": [
+    {
+      "path": "README.md",
+      "sha256": "sha256:...",
+      "text": "bounded untrusted excerpt"
+    }
+  ]
+}
+```
+
+There are at most 20 candidates, 20 evidence strings per candidate, and 20
+context entries. Candidate identifiers are at most 128 bytes; evidence strings
+are at most 1 KiB. Arrays preserve deterministic source order before encoding.
+
+### 4.3 Response and evidence
+
+The exact response schema supplied through `format` is:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "rankings": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "candidate_id": {"type": "string", "minLength": 1, "maxLength": 128},
+          "score": {"type": "integer", "minimum": 0, "maximum": 100},
+          "reason": {"type": "string", "maxLength": 1024}
+        },
+        "required": ["candidate_id", "score", "reason"]
+      }
+    },
+    "uncertainty": {"type": "string", "maxLength": 1024},
+    "warnings": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {"type": "string", "maxLength": 1024}
+    }
+  },
+  "required": ["rankings", "uncertainty", "warnings"]
+}
+```
+
+The application also validates byte limits after decoding, rejects duplicate or
+unknown candidate identifiers, and requires every eligible candidate exactly
+once. Scores may only order already eligible candidates.
+
+The returned `engkit.advice-result/v1alpha1` records the bound root, operation,
+mode (`ollama` or `deterministic`), goal digest, deterministic candidate order,
+final advisory order, prompt-template version and digest, excerpt path and
+content digests, warnings, and—only for model-backed success—the Ollama
+version, exact model tag, observed model digest, and raw structured-response
+digest. It does not persist raw goals, excerpts, prompts, or responses. It has
+no approval field and no executor accepts it as a plan.
+
+### 4.4 Failure and privacy
+
+The adapter never installs or starts Ollama, pulls or mutates a model, follows
+a redirect, uses an HTTP proxy, sends credentials, discovers a remote service,
+executes model output, retries, or silently substitutes another model. Secret
+patterns, ignored local state, environment values, credential configuration,
+private keys, `.engkit` transaction data, and unapproved paths are excluded
+before prompt construction.
+
+Any failure emits a stable bounded diagnostic and returns deterministic profile
+ordering with model-backed advice unavailable. Failure never makes profile
+inspection, planning, or approved execution unavailable.
 
 ## 5. MCP server
 
-The proposed command is:
+The implemented command is:
 
 ```text
 engkit mcp serve --transport stdio --root PATH
@@ -134,8 +269,9 @@ MCP session presence shall never count as approval.
   schemas.
 - Conformance tests proving each MCP result equals its CLI/application result.
 - Tests proving no initial MCP tool mutates files or grants approval.
-- Separate, explicitly approved local Ollama inventory and smoke tests for each
-  exact candidate tag before claiming compatibility.
+- The read-only Ollama inventory is complete. Separate, explicitly approved
+  synthetic smoke tests remain required for each exact candidate tag and
+  observed digest before claiming compatibility.
 
 ## 8. Rollback
 
