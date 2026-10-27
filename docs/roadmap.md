@@ -484,3 +484,40 @@ and approval. Completing the documentation gate does not authorize Go changes,
 dependencies, schema publication, SQLite migrations, local network access,
 model calls, MCP execution, Git operations, or release publication.
 
+### `v0.3.1`: post-release validation and compatible hardening
+
+**Status:** `v0.3.1A` validation planning prepared; no validation execution,
+product correction, candidate workflow, tag, or patch release is approved
+
+This maintenance line starts with acceptance testing of the published
+`v0.3.0` release. It produces `v0.3.1` only when a reproducible defect requires
+a compatibility-preserving correction. A completely passing validation cycle
+does not produce an empty patch release.
+
+Planned gates:
+
+1. **`v0.3.1A` — post-release validation planning:** define the exact public
+   release identity, isolated installation boundary, synthetic installed-binary
+   scenarios, installer rollback checks, evidence limits, defect triage, and
+   stop conditions. This gate changes documentation only.
+2. **`v0.3.1B` — public-install and synthetic acceptance execution:** after a
+   separate approval, install `v0.3.0` from the public release into an isolated
+   user-writable directory, verify its bytes and catalog, and run bounded
+   synthetic doctor, init, local-advice fallback, MCP, and installer scenarios.
+   It must not replace the existing installation, use real repository content,
+   invoke Ollama, or mutate models.
+3. **`v0.3.1C` — defect triage and compatible correction:** open only for a
+   reproduced product defect. Each correction requires a separate design or
+   implementation packet with exact files and focused regression tests. New
+   features or compatibility claims move to a later minor release.
+4. **`v0.3.1RC` — conditional qualification and publication:** required only if
+   C changes product or release bytes. It rebuilds and qualifies all six
+   supported platform targets under the existing release gates. If B passes
+   without a correction, C and RC do not run.
+
+The maintenance line excludes new model tags or allowlist behavior, new MCP
+tools, catalog expansion, schema or SQLite migrations, production TUF, signing,
+notarization, automatic updates, marketplaces, and package-manager work.
+Execution, cleanup, Git operations, workflows, and publication remain separate
+approval boundaries.
+

@@ -714,3 +714,45 @@ SQLite database, provider CLI, credential, or network connection.
   configuration change, SQLite migration, model invocation, Git operation, or
   release action.
 
+## 25. `v0.3.1A` post-release validation planning acceptance criteria
+
+- `v0.3.1` is a compatibility-preserving maintenance line. It may correct only
+  defects reproduced against published `v0.3.0`; it does not add commands,
+  schemas, providers, models, profiles, persistence formats, or distribution
+  authorities.
+- Validation begins from immutable tag `v0.3.0`, exact release commit
+  `2bd28273e072b2a33647fb5d7ba09968e381f27a`, and the 12 published uploaded
+  assets. GitHub-generated source archives and attestations are not counted as
+  uploaded release assets.
+- A fresh Windows AMD64 installation uses the public release in an isolated,
+  disposable user-writable directory without administrator rights or PATH
+  mutation. It verifies downloaded hashes, exact reported version, embedded
+  catalog identity, and cleanup without replacing the existing user
+  installation.
+- Installed-binary acceptance uses synthetic workspaces only. It covers doctor,
+  catalog and profile inspection, unified-init planning and refusal, disabled
+  and unavailable local-advice fallback, and bounded MCP standard-input/output
+  behavior without real repository content.
+- Installer validation covers fresh installation, explicit upgrade, bounded
+  failure injection, rollback to exact prior bytes, and removal of transaction
+  directories. Destructive cleanup is limited to the exact disposable root and
+  requires separate execution authority.
+- Validation records exact commands, exit status, version, asset and executable
+  digests, catalog identity, scenario results, and bounded failure diagnostics.
+  It records no credentials, prompts, model responses, environment values, or
+  unrelated absolute paths.
+- Ollama and model-backed smokes remain outside the initial validation run. No
+  model may be installed, pulled, updated, replaced, invoked, or reclassified;
+  the existing exact-digest observations and compatibility claims remain
+  unchanged.
+- A failed scenario must be reproduced and classified before a correction is
+  proposed. Any correction requires its own affected-file inventory, tests,
+  risks, rollback, and approval. Passing validation produces no source change
+  and does not justify an empty patch release.
+- New model compatibility, allowlist changes, MCP tools, profiles, automatic
+  updates, production TUF activation, signing, notarization, marketplaces, and
+  package-manager distribution remain future minor-release work.
+- Planning acceptance does not authorize network access, installation,
+  workspace mutation, failure injection, cleanup, code changes, Git operations,
+  workflow execution, tagging, or release publication.
+
