@@ -401,9 +401,9 @@ credential, or configuration authority.
 
 **Status:** `v0.3.0A`, `v0.3.0C1`, `v0.3.0D1`, and `v0.3.0E1` completed;
 `v0.3.0B`, `v0.3.0C2`, `v0.3.0D2`, `v0.3.0E2`, and the approved
-`v0.3.0F` catalog slice are implemented; `v0.3.0RC` passed on all six supported
-platform tuples and its evidence is accepted, but no stable workflow, tag,
-release, or publication is approved
+`v0.3.0F` catalog slice are implemented; `v0.3.0RC` and the stable rebuild
+passed on all six supported platform tuples; `v0.3.0` was published on
+2026-10-27 as the immutable latest release with all 12 approved assets
 
 This release introduces a safe operational front door and optional local
 decision assistance without changing the canonical filesystem, approval, or
@@ -472,8 +472,12 @@ Planned implementation gates:
     Candidate `v0.3.0-rc.1` passed the complete six-platform workflow from
     commit `08dac40b4b7f7d2549ce318dcf5e446036347fda`; its package, manifest,
     checksums, executable formats, provider evidence, and six bounded
-    qualification records were independently reviewed. The stable rebuild,
-    Git operations, tag, release, and publication remain separate gates.
+    qualification records were independently reviewed. Stable workflow run
+    `40568038154` then rebuilt exact version `v0.3.0` from commit
+    `2bd28273e072b2a33647fb5d7ba09968e381f27a`; all six native smokes and
+    aggregate provider conformance passed. The annotated tag and immutable
+    latest GitHub Release contain exactly the 12 approved assets with matching
+    recorded sizes and SHA-256 digests.
 
 Every gate requires its own affected-file inventory, tests, risks, rollback,
 and approval. Completing the documentation gate does not authorize Go changes,

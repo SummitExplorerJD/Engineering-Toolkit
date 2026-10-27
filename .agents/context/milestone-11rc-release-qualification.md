@@ -33,12 +33,15 @@ provider projections. The new evidence is deliberately separate and covers the
 `v0.3.0` doctor, unified-init, catalog, local-intelligence fallback, and MCP
 surfaces.
 
-## Remaining gates
+## Publication gate completion
 
-- Approve the exact documentation commit and push separately.
-- Run the stable `v0.3.0` workflow from the resulting reviewed commit.
-- Review the stable manifest, checksums, native evidence, and provider evidence.
-- Obtain separate Git, tag, release, and publication approvals.
+- The release-documentation commit and push were separately approved.
+- Stable `v0.3.0` workflow run `40568038154` passed from the exact reviewed
+  release commit.
+- The stable manifest, checksums, native evidence, provider evidence, and
+  package contents passed independent review.
+- The annotated tag, draft, asset upload, publication, and local upgrade each
+  received separate approval before execution.
 
 ## Observed local validation
 
@@ -88,6 +91,39 @@ and LF-only `install.sh`. Every qualification record names `v0.3.0-rc.1`,
 catalog `0.3.0`, the same three exact Go profiles, and all eight approved
 synthetic scenarios.
 
-Candidate acceptance does not authorize reuse of candidate binaries as stable
-assets. The stable workflow must rebuild version `v0.3.0` from the separately
-reviewed documentation commit. No tag or GitHub Release was created.
+Candidate acceptance did not authorize reuse of candidate binaries as stable
+assets. At candidate acceptance, no tag or GitHub Release existed; the later
+stable workflow rebuilt version `v0.3.0` from the separately reviewed release
+commit.
+
+## Stable publication evidence
+
+Manual workflow run
+[`40568038154`](https://github.com/SummitExplorerJD/Engineering-Toolkit/actions/runs/40568038154)
+completed successfully on 2026-10-27 for stable version `v0.3.0` from exact
+commit `2bd28273e072b2a33647fb5d7ba09968e381f27a`. The build job, all six native
+smoke jobs, and aggregate provider-conformance comparison passed. The run
+retained one stable package plus six provider-conformance and six qualification
+artifacts.
+
+Independent review confirmed the stable package's 11 files, all 10
+`SHA256SUMS` entries, manifest sizes and hashes, six CGO-disabled binaries, two
+installers, PE/ELF/Mach-O identities, LF-only `install.sh`, exact embedded
+version, and all six bounded qualification records. The workflow ZIP became
+`engkit-v0.3.0.zip`; its 11 entries matched the 11 individual release assets
+byte for byte, and its digest is
+`sha256:550d92230c1562d8d9f12ac5fcd5bed0284bfb1e2d06e0703529c1a07cac80fe`.
+
+Annotated tag `v0.3.0` resolves to the exact stable commit. The
+[`v0.3.0` GitHub Release](https://github.com/SummitExplorerJD/Engineering-Toolkit/releases/tag/v0.3.0)
+was published on 2026-10-27 as non-draft, non-prerelease, immutable, and latest.
+Its 12 uploaded assets have the exact approved inventory, sizes, and SHA-256
+digests.
+
+The existing user-scoped Windows AMD64 installation was transactionally
+upgraded from `v0.2.2` to `v0.3.0` using the verified stable asset directory.
+The installed executable matched approved digest
+`sha256:8775446dce378fe29ca8d19895684208706a169996d738873fd7d3b0174e86ce`,
+reported exact version `v0.3.0`, exposed catalog `engineering-toolkit@0.3.0`,
+and left no installer transaction directory. This was not the distinct fresh
+network-installation check described in the publication packet.

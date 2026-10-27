@@ -2,40 +2,38 @@
 
 ## Status and authority
 
-This packet prepares the stable `v0.3.0` release. It does not authorize a
-commit, push, workflow run, tag, draft release, asset upload, immutable release,
-or publication. Each external or Git operation requires its own explicit
-approval.
+This packet records the approved stable `v0.3.0` publication completed on
+2026-10-27. Each commit, push, workflow run, tag, draft, upload, publication,
+and local installation was separately approved before execution.
 
 Candidate `v0.3.0-rc.1` qualified the implementation at commit
-`08dac40b4b7f7d2549ce318dcf5e446036347fda`. The stable release commit is not
-yet selected. It must include the reviewed release documentation, and no source
-change may be introduced without repeating candidate qualification under a new
-`-rc.N` identifier.
+`08dac40b4b7f7d2549ce318dcf5e446036347fda`. Stable release commit
+`2bd28273e072b2a33647fb5d7ba09968e381f27a` added only the reviewed release
+documentation after candidate acceptance.
 
 ## Stable build gate
 
-After the release-documentation commit and push are separately approved:
+The approved stable build gate completed as follows:
 
-1. record the exact full commit SHA and confirm `main` equals `origin/main`;
-2. dispatch `.github/workflows/release-candidate.yml` from that commit with
-   input `version=v0.3.0`;
-3. require the validation/build job, all six native smoke jobs, and aggregate
-   provider-conformance job to pass;
-4. download the stable workflow artifact and independently verify every
-   `SHA256SUMS` entry, manifest size and hash, binary format, installer line
-   ending, embedded version, and six qualification records; and
-5. assemble `engkit-v0.3.0.zip` from the exact 11 verified packaged files
-   without changing their bytes.
+1. `main` and `origin/main` both identified exact commit
+   `2bd28273e072b2a33647fb5d7ba09968e381f27a`;
+2. `.github/workflows/release-candidate.yml` ran as
+   [`40568038154`](https://github.com/SummitExplorerJD/Engineering-Toolkit/actions/runs/40568038154)
+   with input `version=v0.3.0`;
+3. the validation/build job, all six native smoke jobs, and aggregate
+   provider-conformance job passed;
+4. independent review verified every `SHA256SUMS` entry, manifest size and
+   hash, executable format, installer line ending, embedded version, and six
+   qualification records; and
+5. the exact workflow ZIP was retained as `engkit-v0.3.0.zip`, and its 11
+   entries matched the 11 uploaded individual assets byte for byte.
 
-The stable run must produce version `v0.3.0`, not reuse or rename any
-`v0.3.0-rc.1` binary. A failed stable run blocks publication and requires a
-reviewed correction and a new candidate when source or harness behavior
-changes.
+The stable run produced version `v0.3.0`; no `v0.3.0-rc.1` binary was renamed
+or reused.
 
 ## Expected release assets
 
-The draft GitHub Release must contain exactly these 12 uploaded assets:
+The published GitHub Release contains exactly these 12 uploaded assets:
 
 1. `engkit-v0.3.0-windows-amd64.exe`
 2. `engkit-v0.3.0-windows-arm64.exe`
@@ -66,33 +64,33 @@ contents of `docs/release-notes/v0.3.0.md`.
 - Describe Ollama observations only for the exact accepted version, tag,
   digest, host, prompt, and limits. Do not claim general model compatibility.
 
-## Tag and release gate
+## Publication result
 
-After stable artifacts pass independent review, request separate approval for:
-
-- annotated tag `v0.3.0` at the exact stable workflow commit;
-- pushing that tag without moving or replacing an existing ref;
-- creating a draft, non-prerelease GitHub Release targeting the exact tag;
-- uploading the 12 verified assets and confirming their remote hashes;
-- confirming the repository's immutable-release protection applies to the
-  final release; and
-- final publication and latest-release designation.
-
-No approval for one item implies approval for the next.
+After separate approvals, annotated tag `v0.3.0` was created at exact stable
+commit `2bd28273e072b2a33647fb5d7ba09968e381f27a` and pushed without replacing an
+existing ref. The
+[`v0.3.0` GitHub Release](https://github.com/SummitExplorerJD/Engineering-Toolkit/releases/tag/v0.3.0)
+was published as non-draft, non-prerelease, immutable, and latest. Its 12
+uploaded assets have the exact approved names, sizes, and SHA-256 digests. The
+published package digest is
+`sha256:550d92230c1562d8d9f12ac5fcd5bed0284bfb1e2d06e0703529c1a07cac80fe`.
 
 ## Post-publication verification
 
-After publication:
+Public metadata confirms the exact tag, immutable status, non-draft and
+non-prerelease state, latest designation, and 12-asset inventory. GitHub's
+recorded asset sizes and SHA-256 digests match the approved stable files.
 
-- fetch the public release metadata and confirm tag, target, immutability,
-  non-draft, non-prerelease, latest status, and exact asset inventory;
-- redownload public `SHA256SUMS`, installers, manifest, and representative
-  binaries and compare them with the approved stable files;
-- complete a fresh Windows network installation without administrator rights,
-  confirm `engkit version --json` reports exactly `v0.3.0`, and inspect catalog
-  `engineering-toolkit@0.3.0`; and
-- record the immutable release URL, stable commit, asset digests, and observed
-  verification in milestone context and release notes.
+An existing Windows AMD64 installation was transactionally upgraded from
+`v0.2.2` to `v0.3.0` using the verified stable asset directory without
+administrator rights. The installed executable matched approved digest
+`sha256:8775446dce378fe29ca8d19895684208706a169996d738873fd7d3b0174e86ce`,
+`engkit version --json` reported exactly `v0.3.0`, catalog inspection returned
+`engineering-toolkit@0.3.0`, and no transaction directory remained.
+
+This local-asset upgrade does not claim completion of the distinct fresh
+network-installation check. A later network check requires its own approval and
+must not alter the immutable release assets.
 
 ## Risk and rollback
 
