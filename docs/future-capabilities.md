@@ -269,8 +269,9 @@ Required behavior:
 
 ### `v0.3.0`: diagnostics, unified initialization, and local intelligence
 
-**Status:** Design accepted; read-only doctor implemented locally; remaining
-gates require separate approval.
+**Status:** Doctor, unified initialization, read-only MCP, bounded local advice,
+and the approved first-party catalog expansion are implemented locally.
+Release qualification remains separately approved.
 
 The release is divided so deterministic onboarding and diagnostics remain
 useful without Ollama or an MCP host:
@@ -289,18 +290,13 @@ useful without Ollama or an MCP host:
 - First-party templates and profiles expand through individually reviewed,
   immutable catalog versions rather than a remote marketplace.
 
-Implemented interface:
+Implemented interfaces include:
 
 ```text
 engkit doctor [--root PATH] [--scope core|workspace|integrations|all]
-```
-
-Proposed interfaces that are not yet implemented include:
-
-```text
 engkit init plan --target PATH [--profile ID@VERSION] [--set NAME=VALUE]
 engkit init apply --target PATH [--profile ID@VERSION] [--set NAME=VALUE] --approve PLAN_ID
-engkit advise --root PATH --goal TEXT [--model MODEL_TAG]
+engkit advise profiles --root PATH --goal TEXT [--model MODEL_TAG]
 engkit mcp serve --transport stdio --root PATH
 ```
 
@@ -308,6 +304,13 @@ The candidate local-model allowlist begins with the exact user-selected tags
 `phi4-mini:latest`, `qwen3.5:0.8b`, and `granite4:3b`. Their actual local
 availability and suitability must be inventoried before implementation; a name
 in documentation does not trigger a pull or select a default.
+
+The embedded `engineering-toolkit@0.3.0` catalog contains the immutable
+`project-guide@0.1.0` template and three explicit Go profiles:
+`go-cli@0.1.0`, `go-library@0.1.0`, and `go-service@0.1.0`. The CLI and library
+profiles preserve the selected project's source layout and generate no
+application code. Profile recommendation and local advice remain advisory; a
+user must explicitly select an exact profile before planning or execution.
 
 ## 4. Deferred capabilities
 

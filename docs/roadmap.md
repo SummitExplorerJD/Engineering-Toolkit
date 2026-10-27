@@ -400,8 +400,9 @@ credential, or configuration authority.
 ### `v0.3.0`: diagnostics, unified initialization, and local intelligence
 
 **Status:** `v0.3.0A`, `v0.3.0C1`, `v0.3.0D1`, and `v0.3.0E1` completed;
-`v0.3.0B`, `v0.3.0C2`, `v0.3.0D2`, and `v0.3.0E2` implemented locally; later
-gates are not approved
+`v0.3.0B`, `v0.3.0C2`, `v0.3.0D2`, `v0.3.0E2`, and the approved
+`v0.3.0F` catalog slice are implemented locally; release qualification is not
+approved
 
 This release introduces a safe operational front door and optional local
 decision assistance without changing the canonical filesystem, approval, or
@@ -454,9 +455,15 @@ Planned implementation gates:
    digests of `phi4-mini:latest` and `granite4:3b`; `qwen3.5:0.8b` remains an
    allowlisted candidate but did not pass the accepted structured-response
    contract and therefore receives no compatibility claim.
-9. **`v0.3.0F` — first-party catalog expansion:** inventory and independently
-   approve each new template and profile before packaging it. No marketplace or
-   remote package execution is included.
+9. **`v0.3.0F` — first-party catalog expansion:** the approved initial slice is
+   implemented locally. Catalog `engineering-toolkit@0.3.0` adds independently
+   reviewed `go-cli@0.1.0` and `go-library@0.1.0` profiles, both selecting the
+   existing immutable `project-guide@0.1.0` template. They preserve source
+   layout and generate only provider-neutral workspace guidance, conventions,
+   context, and verification assets. No application source, new template,
+   executable resource, marketplace, remote package, dependency, or automatic
+   selection is included. Further catalog entries require another independent
+   inventory and approval.
 10. **`v0.3.0RC` — release qualification:** validate Windows, Linux, and macOS
     on AMD64 and ARM64, including optional-integration absence and failure paths,
     before any candidate or stable publication.

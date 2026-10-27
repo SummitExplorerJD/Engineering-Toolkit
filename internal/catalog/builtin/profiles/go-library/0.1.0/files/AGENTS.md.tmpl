@@ -1,0 +1,21 @@
+# {{engkit.project_name}} repository instructions
+
+## Purpose
+
+This workspace uses Engineering Toolkit's provider-neutral project standard.
+Treat repository files as canonical and preserve existing content outside an explicitly approved change.
+
+## Sources of truth
+
+- `.agents/context/` records durable project facts and decisions.
+- `.agents/conventions/` defines implementation and review conventions.
+- `.agents/skills/` contains validated canonical skill packages.
+- `.agents/workflows/` defines repeatable human-reviewed workflows.
+
+## Working agreement
+
+1. Inspect before editing and keep changes within the requested scope.
+2. Separate planning, implementation, Git operations, and publication approvals.
+3. Never execute a skill resource merely because it is present.
+4. Keep secrets, credentials, local caches, and transient logs out of canonical artifacts.
+5. Run the relevant verification workflow before handing off a change.

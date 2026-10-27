@@ -1,0 +1,52 @@
+schema_version: engkit.project-profile/v1alpha1
+id: go-cli
+version: 0.1.0
+description: Adds a provider-neutral Engineering Toolkit workspace to a Go command-line application.
+compatibility:
+  ecosystems:
+    - go
+  modes:
+    - new-project
+    - existing-workspace
+variables:
+  - name: project_name
+    type: string
+    description: Human-readable project name.
+    required: true
+    min_length: 1
+    max_length: 80
+skills:
+  - template_id: project-guide
+    template_version: 0.1.0
+    bindings:
+      project_name:
+        variable: project_name
+workspace_directories:
+  - .agents/context
+  - .agents/conventions
+  - .agents/skills
+  - .agents/workflows
+workspace_assets:
+  - source: files/AGENTS.md.tmpl
+    destination: AGENTS.md
+    kind: agent-instructions
+    media_type: text
+    source_sha256: sha256:2e64148180db80465626d5fd60a2b50db85602242b6bd2b151fcc8207cb1182d
+  - source: files/go.md.tmpl
+    destination: .agents/conventions/go.md
+    kind: convention
+    media_type: text
+    source_sha256: sha256:11fc44621a19c62c8c2d62f3748f7c081cf9f481033f2c1b094bdd40d4661b57
+  - source: files/project-overview.md.tmpl
+    destination: .agents/context/project-overview.md
+    kind: context
+    media_type: text
+    source_sha256: sha256:4ef2772708b8e8bf1512a40952822f3df2c2b778cd13615d8ddc4354f198ba86
+  - source: files/verify.md.tmpl
+    destination: .agents/workflows/verify.md
+    kind: workflow
+    media_type: text
+    source_sha256: sha256:af2efc9d06da181888478efe06976542d031eda5994aacfb756f709ef9308ee2
+source_layout:
+  policy: preserve
+integration_requests: []

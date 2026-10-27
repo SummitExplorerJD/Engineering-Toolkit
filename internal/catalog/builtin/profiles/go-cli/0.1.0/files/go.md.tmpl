@@ -1,0 +1,9 @@
+# Go CLI conventions for {{engkit.project_name}}
+
+- Keep command entry points beneath `cmd/` and move reusable behavior into focused packages.
+- Keep domain behavior independent of flags, terminal rendering, environment variables, and process exit calls.
+- Reserve standard output for command results and standard error for diagnostics.
+- Keep flag names, machine-readable output, and exit-code behavior stable and tested.
+- Format changed Go files with `gofmt` and run targeted tests before `go test ./...` and `go vet ./...`.
+- Avoid hidden network access, ambient credentials, and nondeterministic filesystem behavior.
+- Preserve Windows, Linux, and macOS behavior unless the project explicitly documents a narrower target.

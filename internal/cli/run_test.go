@@ -135,6 +135,8 @@ func TestBuiltinCatalogCommandsAreOfflineAndDeterministic(t *testing.T) {
 		{args: []string{"templates", "list"}, want: `"schema_version": "engkit.template-list/v1alpha1"`},
 		{args: []string{"templates", "inspect", "--id", "project-guide", "--version", "0.1.0"}, want: `"id": "project-guide"`},
 		{args: []string{"profiles", "list"}, want: `"schema_version": "engkit.profile-list/v1alpha1"`},
+		{args: []string{"profiles", "inspect", "--id", "go-cli", "--version", "0.1.0"}, want: `"id": "go-cli"`},
+		{args: []string{"profiles", "inspect", "--id", "go-library", "--version", "0.1.0"}, want: `"id": "go-library"`},
 		{args: []string{"profiles", "inspect", "--id", "go-service", "--version", "0.1.0"}, want: `"id": "go-service"`},
 	} {
 		var first, second, stderr bytes.Buffer
@@ -507,7 +509,7 @@ func TestAdviseProfilesUsesDeterministicFallbackWhenDisabled(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("advise code = %d, stderr = %q", code, stderr.String())
 	}
-	if !strings.Contains(stdout.String(), `"schema_version": "engkit.advice-result/v1alpha1"`) || !strings.Contains(stdout.String(), `"mode": "deterministic"`) || !strings.Contains(stdout.String(), `"go-service@0.1.0"`) {
+	if !strings.Contains(stdout.String(), `"schema_version": "engkit.advice-result/v1alpha1"`) || !strings.Contains(stdout.String(), `"mode": "deterministic"`) || !strings.Contains(stdout.String(), `"go-cli@0.1.0"`) || !strings.Contains(stdout.String(), `"go-library@0.1.0"`) || !strings.Contains(stdout.String(), `"go-service@0.1.0"`) {
 		t.Fatalf("unexpected advice: %s", stdout.String())
 	}
 	if strings.Contains(stdout.String(), `"model"`) {

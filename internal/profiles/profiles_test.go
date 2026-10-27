@@ -3,8 +3,12 @@ package profiles
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"os"
+	"path/filepath"
 	"testing"
 	"testing/fstest"
+
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/catalog"
 )
 
 func TestLoadValidProfile(t *testing.T) {
@@ -41,6 +45,30 @@ integration_requests: []
 	}
 	if got.ID != "go-service" || got.SourceLayout.Policy != "src" {
 		t.Fatalf("unexpected profile: %#v", got)
+	}
+}
+
+func TestRecommendExpandedBuiltinGoProfiles(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "go.mod"), []byte("module example.com/toolkit\n\ngo 1.27.3\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	inventory, catalogFS, err := catalog.Builtin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := Recommend(root, inventory, catalogFS)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Recommendations) != 3 {
+		t.Fatalf("recommendations = %#v", result.Recommendations)
+	}
+	for index, want := range []string{"go-cli", "go-library", "go-service"} {
+		got := result.Recommendations[index]
+		if got.ID != want || !got.Compatible {
+			t.Fatalf("recommendation at %d = %#v", index, got)
+		}
 	}
 }
 

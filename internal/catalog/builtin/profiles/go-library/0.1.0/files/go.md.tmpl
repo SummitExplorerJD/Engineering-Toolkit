@@ -1,0 +1,9 @@
+# Go library conventions for {{engkit.project_name}}
+
+- Keep exported APIs minimal, documented, and compatible with the module's stated versioning policy.
+- Prefer focused packages and keep implementation details beneath `internal/` when external reuse is not intended.
+- Add examples for important exported behavior and tests for compatibility-sensitive edge cases.
+- Return errors to callers rather than terminating the process or writing unsolicited terminal output.
+- Format changed Go files with `gofmt` and run targeted tests before `go test ./...` and `go vet ./...`.
+- Avoid hidden network access, ambient credentials, global mutable state, and nondeterministic initialization.
+- Preserve cross-platform behavior unless the package contract explicitly documents a narrower target.

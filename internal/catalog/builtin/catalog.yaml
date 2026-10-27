@@ -1,6 +1,6 @@
 schema_version: engkit.catalog/v1alpha1
 id: engineering-toolkit
-version: 0.2.1
+version: 0.3.0
 minimum_engkit: 0.2.1
 templates:
   - id: project-guide
@@ -8,6 +8,14 @@ templates:
     path: templates/project-guide/0.1.0
     sha256: sha256:5b3cf62d11eaef3e29700585c5885f19c7bbccd7f387b89453e9f0487b76953b
 profiles:
+  - id: go-cli
+    version: 0.1.0
+    path: profiles/go-cli/0.1.0
+    sha256: sha256:85b8fb53573a69775d493a23dc04c1a571661746e8213397e4ab4e59dfe9c019
+  - id: go-library
+    version: 0.1.0
+    path: profiles/go-library/0.1.0
+    sha256: sha256:3b37b7baf208dbf30de7625511ce0f659ae844188b421c6e5cae0a9bcfbe0953
   - id: go-service
     version: 0.1.0
     path: profiles/go-service/0.1.0

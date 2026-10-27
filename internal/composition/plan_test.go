@@ -39,6 +39,28 @@ func TestNewCreateIsDeterministicAndDoesNotWrite(t *testing.T) {
 	}
 }
 
+func TestBuiltinExpandedProfilesPlanWithoutApplicationLayout(t *testing.T) {
+	inventory, catalogFS, err := catalog.Builtin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, profileID := range []string{"go-cli", "go-library"} {
+		t.Run(profileID, func(t *testing.T) {
+			target := filepath.Join(localParent(t), profileID)
+			preview, err := NewCreate(target, profileID, "0.1.0", map[string]string{"project_name": "Toolkit"}, inventory.Version, inventory, catalogFS)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !preview.Executable || hasOperation(preview.Operations, "create_directory", "src") {
+				t.Fatalf("unexpected expanded profile plan: %#v", preview)
+			}
+			if _, err := os.Lstat(target); !os.IsNotExist(err) {
+				t.Fatalf("planning wrote target: %v", err)
+			}
+		})
+	}
+}
+
 func TestNewComposeInventoriesWorkspaceWithoutWriting(t *testing.T) {
 	inventory, catalogFS := testCatalog(t)
 	root := filepath.Join(localParent(t), "workspace")

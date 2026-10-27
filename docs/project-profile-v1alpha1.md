@@ -88,5 +88,14 @@ context, Go conventions, and a verification workflow, and selects `src/` as
 the source root. It does not generate application source, `go.mod`, scripts,
 provider files, or Spec Kit content.
 
+The approved `v0.3.0F` catalog slice adds `go-cli@0.1.0` and
+`go-library@0.1.0`. Both select the same immutable
+`project-guide@0.1.0` template, support new and existing Go workspaces, and
+preserve the selected repository's source layout. Their profile-owned assets
+specialize Go conventions, project context, and verification guidance for a
+command-line application or reusable library. They create no application
+source, module, dependency, executable skill resource, provider output, or
+permission grant.
+
 Published profile versions are immutable. Any content or binding change
 requires a new profile version and catalog digest.
