@@ -2,18 +2,14 @@
 package initfacade
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"gopkg.in/yaml.v3"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/workspaceconfig"
 )
-
-const maxConfigurationBytes = 1 << 20
 
 // Lifecycle identifies the one existing operation selected by unified init.
 type Lifecycle string
@@ -28,15 +24,6 @@ const (
 type Classification struct {
 	Target    string
 	Lifecycle Lifecycle
-}
-
-type configDocument struct {
-	SchemaVersion string           `yaml:"schema_version"`
-	Workspace     *workspaceConfig `yaml:"workspace,omitempty"`
-}
-
-type workspaceConfig struct {
-	SourceLayout string `yaml:"source_layout"`
 }
 
 // Classify selects exactly one existing lifecycle without modifying the target.
@@ -120,50 +107,8 @@ func inspectInitializedState(root string) (bool, error) {
 }
 
 func validateConfiguration(path string) error {
-	info, err := os.Stat(path)
-	if err != nil {
-		return err
-	}
-	if info.Size() > maxConfigurationBytes {
-		return errors.New("configuration exceeds the 1 MiB limit")
-	}
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return err
-	}
-	var node yaml.Node
-	if err := yaml.Unmarshal(data, &node); err != nil || yamlContainsAlias(&node) {
-		return errors.New("configuration is not supported YAML")
-	}
-	decoder := yaml.NewDecoder(bytes.NewReader(data))
-	decoder.KnownFields(true)
-	var document configDocument
-	if err := decoder.Decode(&document); err != nil {
-		return errors.New("configuration does not match the supported schema")
-	}
-	var extra any
-	if err := decoder.Decode(&extra); !errors.Is(err, io.EOF) {
-		return errors.New("configuration must contain exactly one YAML document")
-	}
-	if document.SchemaVersion != "engkit.config/v1alpha1" {
-		return errors.New("configuration uses an unsupported schema")
-	}
-	if document.Workspace != nil && document.Workspace.SourceLayout != "" && document.Workspace.SourceLayout != "auto" {
-		return errors.New("configuration uses an unsupported source layout")
-	}
-	return nil
-}
-
-func yamlContainsAlias(node *yaml.Node) bool {
-	if node.Kind == yaml.AliasNode {
-		return true
-	}
-	for _, child := range node.Content {
-		if yamlContainsAlias(child) {
-			return true
-		}
-	}
-	return false
+	_, err := workspaceconfig.LoadFile(path)
+	return err
 }
 
 func rejectLinkedAncestors(target string) error {

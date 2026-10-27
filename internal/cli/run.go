@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/adapters"
@@ -20,7 +21,9 @@ import (
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/execution"
 	sqliteindex "github.com/SummitExplorerJD/Engineering-Toolkit/internal/index/sqlite"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/initfacade"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/localintelligence"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/mcpserver"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/ollama"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/plan"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/profiles"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/providersync"
@@ -31,6 +34,7 @@ import (
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/speckit"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/templates"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/workspace"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/workspaceconfig"
 )
 
 const versionSchema = "engkit.version/v1alpha1"
@@ -77,6 +81,8 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		err = runTemplates(args[1:], stdout, stderr)
 	case "profiles":
 		err = runProfiles(args[1:], stdout, stderr)
+	case "advise":
+		err = runAdvise(args[1:], stdout, stderr)
 	case "project":
 		err = runProject(args[1:], stdout, stderr)
 	default:
@@ -415,6 +421,70 @@ func runProfiles(args []string, stdout, stderr io.Writer) error {
 	default:
 		return &usageError{message: fmt.Sprintf("unknown profiles subcommand %q", args[0])}
 	}
+}
+
+func runAdvise(args []string, stdout, stderr io.Writer) error {
+	if len(args) == 0 || args[0] != "profiles" {
+		return &usageError{message: "advise requires the profiles subcommand"}
+	}
+	flags := newFlagSet("advise profiles", stderr)
+	root := flags.String("root", "", "explicit initialized workspace root")
+	goal := flags.String("goal", "", "bounded recommendation goal")
+	modelOverride := flags.String("model", "", "explicit alternate allowlisted model tag")
+	if err := flags.Parse(args[1:]); err != nil {
+		return &usageError{message: err.Error()}
+	}
+	if flags.NArg() != 0 {
+		return &usageError{message: "advise profiles does not accept positional arguments"}
+	}
+	if *root == "" || strings.TrimSpace(*goal) == "" {
+		return &usageError{message: "advise profiles requires --root and --goal"}
+	}
+	loaded, catalogFS, err := catalog.Builtin()
+	if err != nil {
+		return err
+	}
+	recommendations, err := profiles.Recommend(*root, loaded, catalogFS)
+	if err != nil {
+		return err
+	}
+	config, err := workspaceconfig.Load(filepath.FromSlash(recommendations.Root))
+	if err != nil {
+		return err
+	}
+	model := ""
+	enabled := config.Intelligence != nil && config.Intelligence.Enabled
+	if enabled {
+		model = config.Intelligence.Model
+	}
+	if *modelOverride != "" {
+		if !enabled {
+			return errors.New("--model requires local intelligence to be enabled in .engkit/config.yaml")
+		}
+		if !workspaceconfig.AllowedModel(*modelOverride) {
+			return errors.New("--model must name an allowlisted local model tag")
+		}
+		model = *modelOverride
+	}
+	candidates := make([]localintelligence.Candidate, 0, len(recommendations.Recommendations))
+	for _, recommendation := range recommendations.Recommendations {
+		if !recommendation.Compatible {
+			continue
+		}
+		candidates = append(candidates, localintelligence.Candidate{
+			ID:                recommendation.ID + "@" + recommendation.Version,
+			DeterministicRank: len(candidates) + 1,
+			Evidence:          append([]string(nil), recommendation.Reasons...),
+		})
+	}
+	result, err := localintelligence.Advise(context.Background(), localintelligence.Options{
+		Root: recommendations.Root, Goal: *goal, Enabled: enabled, Model: model, Candidates: candidates,
+		Context: localintelligence.ContextFunc(sqliteindex.AdviceExcerpts), Adviser: ollama.New(),
+	})
+	if err != nil {
+		return err
+	}
+	return writeJSON(stdout, result)
 }
 
 func runProject(args []string, stdout, stderr io.Writer) error {
@@ -1191,6 +1261,7 @@ var usageLines = []string{
 	"profiles list",
 	"profiles inspect --id PROFILE_ID --version VERSION",
 	"profiles recommend [--root PATH]",
+	"advise profiles --root PATH --goal TEXT [--model MODEL_TAG]",
 	"project inspect [--root PATH]",
 	"project plan-create --destination PATH --profile PROFILE_ID@VERSION [--set NAME=VALUE]",
 	"project plan-compose [--root PATH] --profile PROFILE_ID@VERSION [--set NAME=VALUE]",

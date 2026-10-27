@@ -15,13 +15,12 @@ import (
 	"sort"
 	"strings"
 
-	"gopkg.in/yaml.v3"
-
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/catalog"
 	sqliteindex "github.com/SummitExplorerJD/Engineering-Toolkit/internal/index/sqlite"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/providersync"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/skills"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/workspace"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/workspaceconfig"
 )
 
 const (
@@ -37,8 +36,7 @@ const (
 	StatusError       = "error"
 	StatusUnavailable = "unavailable"
 
-	maxConfigurationBytes = 1 << 20
-	maxOwnershipBytes     = 1 << 20
+	maxOwnershipBytes = 1 << 20
 )
 
 // ErrUnhealthy indicates that the complete JSON result contains one or more
@@ -225,62 +223,14 @@ func skippedWorkspaceFindings() []Finding {
 	}
 }
 
-type configDocument struct {
-	SchemaVersion string           `yaml:"schema_version"`
-	Workspace     *workspaceConfig `yaml:"workspace,omitempty"`
-}
-
-type workspaceConfig struct {
-	SourceLayout string `yaml:"source_layout"`
-}
-
 func inspectConfiguration(root string) Finding {
 	relative := ".engkit/config.yaml"
 	filename := filepath.Join(root, ".engkit", "config.yaml")
-	info, err := os.Lstat(filename)
-	if err != nil || info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() {
-		return finding("workspace.config", ScopeWorkspace, StatusError, true, "Workspace configuration is missing or is not a regular file.", relative, nil, "Restore a reviewed regular .engkit/config.yaml file.")
-	}
-	if info.Size() > maxConfigurationBytes {
-		return finding("workspace.config", ScopeWorkspace, StatusError, true, "Workspace configuration exceeds the 1 MiB limit.", relative, nil, "Reduce the configuration to the supported bounded schema.")
-	}
-	data, err := os.ReadFile(filename)
+	document, err := workspaceconfig.LoadFile(filename)
 	if err != nil {
-		return finding("workspace.config", ScopeWorkspace, StatusError, true, "Workspace configuration could not be read.", relative, nil, "Check file permissions and restore the configuration from reviewed source.")
-	}
-	var node yaml.Node
-	if err := yaml.Unmarshal(data, &node); err != nil || yamlContainsAlias(&node) {
-		return finding("workspace.config", ScopeWorkspace, StatusError, true, "Workspace configuration is not supported YAML.", relative, nil, "Remove YAML aliases and fix the document syntax.")
-	}
-	decoder := yaml.NewDecoder(bytes.NewReader(data))
-	decoder.KnownFields(true)
-	var document configDocument
-	if err := decoder.Decode(&document); err != nil {
-		return finding("workspace.config", ScopeWorkspace, StatusError, true, "Workspace configuration does not match the supported schema.", relative, nil, "Remove unknown fields or migrate the configuration to engkit.config/v1alpha1.")
-	}
-	var extra any
-	if err := decoder.Decode(&extra); !errors.Is(err, io.EOF) {
-		return finding("workspace.config", ScopeWorkspace, StatusError, true, "Workspace configuration must contain exactly one YAML document.", relative, nil, "Keep one engkit.config/v1alpha1 document.")
-	}
-	if document.SchemaVersion != "engkit.config/v1alpha1" {
-		return finding("workspace.config", ScopeWorkspace, StatusError, true, "Workspace configuration uses an unsupported schema.", relative, nil, "Migrate the configuration to engkit.config/v1alpha1.")
-	}
-	if document.Workspace != nil && document.Workspace.SourceLayout != "" && document.Workspace.SourceLayout != "auto" {
-		return finding("workspace.config", ScopeWorkspace, StatusError, true, "Workspace source layout is unsupported.", relative, nil, "Use workspace.source_layout: auto in the current schema.")
+		return finding("workspace.config", ScopeWorkspace, StatusError, true, "Workspace configuration does not match the supported schema.", relative, nil, "Restore a reviewed regular engkit.config/v1alpha1 file and remove unknown or unsupported fields.")
 	}
 	return finding("workspace.config", ScopeWorkspace, StatusPass, true, "Workspace configuration passed schema validation.", relative, []Evidence{{Name: "schema_version", Value: document.SchemaVersion}}, "")
-}
-
-func yamlContainsAlias(node *yaml.Node) bool {
-	if node.Kind == yaml.AliasNode {
-		return true
-	}
-	for _, child := range node.Content {
-		if yamlContainsAlias(child) {
-			return true
-		}
-	}
-	return false
 }
 
 func skillFinding(validation skills.Validation, err error) Finding {

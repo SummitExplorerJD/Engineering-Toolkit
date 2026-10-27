@@ -2,12 +2,13 @@
 
 ## 1. Status and scope
 
-This document owns the accepted `v0.3.0E1` local-intelligence contract and
-summarizes the implemented `v0.3.0D2` MCP boundary. E1 authorized one bounded,
-read-only Ollama inventory; it did not authorize model invocation,
-implementation, configuration-schema changes, SQLite migration, dependency
-changes, workspace mutation, Git operations, or publication. The governing
-decisions are [ADR 0014](adr/0014-local-intelligence-and-ollama.md),
+This document owns the accepted `v0.3.0E1` local-intelligence contract,
+describes the locally implemented `v0.3.0E2` advisory boundary, and summarizes
+the implemented `v0.3.0D2` MCP boundary. E2 adds an explicitly enabled
+fixed-loopback adviser, compatible optional configuration fields, and bounded
+fresh-index retrieval. It adds no SQLite migration, dependency, workspace
+mutation, Git operation, or publication behavior. The governing decisions are
+[ADR 0014](adr/0014-local-intelligence-and-ollama.md),
 [ADR 0017](adr/0017-use-official-go-mcp-sdk.md), and
 [ADR 0018](adr/0018-use-bounded-ollama-adviser.md).
 
@@ -60,8 +61,8 @@ defense in depth and does not redefine the SQLite indexing policy.
 
 ## 4. Ollama adapter
 
-The future E2 configuration proposal extends `.engkit/config.yaml` only after a
-separately approved schema change:
+The E2 implementation accepts this optional extension to
+`.engkit/config.yaml`:
 
 ```yaml
 intelligence:
@@ -79,7 +80,7 @@ intelligence is enabled.
 
 ### 4.1 Initial application operation
 
-The initial public shape proposed for E2 is:
+The implemented public command is:
 
 ```text
 engkit advise profiles --root PATH --goal TEXT [--model MODEL_TAG]
@@ -272,6 +273,33 @@ MCP session presence shall never count as approval.
 - The read-only Ollama inventory is complete. Separate, explicitly approved
   synthetic smoke tests remain required for each exact candidate tag and
   observed digest before claiming compatibility.
+
+### 7.1 Observed E2 implementation evidence
+
+- Unit tests use in-memory adviser and HTTP fakes; the Go test suite does not
+  contact the installed Ollama daemon or load a model.
+- Configuration compatibility, allowlist enforcement, fresh-index retrieval,
+  context limits, secret exclusion, deterministic fallback, strict structured
+  decoding, response limits, redirect refusal, deadlines, and cancellation are
+  covered by focused tests.
+- `go test ./...` and `go vet ./...` passed on Windows on 2026-10-27.
+- CGO-disabled CLI builds passed for Windows, Linux, and macOS on AMD64 and
+  ARM64. `govulncheck` was not installed and was not downloaded.
+- Separately approved synthetic smoke tests against Ollama `0.40.4` passed for
+  `phi4-mini:latest` at digest
+  `78fad5d182a7c33065e153a5f8ba210754207ba9d91973f57dffa7f487363753`
+  and `granite4:3b` at digest
+  `89962fcc75239ac434cdebceb6b7e0669397f92eaef9c487774b718bc36a3e5f`.
+  `qwen3.5:0.8b` at digest
+  `de63045f29755d4721c09d54c9b45c2dadb644f4fd7d604d4cac90d96049971c`
+  failed the exact-candidate cardinality check twice with thinking disabled and
+  produced no final structured response in one diagnostic with thinking
+  enabled. It remains a permitted explicit tag but has no compatibility claim;
+  failures preserve deterministic ordering.
+- An exploratory, out-of-contract `qwen3.5:4b` smoke at digest
+  `d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04`
+  exceeded the accepted 60-second deadline. The tag was not added to the
+  allowlist.
 
 ## 8. Rollback
 

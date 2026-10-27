@@ -499,6 +499,22 @@ func TestContextLifecycle(t *testing.T) {
 	}
 }
 
+func TestAdviseProfilesUsesDeterministicFallbackWhenDisabled(t *testing.T) {
+	root := testWorkspace(t)
+	initializeWithCLI(t, root)
+	var stdout, stderr bytes.Buffer
+	code := Run([]string{"advise", "profiles", "--root", root, "--goal", "Select a compatible profile."}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("advise code = %d, stderr = %q", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), `"schema_version": "engkit.advice-result/v1alpha1"`) || !strings.Contains(stdout.String(), `"mode": "deterministic"`) || !strings.Contains(stdout.String(), `"go-service@0.1.0"`) {
+		t.Fatalf("unexpected advice: %s", stdout.String())
+	}
+	if strings.Contains(stdout.String(), `"model"`) {
+		t.Fatalf("disabled advice reported model evidence: %s", stdout.String())
+	}
+}
+
 func TestAdapterAndSpecKitCommandsAreReadOnly(t *testing.T) {
 	root := testWorkspace(t)
 	if err := os.WriteFile(filepath.Join(root, "AGENTS.md"), []byte("# Rules\n"), 0o600); err != nil {

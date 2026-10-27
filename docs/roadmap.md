@@ -400,8 +400,8 @@ credential, or configuration authority.
 ### `v0.3.0`: diagnostics, unified initialization, and local intelligence
 
 **Status:** `v0.3.0A`, `v0.3.0C1`, `v0.3.0D1`, and `v0.3.0E1` completed;
-`v0.3.0B`, `v0.3.0C2`, and `v0.3.0D2` implemented locally; `v0.3.0E2` and
-later gates are not approved
+`v0.3.0B`, `v0.3.0C2`, `v0.3.0D2`, and `v0.3.0E2` implemented locally; later
+gates are not approved
 
 This release introduces a safe operational front door and optional local
 decision assistance without changing the canonical filesystem, approval, or
@@ -444,9 +444,16 @@ Planned implementation gates:
    model-digest evidence, and deterministic fallback. Installation and tag
    presence are not compatibility claims; model smoke execution and
    implementation remain separately gated.
-8. **`v0.3.0E2` — advisory implementation:** add bounded context retrieval and
-   non-authoritative recommendations. Model output cannot approve or execute a
-   plan.
+8. **`v0.3.0E2` — advisory implementation:** implemented locally. The explicit
+   `advise profiles` command composes deterministic eligibility, fresh bounded
+   SQLite context, strict privacy filtering, an optional fixed-loopback Ollama
+   adapter, and a non-authoritative versioned result. Local intelligence is
+   disabled by default, malformed or unavailable model behavior preserves the
+   deterministic order, and model output cannot approve or execute a plan.
+   Synthetic smoke evidence on Ollama `0.40.4` supports the observed exact
+   digests of `phi4-mini:latest` and `granite4:3b`; `qwen3.5:0.8b` remains an
+   allowlisted candidate but did not pass the accepted structured-response
+   contract and therefore receives no compatibility claim.
 9. **`v0.3.0F` — first-party catalog expansion:** inventory and independently
    approve each new template and profile before packaging it. No marketplace or
    remote package execution is included.
