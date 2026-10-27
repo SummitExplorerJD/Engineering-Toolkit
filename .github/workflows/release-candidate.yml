@@ -121,6 +121,23 @@ jobs:
           $binary = Join-Path candidate "engkit-$env:RELEASE_VERSION-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.extension }}"
           ./scripts/test-release-binary.ps1 -BinaryPath $binary -Version $env:RELEASE_VERSION
 
+      - name: Qualify v0.3.0 command and fallback paths
+        if: startsWith(inputs.version, 'v0.3.0')
+        shell: pwsh
+        run: |
+          $binary = Join-Path candidate "engkit-$env:RELEASE_VERSION-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.extension }}"
+          $evidence = Join-Path $env:RUNNER_TEMP "v030-qualification"
+          ./scripts/test-v030-release-binary.ps1 -BinaryPath $binary -Version $env:RELEASE_VERSION -OutputDirectory $evidence
+
+      - name: Upload v0.3.0 qualification evidence
+        if: startsWith(inputs.version, 'v0.3.0')
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: v030-qualification-${{ inputs.version }}-${{ matrix.os }}-${{ matrix.arch }}
+          path: ${{ runner.temp }}/v030-qualification/v030-release-qualification.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Test installation transaction
         shell: pwsh
         run: ./scripts/test-installer.ps1 -CandidateDirectory candidate -Version $env:RELEASE_VERSION -OS ${{ matrix.os }} -Arch ${{ matrix.arch }}

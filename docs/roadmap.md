@@ -401,8 +401,9 @@ credential, or configuration authority.
 
 **Status:** `v0.3.0A`, `v0.3.0C1`, `v0.3.0D1`, and `v0.3.0E1` completed;
 `v0.3.0B`, `v0.3.0C2`, `v0.3.0D2`, `v0.3.0E2`, and the approved
-`v0.3.0F` catalog slice are implemented locally; release qualification is not
-approved
+`v0.3.0F` catalog slice are implemented; the `v0.3.0RC` qualification harness
+is implemented and locally validated, but no candidate workflow, cross-platform
+evidence acceptance, or publication is approved
 
 This release introduces a safe operational front door and optional local
 decision assistance without changing the canonical filesystem, approval, or
@@ -464,9 +465,13 @@ Planned implementation gates:
    executable resource, marketplace, remote package, dependency, or automatic
    selection is included. Further catalog entries require another independent
    inventory and approval.
-10. **`v0.3.0RC` — release qualification:** validate Windows, Linux, and macOS
-    on AMD64 and ARM64, including optional-integration absence and failure paths,
-    before any candidate or stable publication.
+10. **`v0.3.0RC` — release qualification:** the approved preparation slice adds
+    synthetic native-binary coverage for Windows, Linux, and macOS on AMD64 and
+    ARM64, including optional-integration absence, deterministic local-advice
+    fallback, model rejection, unified-init refusal, and MCP stdio boundaries.
+    The harness is locally validated on Windows AMD64. Candidate workflow
+    execution, six-platform evidence acceptance, Git operations, and publication
+    remain separate gates.
 
 Every gate requires its own affected-file inventory, tests, risks, rollback,
 and approval. Completing the documentation gate does not authorize Go changes,
