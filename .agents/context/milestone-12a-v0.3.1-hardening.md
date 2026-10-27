@@ -78,3 +78,39 @@ defect. Only a reproduced product defect may open `v0.3.1C`.
 `v0.3.1C` must present exact source files, regression tests, compatibility
 impact, risks, and rollback before any change. If all `v0.3.1B` scenarios pass,
 the milestone records that result and stops without a candidate or release.
+
+## Observed validation outcome
+
+The separately approved `v0.3.1B1` public-install and installed-binary
+acceptance run completed successfully on Windows AMD64 on 2026-10-27. The
+public `install.ps1` matched approved digest
+`sha256:ef7bd3c1d425d4514680fdc2ae2ccc39acf448640b7555a24718f96dc091d120`
+and installed into the exact isolated root without administrator rights or PATH
+mutation. The installed executable matched approved digest
+`sha256:8775446dce378fe29ca8d19895684208706a169996d738873fd7d3b0174e86ce`,
+reported `v0.3.0`, and exposed catalog `engineering-toolkit@0.3.0`.
+
+Both the native release smoke and the complete `v0.3.0` synthetic qualification
+harness passed against that isolated public installation. The bounded evidence
+record uses schema `engkit.release-qualification/v1alpha1`, names exact version
+`v0.3.0`, catalog `0.3.0`, the three exact Go profiles, and all eight approved
+scenarios. Its retained SHA-256 is
+`91985eab0948c992455ef5505e50f1cbabc27d9e890c044e8293a79fda2caf89`.
+The existing user installation remained byte-for-byte unchanged, and no Ollama
+request or model operation occurred.
+
+The separately approved `v0.3.1B2` installer-rollback run used a disposable
+copy of the existing local `v0.2.1-rc.1` Windows AMD64 binary as the known prior
+state. Its digest was
+`sha256:f1b07a5bf817e0fc72a440fda08f5a09854dd31cf557fc60700e6687ee487997`.
+The bounded failure injection fired after backup creation; the installer then
+restored the exact prior digest and version and removed its transaction
+directory. A subsequent explicit upgrade succeeded, produced the exact approved
+`v0.3.0` executable digest, exposed catalog `engineering-toolkit@0.3.0`, and
+left no transaction directory. PATH, the user-scoped installation, and Git
+state remained unchanged.
+
+No `v0.3.0` product defect was reproduced. Under the accepted stop condition,
+`v0.3.1C` and `v0.3.1RC` do not open, and no empty `v0.3.1` candidate, tag, or
+release is justified. The two isolated evidence roots remain retained for
+review; their cleanup requires separate approval.

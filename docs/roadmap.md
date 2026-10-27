@@ -486,8 +486,9 @@ model calls, MCP execution, Git operations, or release publication.
 
 ### `v0.3.1`: post-release validation and compatible hardening
 
-**Status:** `v0.3.1A` validation planning prepared; no validation execution,
-product correction, candidate workflow, tag, or patch release is approved
+**Status:** `v0.3.1A` planning and the separately approved `v0.3.1B1` and
+`v0.3.1B2` validations completed; no product defect was reproduced, so the
+maintenance line stopped without a correction, candidate, tag, or patch release
 
 This maintenance line starts with acceptance testing of the published
 `v0.3.0` release. It produces `v0.3.1` only when a reproducible defect requires
@@ -514,6 +515,16 @@ Planned gates:
    C changes product or release bytes. It rebuilds and qualifies all six
    supported platform targets under the existing release gates. If B passes
    without a correction, C and RC do not run.
+
+**Observed result:** A fresh public Windows AMD64 installation of `v0.3.0`
+passed exact installer, executable, version, catalog, native smoke, and all
+eight synthetic qualification checks without changing the existing user
+installation or PATH. A separate isolated failure-injection run restored exact
+prior `v0.2.1-rc.1` bytes after backup, left no transaction directory, and then
+upgraded successfully to the approved `v0.3.0` bytes and catalog. No network
+access occurred during rollback testing, no Ollama request or model operation
+occurred in either run, and Git remained clean. Because no product defect was
+reproduced, gates C and RC did not open and no `v0.3.1` release is planned.
 
 The maintenance line excludes new model tags or allowlist behavior, new MCP
 tools, catalog expansion, schema or SQLite migrations, production TUF, signing,
