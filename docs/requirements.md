@@ -46,6 +46,19 @@ The system shall pause before material changes identified by policy or plan. App
 
 The system may maintain an optional SQLite database for contextual discovery, search, and acceleration. The index shall be rebuildable exclusively from canonical filesystem artifacts.
 
+For explicitly selected real workspaces, contextual indexing may include
+bounded textual source files beneath configured workspace-relative source
+roots. Source selection, exclusions, byte limits, chunk boundaries, language
+hints, line ranges, and content digests shall be deterministic and recorded in
+the rebuildable projection. The index shall exclude linked files, binary or
+oversized content, dependency and generated-output trees, repository metadata,
+and known secret-bearing paths by default.
+
+Retrieval shall optimize for minimum useful context rather than maximum result
+volume. Search returns compact ranked snippets first; exact indexed excerpts
+require a separate bounded read. Callers shall be able to constrain path,
+artifact kind, result count, and total response bytes.
+
 ### FR-009: Agent adapters
 
 The system shall provide selective adapters for Codex, Claude Code, and OpenCode. Each adapter shall declare supported capabilities and render only provider-appropriate assets.
@@ -208,6 +221,13 @@ writes to standard output according to the protocol, and keep diagnostics on
 standard error. The initial server shall not open a listening socket, expose
 mutation tools, execute skill resources, access credentials, or grant approval.
 
+A later read-only MCP expansion may expose context status, indexed-source
+inventory, filtered search, indexed excerpt reads, and a bounded workspace tree
+through application-owned use cases. It shall use staged retrieval and compact
+defaults to reduce model-context consumption. It shall not expose a database
+path or SQL interface, rebuild the index, read arbitrary unindexed files, invoke
+a model, or broaden the authority of the launching harness.
+
 ### FR-022: First-party catalog growth
 
 The system shall support incremental addition of independently reviewed,
@@ -256,6 +276,13 @@ shall not authorize execution by themselves.
 ### NFR-007: Performance
 
 Common local inspection commands should complete interactively on typical repositories. Optional indexing shall improve discovery without being required for correctness.
+
+Context operations shall enforce deterministic byte and item budgets at index,
+query, and protocol boundaries. Default MCP results shall favor a small number
+of compact summaries and snippets, and shall require an explicit follow-up for
+larger excerpts. Validation shall measure indexed files and bytes, query result
+bytes, and approximate context reduction against a bounded full-file baseline;
+it shall not claim exact model-token counts without a pinned tokenizer.
 
 ### NFR-008: Compatibility
 
@@ -755,4 +782,124 @@ SQLite database, provider CLI, credential, or network connection.
 - Planning acceptance does not authorize network access, installation,
   workspace mutation, failure injection, cleanup, code changes, Git operations,
   workflow execution, tagging, or release publication.
+
+## 26. `v0.4.0A` real-workspace context and MCP design acceptance criteria
+
+- The primary product outcome is lower context consumption for repository
+  understanding: callers inspect compact workspace facts, search bounded
+  snippets, and request only the exact indexed excerpts needed for a task.
+- Source indexing is opt-in through explicit workspace-relative roots. The
+  design must define deterministic textual-file eligibility, built-in excluded
+  paths, user exclusions, symlink refusal, per-file and aggregate limits, chunk
+  boundaries, and freshness evidence before implementation.
+- SQLite remains an optional, local, disposable projection. A schema change is
+  handled by rebuilding into a new database and atomically replacing the old
+  projection, never by treating derived rows as canonical or irreplaceable.
+- The proposed read-only MCP additions are `context_status`,
+  `context_sources`, enhanced `context_search`, `context_read`, and
+  `workspace_tree`. Exact schemas, byte limits, pagination, error behavior, and
+  equivalence with application use cases must be accepted before code changes.
+- Staged retrieval is mandatory. Status and tree results contain no file
+  contents; search defaults to compact snippets; `context_read` can return only
+  indexed text from the same fresh projection and requires an exact path and
+  bounded line range or chunk identity.
+- MCP results shall not duplicate the same excerpt in structured and textual
+  compatibility fields when the negotiated client contract permits a compact
+  representation. C1 must test both structured-content clients and clients that
+  require text compatibility before changing the existing response convention.
+- Result budgets are expressed in deterministic UTF-8 bytes and item counts.
+  Token savings are evaluated as an approximate ratio against a declared
+  bounded baseline because model tokenizers differ and no tokenizer dependency
+  is introduced by the design slice.
+- Real-workspace validation begins with a local MCP test client and explicitly
+  selected projects. Retained evidence contains counts, timings, digests,
+  budget utilization, and sanitized outcomes, but no source text, prompts,
+  credentials, unrelated paths, or environment values.
+- Starting an AI harness against a real project is a separate disclosure gate:
+  MCP excerpts can enter that harness's model context even when the Engineering
+  Toolkit server itself performs no network request.
+- The initial expansion remains read-only. MCP index rebuild, plan approval or
+  execution, recovery, canonical-file mutation, provider invocation, Ollama,
+  remote transport, resources, prompts, and sampling remain outside scope.
+- `v0.4.0A` changes documentation only. It authorizes no Go or configuration
+  change, SQLite schema change, dependency operation, real-project indexing,
+  MCP execution, model call, network access, Git operation, or release action.
+- Production TUF activation moves to a later independently approved release so
+  update trust and real-workspace context do not share one implementation and
+  risk boundary.
+
+## 27. `v0.4.0B1` context-index schema acceptance criteria
+
+- `engkit.config/v1alpha1` gains only an optional `context` mapping with 1 to 32
+  explicit source roots and up to 128 prefix exclusions. Existing configuration
+  remains valid and continues documentation-only indexing when the mapping is
+  absent.
+- Discovery uses a fixed textual extension and basename allowlist, mandatory
+  VCS, dependency, generated-output, state, and secret path exclusions, explicit
+  user prefix exclusions, linked-path refusal, valid UTF-8, and exact size and
+  aggregate limits. It does not interpret globs, environment variables, Git
+  ignore rules, or content as configuration.
+- SQLite advances to `user_version = 2` through complete rebuild and atomic
+  replacement, never an authoritative in-place migration. A v1 projection is
+  unsupported for reads but remains preserved until successful v2 publication.
+- Exact source bytes and normalized LF text have separate digests. Stable,
+  non-overlapping chunks bind path, source digest, ordinal, inclusive line
+  range, and content digest; one chunk is at most 8 KiB and 120 lines.
+- Hard rebuild ceilings are 20,000 candidates, 1 MiB per eligible file,
+  128 MiB total eligible source, 50,000 stored chunks, and a 512 MiB published
+  database. Aggregate overflow fails before publication rather than creating a
+  partial index.
+- The v2 database separates metadata, sources, chunks, sanitized exclusion
+  counts, and an FTS5 external-content search table. FTS5 comes from the already
+  pinned SQLite module and adds no module-version change.
+- Status, source inventory, filtered search, and indexed read are
+  application-owned, versioned, freshness-checked, and bounded. Retrieval never
+  exposes SQL, an absolute database path, excluded paths, or arbitrary unindexed
+  files.
+- B2 is limited to the exact source and test inventory in the index contract;
+  it changes no MCP handler, dependency version, catalog, initialization output,
+  provider, model, TUF behavior, Git state, workflow, or release artifact.
+- B1 changes documentation only and authorizes no configuration edit, database
+  operation, implementation, real-project indexing, MCP execution, model call,
+  network access, Git operation, or publication.
+
+## 28. `v0.4.0C1` compact MCP expansion acceptance criteria
+
+- The fixed server inventory expands from eight to twelve tools by adding
+  `context_status`, `context_sources`, `context_read`, and `workspace_tree` and
+  enhancing the existing `context_search`. No tool rebuilds or mutates the
+  index.
+- Every expanded context tool accepts an optional `response_mode`. `compact` is
+  the default and places the complete typed result only in
+  `structuredContent`; its text content is a bounded summary with no excerpt
+  duplication. `text` places the complete JSON result only in text content and
+  omits `structuredContent` for compatibility clients.
+- Safe tool errors use bounded text content only, set the protocol error flag,
+  and expose no partial structured result, SQL, database path, credential,
+  environment value, excluded path, or unrelated absolute path.
+- Encoded result ceilings are 16 KiB for status, 64 KiB for source inventory,
+  32 KiB for search, 40 KiB for indexed read, and 64 KiB for workspace tree.
+  Application item, depth, line, and content-byte limits remain independently
+  enforced before protocol encoding.
+- Source inventory and workspace-tree continuation bind the exact fresh
+  projection fingerprint. A rebuild invalidates earlier continuation inputs
+  rather than mixing pages from different projections.
+- `workspace_tree` is synthesized only from paths in the fresh indexed-source
+  inventory. It does not traverse the canonical filesystem and cannot reveal
+  excluded or unindexed names.
+- The adapter retains schemas derived by the pinned official MCP SDK but uses a
+  reviewed low-level handler because the typed helper inserts a duplicate JSON
+  text fallback when structured content is otherwise sufficient. It does not
+  reimplement protocol framing or negotiation.
+- C2 conformance must compare application results with both protocol response
+  modes, prove excerpt bytes occur in only one representation, exercise stale
+  continuation, limits, truncation, cancellation, safe errors, and output
+  isolation, and retain the existing tools-only stdio capability boundary.
+- C2 is limited to the exact source and test inventory recorded by the C1
+  contract. It adds no module version, network transport, resource, prompt,
+  sampling, Ollama call, provider configuration, index rebuild tool, canonical
+  mutation, or real-project execution.
+- C1 changes documentation only. It authorizes no Go change, MCP execution,
+  database operation, real-project indexing, model call, dependency operation,
+  network access, Git operation, workflow, installation, or publication.
 

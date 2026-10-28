@@ -4,15 +4,18 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/contextsearch"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/contextview"
 )
 
 func TestServerAdvertisesOnlyFixedReadOnlyTools(t *testing.T) {
@@ -32,7 +35,7 @@ func TestServerAdvertisesOnlyFixedReadOnlyTools(t *testing.T) {
 		}
 	}
 	sort.Strings(names)
-	want := []string{"catalog_inspect", "context_search", "engkit_doctor", "plan_inspect", "profiles_recommend", "skills_list", "skills_validate", "workspace_inspect"}
+	want := []string{"catalog_inspect", "context_read", "context_search", "context_sources", "context_status", "engkit_doctor", "plan_inspect", "profiles_recommend", "skills_list", "skills_validate", "workspace_inspect", "workspace_tree"}
 	if !reflect.DeepEqual(names, want) {
 		t.Fatalf("tools = %#v, want %#v", names, want)
 	}
@@ -65,6 +68,77 @@ func TestWorkspaceAndContextResultsAreStructured(t *testing.T) {
 	}
 }
 
+func TestContextResponseModesDoNotDuplicateExcerpt(t *testing.T) {
+	server := newTestServer(t, contextsearch.OptionsSearchFunc(func(_ context.Context, _, query string, options contextsearch.Options) (contextsearch.Response, error) {
+		return contextsearch.Response{SchemaVersion: contextsearch.Schema, Query: query, Fresh: true, Results: []contextsearch.Result{}, AppliedLimit: options.Limit, AppliedMaxBytes: options.MaxContentBytes}, nil
+	}))
+	client, closeSessions := connectTestClient(t, server)
+	defer closeSessions()
+
+	compact, err := client.CallTool(context.Background(), &mcp.CallToolParams{Name: "context_read", Arguments: map[string]any{"path": "internal/example.go", "chunk": testProjection}})
+	if err != nil || compact.IsError || compact.StructuredContent == nil {
+		t.Fatalf("compact result = %#v, err = %v", compact, err)
+	}
+	compactText := resultText(t, compact)
+	if strings.Contains(compactText, "unique indexed excerpt") || len([]byte(compactText)) > MaxSummaryBytes {
+		t.Fatalf("compact text duplicated content or exceeded its bound: %q", compactText)
+	}
+
+	textResult, err := client.CallTool(context.Background(), &mcp.CallToolParams{Name: "context_read", Arguments: map[string]any{"path": "internal/example.go", "chunk": testProjection, "response_mode": "text"}})
+	if err != nil || textResult.IsError || textResult.StructuredContent != nil {
+		t.Fatalf("text result = %#v, err = %v", textResult, err)
+	}
+	if got := strings.Count(resultText(t, textResult), "unique indexed excerpt"); got != 1 {
+		t.Fatalf("text response contains excerpt %d times", got)
+	}
+}
+
+func TestContextErrorsAreSafeAndEncodedLimitsFailClosed(t *testing.T) {
+	for _, test := range []struct {
+		name   string
+		reader contextview.Reader
+		check  func(*testing.T, *mcp.CallToolResult, string)
+	}{
+		{
+			name: "root is scrubbed",
+			reader: contextview.ReaderFuncs{ReadFunc: func(_ context.Context, root string, _ contextview.ReadRequest) (contextview.ReadResult, error) {
+				return contextview.ReadResult{}, errors.New(root + `\private failure`)
+			}},
+			check: func(t *testing.T, result *mcp.CallToolResult, root string) {
+				if strings.Contains(resultText(t, result), root) {
+					t.Fatalf("error exposed root: %q", resultText(t, result))
+				}
+			},
+		},
+		{
+			name: "encoded ceiling",
+			reader: contextview.ReaderFuncs{ReadFunc: func(context.Context, string, contextview.ReadRequest) (contextview.ReadResult, error) {
+				return contextview.ReadResult{SchemaVersion: contextview.ReadSchema, Path: "internal/example.go", Content: strings.Repeat("x", MaxReadResponseBytes), AppliedBytes: MaxReadResponseBytes}, nil
+			}},
+			check: func(t *testing.T, result *mcp.CallToolResult, _ string) {
+				if !strings.Contains(resultText(t, result), "protocol limit") {
+					t.Fatalf("unexpected limit error: %q", resultText(t, result))
+				}
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			root := t.TempDir()
+			server, err := New(root, Dependencies{Version: "v0.4.0-test", ContextReader: test.reader})
+			if err != nil {
+				t.Fatal(err)
+			}
+			client, closeSessions := connectTestClient(t, server)
+			defer closeSessions()
+			result, err := client.CallTool(context.Background(), &mcp.CallToolParams{Name: "context_read", Arguments: map[string]any{"path": "internal/example.go", "chunk": testProjection}})
+			if err != nil || !result.IsError || result.StructuredContent != nil {
+				t.Fatalf("result = %#v, err = %v", result, err)
+			}
+			test.check(t, result, server.root)
+		})
+	}
+}
+
 func TestToolInputSchemasRejectUnknownAndOversizedValues(t *testing.T) {
 	server := newTestServer(t, contextsearch.SearchFunc(func(context.Context, string, string) (contextsearch.Response, error) {
 		return contextsearch.Response{SchemaVersion: contextsearch.Schema, Fresh: true, Results: []contextsearch.Result{}}, nil
@@ -75,6 +149,10 @@ func TestToolInputSchemasRejectUnknownAndOversizedValues(t *testing.T) {
 	for _, params := range []*mcp.CallToolParams{
 		{Name: "workspace_inspect", Arguments: map[string]any{"unknown": true}},
 		{Name: "context_search", Arguments: map[string]any{}},
+		{Name: "context_search", Arguments: map[string]any{"query": "x", "limit": 0}},
+		{Name: "context_sources", Arguments: map[string]any{"after": "internal/z.go"}},
+		{Name: "context_read", Arguments: map[string]any{"path": "../escape", "start_line": 1, "end_line": 1}},
+		{Name: "workspace_tree", Arguments: map[string]any{"max_depth": 9}},
 		{Name: "skills_validate", Arguments: map[string]any{"id": "INVALID"}},
 	} {
 		if result, err := client.CallTool(context.Background(), params); err == nil {
@@ -159,11 +237,42 @@ type teeWriteCloser struct {
 
 func newTestServer(t *testing.T, searcher contextsearch.Searcher) *Server {
 	t.Helper()
-	server, err := New(t.TempDir(), Dependencies{Version: "v0.3.0-test", ContextSearch: searcher})
+	server, err := New(t.TempDir(), Dependencies{Version: "v0.4.0-test", ContextSearch: searcher, ContextReader: testContextReader()})
 	if err != nil {
 		t.Fatal(err)
 	}
 	return server
+}
+
+const testProjection = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+func testContextReader() contextview.Reader {
+	return contextview.ReaderFuncs{
+		StatusFunc: func(context.Context, string) (contextview.Status, error) {
+			return contextview.Status{SchemaVersion: contextview.StatusSchema, Exists: true, Supported: true, Fresh: true, ProjectionFingerprint: testProjection, SourceCount: 1, ChunkCount: 1}, nil
+		},
+		SourcesFunc: func(_ context.Context, _ string, options contextview.SourceOptions) (contextview.Sources, error) {
+			return contextview.Sources{SchemaVersion: contextview.SourcesSchema, ProjectionFingerprint: testProjection, Items: []contextview.Source{{Path: "internal/example.go", Kind: "source", Language: "go", ChunkCount: 1}}}, nil
+		},
+		ReadFunc: func(context.Context, string, contextview.ReadRequest) (contextview.ReadResult, error) {
+			return contextview.ReadResult{SchemaVersion: contextview.ReadSchema, Path: "internal/example.go", SourceSHA256: testProjection, ContentSHA256: testProjection, StartLine: 1, EndLine: 1, Content: "unique indexed excerpt", AppliedBytes: 22}, nil
+		},
+		TreeFunc: func(context.Context, string, contextview.TreeOptions) (contextview.TreeResult, error) {
+			return contextview.TreeResult{SchemaVersion: contextview.TreeSchema, ProjectionFingerprint: testProjection, AppliedDepth: 3, AppliedLimit: 100, Entries: []contextview.TreeEntry{{Path: "internal", Kind: "directory"}, {Path: "internal/example.go", Kind: "source"}}}, nil
+		},
+	}
+}
+
+func resultText(t *testing.T, result *mcp.CallToolResult) string {
+	t.Helper()
+	if len(result.Content) != 1 {
+		t.Fatalf("content blocks = %d, want 1", len(result.Content))
+	}
+	text, ok := result.Content[0].(*mcp.TextContent)
+	if !ok {
+		t.Fatalf("content type = %T", result.Content[0])
+	}
+	return text.Text
 }
 
 func connectTestClient(t *testing.T, server *Server) (*mcp.ClientSession, func()) {

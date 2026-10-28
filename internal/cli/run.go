@@ -17,6 +17,7 @@ import (
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/composition"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/compositionexec"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/contextsearch"
+	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/contextview"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/doctor"
 	"github.com/SummitExplorerJD/Engineering-Toolkit/internal/execution"
 	sqliteindex "github.com/SummitExplorerJD/Engineering-Toolkit/internal/index/sqlite"
@@ -130,7 +131,13 @@ func runMCP(args []string, stderr io.Writer) error {
 	}
 	server, err := mcpserver.New(*root, mcpserver.Dependencies{
 		Version:       Version,
-		ContextSearch: contextsearch.SearchFunc(sqliteindex.Search),
+		ContextSearch: contextsearch.OptionsSearchFunc(sqliteindex.SearchWithOptions),
+		ContextReader: contextview.ReaderFuncs{
+			StatusFunc:  sqliteindex.Inspect,
+			SourcesFunc: sqliteindex.ListSources,
+			ReadFunc:    sqliteindex.ReadIndexed,
+			TreeFunc:    sqliteindex.Tree,
+		},
 	})
 	if err != nil {
 		return err
@@ -1052,7 +1059,7 @@ func runSpecKit(args []string, stdout, stderr io.Writer) error {
 
 func runContext(args []string, stdout, stderr io.Writer) error {
 	if len(args) == 0 {
-		return &usageError{message: "context requires a subcommand: rebuild, status, or search"}
+		return &usageError{message: "context requires a subcommand: rebuild, status, sources, search, or read"}
 	}
 	switch args[0] {
 	case "rebuild":
@@ -1086,13 +1093,57 @@ func runContext(args []string, stdout, stderr io.Writer) error {
 	case "search":
 		flags := newFlagSet("context search", stderr)
 		root := flags.String("root", ".", "initialized workspace root")
+		pathPrefix := flags.String("path-prefix", "", "normalized indexed path prefix")
+		kind := flags.String("kind", "", "exact artifact kind")
+		language := flags.String("language", "", "exact source language")
+		limit := flags.Int("limit", 0, "result count: 1-20; default 5")
+		maxContentBytes := flags.Int("max-content-bytes", 0, "combined snippet bytes: 1-16384; default 4096")
 		if err := flags.Parse(args[1:]); err != nil {
 			return &usageError{message: err.Error()}
 		}
 		if flags.NArg() != 1 {
 			return &usageError{message: "context search requires exactly one query argument"}
 		}
-		result, err := sqliteindex.Search(context.Background(), *root, flags.Arg(0))
+		result, err := sqliteindex.SearchWithOptions(context.Background(), *root, flags.Arg(0), contextsearch.Options{PathPrefix: *pathPrefix, Kind: *kind, Language: *language, Limit: *limit, MaxContentBytes: *maxContentBytes})
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "sources":
+		flags := newFlagSet("context sources", stderr)
+		root := flags.String("root", ".", "initialized workspace root")
+		pathPrefix := flags.String("path-prefix", "", "normalized indexed path prefix")
+		kind := flags.String("kind", "", "exact artifact kind")
+		language := flags.String("language", "", "exact source language")
+		limit := flags.Int("limit", 0, "source count: 1-200; default 50")
+		after := flags.String("after", "", "exclusive normalized source path")
+		projection := flags.String("projection", "", "projection fingerprint required with --after")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "context sources does not accept positional arguments"}
+		}
+		result, err := sqliteindex.ListSources(context.Background(), *root, contextview.SourceOptions{PathPrefix: *pathPrefix, Kind: *kind, Language: *language, Limit: *limit, After: *after, ProjectionFingerprint: *projection})
+		if err != nil {
+			return err
+		}
+		return writeJSON(stdout, result)
+	case "read":
+		flags := newFlagSet("context read", stderr)
+		root := flags.String("root", ".", "initialized workspace root")
+		indexedPath := flags.String("path", "", "exact normalized indexed path")
+		chunk := flags.String("chunk", "", "exact indexed chunk identity")
+		startLine := flags.Int("start-line", 0, "inclusive source start line")
+		endLine := flags.Int("end-line", 0, "inclusive source end line")
+		maxBytes := flags.Int("max-bytes", 0, "response content bytes: 1-32768; default 8192")
+		if err := flags.Parse(args[1:]); err != nil {
+			return &usageError{message: err.Error()}
+		}
+		if flags.NArg() != 0 {
+			return &usageError{message: "context read does not accept positional arguments"}
+		}
+		result, err := sqliteindex.ReadIndexed(context.Background(), *root, contextview.ReadRequest{Path: *indexedPath, ChunkID: *chunk, StartLine: *startLine, EndLine: *endLine, MaxBytes: *maxBytes})
 		if err != nil {
 			return err
 		}
@@ -1235,7 +1286,9 @@ var usageLines = []string{
 	"workspace init [--root PATH] --approve PLAN_ID",
 	"context rebuild [--root PATH]",
 	"context status [--root PATH]",
-	"context search [--root PATH] QUERY",
+	"context sources [--root PATH] [--path-prefix PATH] [--kind KIND] [--language LANGUAGE]",
+	"context search [--root PATH] [--path-prefix PATH] [--kind KIND] [--language LANGUAGE] QUERY",
+	"context read [--root PATH] --path FILE (--chunk SHA256 | --start-line N --end-line N)",
 	"adapters list",
 	"adapters inspect [--root PATH] --provider PROVIDER",
 	"speckit plan [--root PATH] --integration PROVIDER --version RELEASE_TAG",

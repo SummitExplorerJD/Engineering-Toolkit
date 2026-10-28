@@ -3,10 +3,11 @@
 ## 1. Status and authority
 
 This document defines the approved `v0.3.0D1` contract for the first
-Engineering Toolkit Model Context Protocol server. The `v0.3.0D2`
-implementation is now present locally and remains unpublished. Configuring a
-harness, committing or pushing the implementation, and publishing the
-capability remain separate approval boundaries.
+Engineering Toolkit Model Context Protocol server and records the additive
+documentation-only `v0.4.0C1` expansion. The original implementation shipped
+in `v0.3.0`; the C1 additions are not implemented. Configuring a real-project
+harness, changing implementation, committing, pushing, and publishing remain
+separate approval boundaries.
 
 The server is a read-only presentation adapter over application-owned use
 cases. Canonical filesystem artifacts remain authoritative. SQLite remains an
@@ -243,7 +244,38 @@ configuration.
   connection.
 - Windows, Linux, and macOS builds remain valid for AMD64 and ARM64.
 
-## 10. Deferred capabilities
+## 10. `v0.4.0C1` additive context contract
+
+The proposed fixed inventory contains twelve tools. It preserves the original
+eight and adds `context_status`, `context_sources`, `context_read`, and
+`workspace_tree`; `context_search` gains bounded path, kind, language, result,
+and content-byte filters. All five context operations delegate to
+application-owned ports, require a fresh projection, and remain read-only.
+
+Every expanded context input accepts optional `response_mode` with default
+`compact` and compatibility value `text`:
+
+- `compact` returns the complete typed result once in `structuredContent` and a
+  source-free text summary of at most 256 UTF-8 bytes;
+- `text` returns the complete JSON result once in text content and omits
+  `structuredContent`;
+- errors return bounded safe text only, set `isError`, and contain no partial
+  structured result.
+
+This explicit selection avoids duplicating excerpts through the official SDK
+typed helper's automatic JSON text fallback. The future implementation retains
+SDK-derived schemas and protocol handling, then uses a reviewed low-level tool
+handler only for validation, application invocation, result encoding, and the
+representation choice.
+
+Encoded ceilings are 16 KiB for status, 64 KiB for sources, 32 KiB for search,
+40 KiB for read, and 64 KiB for tree. `workspace_tree` is synthesized from
+fresh indexed paths and never traverses the filesystem. Index rebuild remains
+outside MCP. Exact inputs, outputs, pagination rules, application limits,
+conformance requirements, and the proposed C2 inventory are defined in
+[`context-mcp-v0.4.0-v1alpha1.md`](context-mcp-v0.4.0-v1alpha1.md).
+
+## 11. Deferred capabilities
 
 - Mutation, approval, and recovery tools.
 - Canonical-file fallback for context search.
@@ -256,7 +288,7 @@ configuration.
 Each item requires a separate threat analysis, contract, affected-file list,
 tests, rollback plan, and approval.
 
-## 11. Rollback
+## 12. Rollback
 
 The future server owns no canonical or persistent state. Removing its command,
 adapter, and dependency leaves canonical files, optional SQLite indexes,

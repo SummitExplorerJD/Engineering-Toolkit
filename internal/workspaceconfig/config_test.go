@@ -34,9 +34,23 @@ func TestParseRejectsInvalidConfiguration(t *testing.T) {
 		"schema_version: engkit.config/v1alpha1\nintelligence:\n  enabled: true\n",
 		"schema_version: engkit.config/v1alpha1\nintelligence:\n  enabled: true\n  provider: remote\n  model: granite4:3b\n",
 		"schema_version: engkit.config/v1alpha1\nintelligence:\n  enabled: true\n  provider: ollama\n  model: qwen3.5:4b\n",
+		"schema_version: engkit.config/v1alpha1\ncontext: {}\n",
+		"schema_version: engkit.config/v1alpha1\ncontext:\n  source_roots: [../outside]\n",
+		"schema_version: engkit.config/v1alpha1\ncontext:\n  source_roots: [src, src]\n",
+		"schema_version: engkit.config/v1alpha1\ncontext:\n  source_roots: [src]\n  exclude_paths: ['.']\n",
 	} {
 		if _, err := Parse([]byte(data)); err == nil {
 			t.Fatalf("Parse(%q) succeeded", data)
 		}
+	}
+}
+
+func TestParseContextSelection(t *testing.T) {
+	config, err := Parse([]byte("schema_version: engkit.config/v1alpha1\ncontext:\n  source_roots:\n    - .\n    - internal\n  exclude_paths:\n    - internal/testdata/private\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if config.Context == nil || len(config.Context.SourceRoots) != 2 || config.Context.SourceRoots[0] != "." {
+		t.Fatalf("unexpected context: %#v", config.Context)
 	}
 }

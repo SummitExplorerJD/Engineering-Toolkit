@@ -554,3 +554,91 @@ No catalog milestone enables remote marketplaces, floating versions, automatic
 selection, executable skill resources, or permission grants. Local intelligence
 may recommend only entries already accepted into the packaged catalog.
 
+## 25. Token-efficient real-workspace context boundary
+
+The `v0.4.0` context expansion follows a staged retrieval pipeline:
+
+```text
+explicit source roots
+  -> deterministic eligibility and exclusion policy
+  -> bounded textual chunks with paths, line ranges, and digests
+  -> disposable SQLite projection
+  -> application-owned status, inventory, search, read, and tree ports
+  -> CLI or read-only MCP presentation
+```
+
+The architecture optimizes for the smallest useful disclosure. A caller first
+obtains content-free status or tree metadata, then compact search snippets, and
+only then an exact excerpt from a fresh indexed chunk. Full repository dumps,
+implicit recursive reads, and arbitrary filesystem access are not application
+use cases. UTF-8 byte budgets and item limits are authoritative; approximate
+token reduction is validation evidence rather than a persisted contract.
+
+Stable projection, source, and chunk digests let callers reuse unchanged
+results instead of fetching the same text again. The protocol adapter avoids
+duplicating excerpt bytes across structured and textual compatibility payloads
+when the negotiated client behavior permits it; compatibility fallback remains
+explicitly tested rather than assumed.
+
+Source roots are explicit, workspace-relative, and subordinate to one validated
+root. The normalized `.` root may be selected explicitly for repositories with
+top-level source, but it receives the same mandatory exclusions and limits as
+every narrower root. The accepted and implemented indexing contract combines a
+conservative textual-extension allowlist with built-in exclusions for VCS
+metadata, dependencies, generated outputs, caches, credentials, private keys,
+environment files, linked paths,
+binary content, and oversized files. User exclusions may narrow the eligible
+set but cannot disable mandatory secret and boundary exclusions. Files remain
+canonical; chunks and search metadata are derived.
+
+The SQLite schema is replaceable rather than migrated as authoritative state.
+Rebuild creates and verifies a complete new projection before atomic
+publication. Freshness binds source-selection policy, source inventory, content
+digests, and schema version. A query against a missing, unsupported, or stale
+projection fails closed and explains how to rebuild through the specialized
+CLI. MCP does not rebuild it.
+
+The accepted B1 projection uses SQLite `user_version = 2`. Strict `metadata`,
+`sources`, `chunks`, and path-free `exclusion_summary` tables separate source
+identity from retrievable text. An FTS5 external-content table indexes chunk
+content with the already pinned SQLite module. Application contracts, rather
+than SQL rows, own status, source inventory, filtered search, and exact indexed
+reads. The complete schema, configuration, allowlists, limits, chunk identity,
+publication sequence, and B2 file inventory are specified in
+[`context-index-v0.4.0-v1alpha1.md`](context-index-v0.4.0-v1alpha1.md).
+
+The C1 MCP contract adds `context_status`, `context_sources`,
+`context_search`, `context_read`, and `workspace_tree`. Handlers receive only
+application ports and versioned results. `context_read` addresses content that
+was already accepted into the fresh projection; it is not a general file-read
+primitive. Status and tree results contain no source content. Search and read
+apply independent item and byte budgets so a single request cannot expand into
+an uncontrolled model context.
+
+The protocol representation is explicit rather than inferred from client
+behavior. In default `compact` mode the complete typed application result
+appears once in `structuredContent`, while text content is a summary of at most
+256 bytes without source excerpts. In `text` mode the complete JSON result
+appears once in text content and `structuredContent` is absent. A reviewed
+low-level tool handler preserves schemas derived through the pinned official
+SDK while avoiding the typed helper's automatic duplicate JSON fallback.
+
+`workspace_tree` derives directory entries only from normalized paths already
+present in the fresh indexed-source inventory. It never receives an
+unrestricted filesystem reader. Pagination inputs bind the exact projection
+fingerprint, and every protocol result has a ceiling in addition to the
+application-level item and content budgets. The complete C1 representation,
+schemas, limits, and proposed C2 source inventory are specified in
+[`context-mcp-v0.4.0-v1alpha1.md`](context-mcp-v0.4.0-v1alpha1.md).
+
+Real-workspace validation uses a local protocol client before any AI harness.
+The server itself opens no network connection, but a harness may transmit tool
+results to its model provider. Therefore attaching Codex, Claude Code, OpenCode,
+or another model-backed host to a real project is a separate disclosure and
+execution approval, not an implication of local MCP conformance.
+
+Production TUF activation is intentionally not part of `v0.4.0`. It retains the
+existing Milestone 5B approval gate and will be scheduled independently so its
+trust roots, endpoints, signing operations, and incident procedures cannot be
+conflated with context-index and protocol changes.
+

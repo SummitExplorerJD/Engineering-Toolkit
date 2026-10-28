@@ -482,6 +482,13 @@ func TestContextLifecycle(t *testing.T) {
 		t.Fatal(err)
 	}
 	initializeWithCLI(t, root)
+	config := "schema_version: engkit.config/v1alpha1\nworkspace:\n  source_layout: auto\ncontext:\n  source_roots: [.]\n"
+	if err := os.WriteFile(filepath.Join(root, ".engkit", "config.yaml"), []byte(config), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "main.go"), []byte("package main\n\nfunc TokenSavingNeedle() {}\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
 
 	for _, test := range []struct {
 		args []string
@@ -490,6 +497,7 @@ func TestContextLifecycle(t *testing.T) {
 		{args: []string{"context", "rebuild", "--root", root}, want: `"artifact_count"`},
 		{args: []string{"context", "status", "--root", root}, want: `"fresh": true`},
 		{args: []string{"context", "search", "--root", root, "context discovery"}, want: `"README.md"`},
+		{args: []string{"context", "sources", "--root", root, "--language", "go"}, want: `"main.go"`},
 	} {
 		var stdout, stderr bytes.Buffer
 		if code := Run(test.args, &stdout, &stderr); code != 0 {
@@ -498,6 +506,29 @@ func TestContextLifecycle(t *testing.T) {
 		if !strings.Contains(stdout.String(), test.want) {
 			t.Fatalf("Run(%v) output = %q, want %q", test.args, stdout.String(), test.want)
 		}
+	}
+	var searchOut, searchErr bytes.Buffer
+	if code := Run([]string{"context", "search", "--root", root, "TokenSavingNeedle"}, &searchOut, &searchErr); code != 0 {
+		t.Fatalf("source search code = %d, stderr = %q", code, searchErr.String())
+	}
+	var search struct {
+		Results []struct {
+			Path    string `json:"path"`
+			ChunkID string `json:"chunk_id"`
+		} `json:"results"`
+	}
+	if err := json.Unmarshal(searchOut.Bytes(), &search); err != nil {
+		t.Fatal(err)
+	}
+	if len(search.Results) != 1 {
+		t.Fatalf("unexpected source search: %s", searchOut.String())
+	}
+	var readOut, readErr bytes.Buffer
+	if code := Run([]string{"context", "read", "--root", root, "--path", search.Results[0].Path, "--chunk", search.Results[0].ChunkID}, &readOut, &readErr); code != 0 {
+		t.Fatalf("context read code = %d, stderr = %q", code, readErr.String())
+	}
+	if !strings.Contains(readOut.String(), "TokenSavingNeedle") {
+		t.Fatalf("context read output = %q", readOut.String())
 	}
 }
 

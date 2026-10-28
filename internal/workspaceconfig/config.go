@@ -7,7 +7,10 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
+	"strings"
+	"unicode/utf8"
 
 	"gopkg.in/yaml.v3"
 )
@@ -27,6 +30,7 @@ type Config struct {
 	SchemaVersion string        `yaml:"schema_version"`
 	Workspace     *Workspace    `yaml:"workspace,omitempty"`
 	Intelligence  *Intelligence `yaml:"intelligence,omitempty"`
+	Context       *Context      `yaml:"context,omitempty"`
 }
 
 type Workspace struct {
@@ -37,6 +41,13 @@ type Intelligence struct {
 	Enabled  bool   `yaml:"enabled"`
 	Provider string `yaml:"provider,omitempty"`
 	Model    string `yaml:"model,omitempty"`
+}
+
+// Context selects additional bounded textual source roots for the rebuildable
+// context index. Omission preserves the legacy documentation-only inventory.
+type Context struct {
+	SourceRoots  []string `yaml:"source_roots"`
+	ExcludePaths []string `yaml:"exclude_paths,omitempty"`
 }
 
 func Load(root string) (Config, error) {
@@ -85,6 +96,9 @@ func Parse(data []byte) (Config, error) {
 	if err := validateIntelligence(config.Intelligence); err != nil {
 		return Config{}, err
 	}
+	if err := validateContext(config.Context); err != nil {
+		return Config{}, err
+	}
 	return config, nil
 }
 
@@ -105,6 +119,48 @@ func validateIntelligence(config *Intelligence) error {
 	}
 	if config.Enabled && (config.Provider != "ollama" || config.Model == "") {
 		return errors.New("enabled intelligence requires provider ollama and one allowlisted model")
+	}
+	return nil
+}
+
+func validateContext(config *Context) error {
+	if config == nil {
+		return nil
+	}
+	if len(config.SourceRoots) == 0 || len(config.SourceRoots) > 32 {
+		return errors.New("context source_roots must contain between 1 and 32 paths")
+	}
+	if len(config.ExcludePaths) > 128 {
+		return errors.New("context exclude_paths exceeds the 128-path limit")
+	}
+	if err := validateContextPaths(config.SourceRoots, true); err != nil {
+		return fmt.Errorf("context source_roots: %w", err)
+	}
+	if err := validateContextPaths(config.ExcludePaths, false); err != nil {
+		return fmt.Errorf("context exclude_paths: %w", err)
+	}
+	return nil
+}
+
+func validateContextPaths(paths []string, allowRoot bool) error {
+	seen := make(map[string]struct{}, len(paths))
+	for _, value := range paths {
+		if value == "" || len([]byte(value)) > 512 || !utf8.ValidString(value) || strings.ContainsAny(value, "\\\x00") {
+			return errors.New("paths must contain between 1 and 512 UTF-8 bytes and use forward slashes")
+		}
+		if strings.HasPrefix(value, "/") || strings.HasPrefix(value, "//") || (len(value) >= 2 && value[1] == ':') {
+			return errors.New("paths must be workspace-relative")
+		}
+		if path.Clean(value) != value || value == ".." || strings.HasPrefix(value, "../") {
+			return errors.New("paths must be normalized and must not contain dot segments")
+		}
+		if value == "." && !allowRoot {
+			return errors.New("the workspace root cannot be excluded")
+		}
+		if _, exists := seen[value]; exists {
+			return errors.New("paths must be unique")
+		}
+		seen[value] = struct{}{}
 	}
 	return nil
 }

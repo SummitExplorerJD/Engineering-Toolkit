@@ -32,16 +32,19 @@ func AdviceExcerpts(ctx context.Context, root string) ([]localintelligence.Excer
 	defer db.Close()
 
 	rows, err := db.QueryContext(ctx, `
-		SELECT path, sha256, substr(content, 1, 8193)
-		FROM artifacts
-		WHERE content IS NOT NULL
+		SELECT s.path, s.source_sha256, substr((
+		  SELECT group_concat(c.content, '') FROM chunks c
+		  WHERE c.source_path = s.path ORDER BY c.ordinal
+		), 1, 8193)
+		FROM sources s
+		WHERE s.chunk_count > 0
 		  AND (
-		    path = 'README.md'
-		    OR path = 'AGENTS.md'
-		    OR (path LIKE 'docs/%' AND lower(path) LIKE '%.md')
-		    OR (path LIKE '.agents/conventions/%' AND lower(path) LIKE '%.md')
+		    s.path = 'README.md'
+		    OR s.path = 'AGENTS.md'
+		    OR (s.path LIKE 'docs/%' AND lower(s.path) LIKE '%.md')
+		    OR (s.path LIKE '.agents/conventions/%' AND lower(s.path) LIKE '%.md')
 		  )
-		ORDER BY path
+		ORDER BY s.path
 		LIMIT 100`)
 	if err != nil {
 		return nil, fmt.Errorf("query adviser context: %w", err)

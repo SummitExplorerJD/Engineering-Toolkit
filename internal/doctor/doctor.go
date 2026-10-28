@@ -251,7 +251,10 @@ func inspectContext(ctx context.Context, root string) Finding {
 	if !status.Exists {
 		return finding("workspace.context", ScopeWorkspace, StatusUnavailable, false, "The optional contextual index has not been built.", status.DatabasePath, nil, "Run engkit context rebuild when indexed search is desired.")
 	}
-	evidence := []Evidence{{Name: "artifacts", Value: fmt.Sprint(status.ArtifactCount)}, {Name: "rebuilt_at", Value: status.RebuiltAt}}
+	evidence := []Evidence{{Name: "artifacts", Value: fmt.Sprint(status.ArtifactCount)}, {Name: "sources", Value: fmt.Sprint(status.SourceCount)}, {Name: "chunks", Value: fmt.Sprint(status.ChunkCount)}, {Name: "rebuilt_at", Value: status.RebuiltAt}}
+	if !status.Supported {
+		return finding("workspace.context", ScopeWorkspace, StatusWarning, false, "The optional contextual index uses an unsupported schema.", status.DatabasePath, evidence, "Run engkit context rebuild before relying on indexed search.")
+	}
 	if !status.Fresh {
 		return finding("workspace.context", ScopeWorkspace, StatusWarning, false, "The optional contextual index is stale.", status.DatabasePath, evidence, "Run engkit context rebuild before relying on indexed search.")
 	}

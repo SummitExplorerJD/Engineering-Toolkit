@@ -532,3 +532,76 @@ notarization, automatic updates, marketplaces, and package-manager work.
 Execution, cleanup, Git operations, workflows, and publication remain separate
 approval boundaries.
 
+### `v0.4.0`: token-efficient real-workspace context and MCP expansion
+
+**Status:** gates A through C2, the separately approved D1 local real-project
+pilot, and the RC qualification preparation are complete locally. The optional
+D2 model-backed harness is skipped; candidate workflow execution, Git
+operations, and publication remain separately gated
+
+This release is intended to reduce the repository context that an agent must
+consume while making the existing local SQLite and MCP boundaries useful on
+explicitly selected real projects. It keeps canonical files authoritative and
+starts with local read-only validation before any model-backed harness.
+
+Planned gates:
+
+1. **`v0.4.0A` — requirements, architecture, and threat contract:** define
+   explicit source selection, mandatory exclusions, deterministic chunks,
+   freshness, response budgets, staged retrieval, safe evidence, and the exact
+   read-only MCP surface. This gate changes documentation only.
+2. **`v0.4.0B1` — SQLite schema and rebuild packet:** completed. Fixes the exact
+   configuration delta, replaceable schema, application ports, affected files,
+   unchanged module dependency set, tests, failure behavior, and rollback. The
+   additive configuration preserves legacy files; SQLite v2 is rebuilt rather
+   than migrated; mandatory exclusions, non-overlapping chunks, FTS5 search,
+   and byte budgets remain bounded. No implementation is authorized by B1.
+3. **`v0.4.0B2` — bounded source-index implementation:** completed locally
+   after separate approval. It implements explicit-root source discovery,
+   exclusion and binary checks, deterministic chunks, atomic full rebuild,
+   freshness inspection, filtered search, and exact indexed-excerpt retrieval.
+   Focused and full tests, vet, six cross-build targets, and diff checks passed;
+   no real project, MCP client, model, dependency change, or Git operation was
+   used.
+4. **`v0.4.0C1` — MCP expansion packet:** completed as documentation only. It
+   binds exact schemas and budgets for `context_status`, `context_sources`,
+   enhanced `context_search`, `context_read`, and `workspace_tree`, plus
+   explicit non-duplicating `compact` and compatibility `text` response modes.
+   The server remains stdio-only and read-only.
+5. **`v0.4.0C2` — MCP implementation and synthetic conformance:** completed
+   locally after separate approval. Twelve fixed read-only tools delegate only
+   to application ports; compact and text response modes, non-duplication,
+   limits, indexed tree synthesis, output isolation, cancellation, strict
+   inputs, and application equivalence passed focused and full validation.
+6. **`v0.4.0D1` — local real-project pilot:** completed against a sanitized
+   temporary copy of the current Engineering Toolkit working tree. The local
+   official-SDK stdio client observed 264 sources and 474 chunks, all twelve
+   tools, no excluded path exposure, and three passing staged-retrieval checks
+   with 83.58%, 90.83%, and 87.10% byte reductions against bounded full-file
+   baselines. Retained evidence contains only metrics, digests, labels, and
+   outcomes; the temporary copy, configuration, index, binaries, and client
+   were removed.
+7. **`v0.4.0D2` — optional agent-harness pilot:** open only through another
+   approval that names the project, provider, exact host version, authentication
+   and network behavior, disclosure boundary, queries, evidence, cleanup, and
+   stop conditions.
+8. **`v0.4.0RC` — release qualification:** preparation is complete locally.
+   The additive native smoke covers SQLite v2 freshness, mandatory and user
+   exclusions, bounded search/read, stale refusal, the twelve-tool MCP
+   inventory, indexed tree, compact non-duplication, text compatibility, strict
+   inputs, and CLI/MCP equivalence using synthetic content only. A local
+   `v0.4.0-rc.1` package built all six binaries and its Windows AMD64 smoke
+   passed all ten scenarios. The manual six-runner workflow remains a separate
+   execution and Git approval gate.
+
+Token-efficiency acceptance compares bytes returned by staged MCP retrieval
+with a declared bounded full-file baseline and records the ratio. It does not
+claim exact provider token counts or introduce a tokenizer dependency. Default
+operations must remain useful without returning complete files or repository
+trees.
+
+Production TUF activation, self-update, model changes, MCP mutation, remote MCP
+transport, automatic index rebuild, new dependencies, and provider integration
+remain outside this planning gate. Each later gate requires its own exact file
+inventory, tests, risks, rollback, and explicit approval.
+
