@@ -69,9 +69,11 @@ function Invoke-ExpectedFailure {
     param([Parameter(Mandatory = $true)][string[]]$Arguments)
 
     & $resolvedBinary @Arguments 1> $null 2> $null
-    if ($LASTEXITCODE -eq 0) {
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -eq 0) {
         throw 'engkit command unexpectedly succeeded'
     }
+    $global:LASTEXITCODE = 0
 }
 
 function Send-MCPRequest {
