@@ -4,7 +4,9 @@
 
 This document defines the non-publishing qualification gate for `v0.4.0`.
 Preparation and a local Windows AMD64 smoke for `v0.4.0-rc.1` completed on
-2026-10-28. The six-platform GitHub Actions candidate workflow has not run.
+2026-10-28. Candidate `v0.4.0-rc.2` subsequently satisfied the complete
+six-platform gate at commit `1de90e29242ecb6ec5171a8463203b3a20b3d657` in
+[GitHub Actions run 40770854564](https://github.com/SummitExplorerJD/Engineering-Toolkit/actions/runs/40770854564).
 
 This gate does not authorize a commit, push, workflow run, tag, GitHub Release,
 installer execution outside an isolated test root, model invocation, provider
@@ -99,7 +101,7 @@ independent review after the workflow succeeds.
 
 ## Candidate acceptance
 
-`v0.4.0-rc.1` qualifies only if the validation/build job, all six native smoke
+`v0.4.0-rc.2` qualifies only if the validation/build job, all six native smoke
 jobs, the ten v0.4.0 scenarios on every tuple, all installer transactions, all
 provider-conformance jobs, and the aggregate provider comparison pass for one
 exact commit. Temporary workflow artifacts are one candidate package, six
@@ -128,12 +130,45 @@ No GitHub Actions workflow, network service, Git operation, tag, release,
 installation, provider runtime, Ollama daemon, or model was invoked. Local
 success does not substitute for native execution on the other five tuples.
 
+## Observed workflow qualification
+
+On 2026-10-28, the first `v0.4.0-rc.1` workflow attempt exposed a harness exit
+status defect after every v0.4.0 scenario had passed. That candidate was
+discarded. Commit `1de90e29242ecb6ec5171a8463203b3a20b3d657` clears the
+expected negative-command status after validating it. A later successful run
+under the same `rc.1` identifier demonstrated the correction but did not revive
+the discarded candidate.
+
+Fresh candidate `v0.4.0-rc.2` then passed run `40770854564` at the corrected
+commit. The validation/build job, all six native smoke jobs, all installer and
+provider-conformance checks, and the aggregate provider comparison completed
+successfully. The workflow produced one candidate package, six provider
+artifacts, and six v0.4.0 qualification artifacts.
+
+Independent artifact review confirmed:
+
+- all 13 downloaded workflow artifact digests matched GitHub metadata;
+- the candidate package digest was
+  `7c021629ea28d16f70137d69de9c156f6710b750d97fa1d351f512b621821e16`;
+- the package contained the expected 11 files and all 10 `SHA256SUMS` entries
+  matched their contents;
+- all six qualification records named `v0.4.0-rc.2`, reported 12 tools, 4
+  sources, 3 chunks, 3 exclusions, 6 tree entries, and the same 10 scenarios;
+  and
+- all six provider artifacts contained portable and runtime evidence for
+  Codex, Claude, and OpenCode on the declared operating-system and architecture
+  tuple.
+
+The downloaded review copies were removed. No candidate artifact was renamed
+or retained for stable publication. Tagging, a stable `v0.4.0` rebuild, release
+asset upload, publication, and local installation remain separate approvals.
+
 ## Failure and rollback
 
 Any failed tuple blocks the candidate. Preserve bounded logs, discard its
 artifacts, correct source or harness under a new approval where required, and
-use `v0.4.0-rc.2`. Never rename a candidate binary, reuse failed evidence, move
-an existing tag, or replace an immutable asset.
+advance to the next `-rc.N` identifier. Never rename a candidate binary, reuse
+failed evidence, move an existing tag, or replace an immutable asset.
 
 Before workflow execution, rollback reverts only the v0.4.0 smoke script,
 workflow steps, this contract, roadmap status, and milestone context. No Go

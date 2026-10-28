@@ -10,10 +10,10 @@ layout, model behavior, provider adapter, Git state, or release.
 
 ## Qualification boundary
 
-The candidate identifier is `v0.4.0-rc.1`. The workflow retains read-only
-repository permissions and the existing pinned action revisions. Existing test,
-vet, vulnerability, TUF staging, packaging, native version, installer, and
-provider-conformance steps remain unchanged.
+The accepted candidate identifier is `v0.4.0-rc.2`. The workflow retains
+read-only repository permissions and the existing pinned action revisions.
+Existing test, vet, vulnerability, TUF staging, packaging, native version,
+installer, and provider-conformance steps remain unchanged.
 
 Each native tuple additionally runs `scripts/test-v040-release-binary.ps1` in a
 synthetic workspace. The smoke covers SQLite v2 rebuild and freshness, mandatory
@@ -53,12 +53,32 @@ No workflow, network, Git operation, installer, provider runtime, Ollama daemon,
 model, tag, or release was used. The six native workflow tuples remain the
 authoritative candidate gate.
 
+## Observed candidate qualification
+
+The first `v0.4.0-rc.1` run exposed a PowerShell exit-status defect after the
+new qualification script had reported success. The candidate was discarded.
+Commit `1de90e29242ecb6ec5171a8463203b3a20b3d657` resets the status left by an
+expected negative command after validating the failure. A subsequent `rc.1`
+run demonstrated the correction but did not revive that candidate identifier.
+
+Fresh `v0.4.0-rc.2` passed GitHub Actions run `40770854564` on 2026-10-28. The
+validation/build job, all six native jobs, installer transactions, portable and
+runtime provider checks, aggregate provider comparison, and ten v0.4.0
+scenarios per tuple completed successfully.
+
+The run produced 13 temporary artifacts. Independent review matched every
+artifact digest to GitHub metadata, matched all 10 package checksums across the
+unchanged 11-file package, validated six bounded qualification records, and
+validated portable and runtime records for all three providers on all six
+tuples. The candidate package artifact digest was
+`7c021629ea28d16f70137d69de9c156f6710b750d97fa1d351f512b621821e16`.
+Downloaded review copies were removed after inspection.
+
 ## Remaining approvals
 
-Preparation does not authorize committing or pushing these changes, running the
-workflow, downloading artifacts, tagging, creating a draft, uploading assets,
-publishing a release, or updating a local installation. Each remains a separate
-approval boundary.
+Candidate qualification does not authorize a stable workflow run, annotated
+tag, draft or published release, asset upload, or local installation. Each
+remains a separate approval boundary.
 
 ## Rollback
 

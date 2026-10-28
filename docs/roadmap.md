@@ -535,9 +535,10 @@ approval boundaries.
 ### `v0.4.0`: token-efficient real-workspace context and MCP expansion
 
 **Status:** gates A through C2, the separately approved D1 local real-project
-pilot, and the RC qualification preparation are complete locally. The optional
-D2 model-backed harness is skipped; candidate workflow execution, Git
-operations, and publication remain separately gated
+pilot, and RC qualification are complete. Candidate `v0.4.0-rc.2` passed the
+six-platform workflow and artifact review at commit `1de90e2`; the optional D2
+model-backed harness is skipped. Stable rebuild, Git tag, release publication,
+and local installation remain separately gated
 
 This release is intended to reduce the repository context that an agent must
 consume while making the existing local SQLite and MCP boundaries useful on
@@ -585,14 +586,17 @@ Planned gates:
    approval that names the project, provider, exact host version, authentication
    and network behavior, disclosure boundary, queries, evidence, cleanup, and
    stop conditions.
-8. **`v0.4.0RC` — release qualification:** preparation is complete locally.
+8. **`v0.4.0RC` — release qualification:** completed for `v0.4.0-rc.2`.
    The additive native smoke covers SQLite v2 freshness, mandatory and user
    exclusions, bounded search/read, stale refusal, the twelve-tool MCP
    inventory, indexed tree, compact non-duplication, text compatibility, strict
-   inputs, and CLI/MCP equivalence using synthetic content only. A local
-   `v0.4.0-rc.1` package built all six binaries and its Windows AMD64 smoke
-   passed all ten scenarios. The manual six-runner workflow remains a separate
-   execution and Git approval gate.
+   inputs, and CLI/MCP equivalence using synthetic content only. The first
+   `v0.4.0-rc.1` attempt exposed a harness exit-status defect and was discarded.
+   After the isolated correction, `v0.4.0-rc.2` passed GitHub Actions run
+   `40770854564` from commit `1de90e2` on all six tuples, including installer,
+   provider-conformance, aggregate comparison, and ten v0.4.0 scenarios per
+   tuple. Review confirmed all 13 artifact digests, the unchanged 11-file
+   package, six bounded qualification records, and six provider records.
 
 Token-efficiency acceptance compares bytes returned by staged MCP retrieval
 with a declared bounded full-file baseline and records the ratio. It does not
