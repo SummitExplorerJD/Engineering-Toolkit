@@ -4,8 +4,10 @@
 
 The `v0.3.0B` doctor contract and `v0.3.0C2` unified-init facade are implemented.
 The facade follows the accepted `v0.3.0C1` contract and reuses existing planners
-and executors without adding a persisted schema or transaction mechanism. This
-document does not authorize dependency changes, Git operations, or publication.
+and executors without adding a persisted schema or transaction mechanism.
+`v0.5.0A` additionally fixes the documentation-only contract for an optional
+human doctor summary. This document does not authorize implementation,
+dependency changes, Git operations, or publication.
 
 ## 2. Doctor command
 
@@ -15,9 +17,16 @@ The implemented command is:
 engkit doctor [--root PATH] [--scope core|workspace|integrations|all]
 ```
 
-JSON is the canonical initial output. A later human-readable renderer may consume
-the same result but shall not own policy. The result schema is
-`engkit.doctor-result/v1alpha1`.
+The planned additive presentation form is:
+
+```text
+engkit doctor [--root PATH] [--scope core|workspace|integrations|all] [--summary|-s]
+```
+
+JSON remains the canonical default output. `--summary` and `-s` select a
+human-readable renderer that consumes the same completed result and does not
+own policy. The result schema remains `engkit.doctor-result/v1alpha1`; no second
+schema or alternate probe path is introduced.
 
 Each finding contains:
 
@@ -50,6 +59,48 @@ Doctor returns `0` when required checks contain no errors, `1` when one or more
 required checks fail or an operational error prevents inspection, and `2` for
 invalid command input or scope. Optional `unavailable` findings do not alone
 produce exit `1`.
+
+### 2.1 Human-summary presentation
+
+The summary renderer emits one bounded line per existing finding in the same
+deterministic order as the canonical result. Its status mapping is fixed:
+
+| Canonical status | Human label |
+| --- | --- |
+| `pass` | `[OK]` |
+| `warning` | `[WARN]` |
+| `error` | `[ERROR]` |
+| `unavailable` | `[N/A]` |
+
+Each line includes the stable finding code and existing summary. Raw evidence
+and paths are omitted from the concise default. When a non-pass finding already
+contains remediation, the renderer may add one indented `Next:` line containing
+that bounded remediation verbatim. It never synthesizes or executes a command.
+
+The footer renders `Overall: OK` when `result.summary.healthy` is true and
+`Overall: NEEDS ATTENTION` otherwise, plus the canonical pass, warning, error,
+and unavailable counts. The renderer cannot recalculate severity, treat an
+optional unavailable integration as a failure, or change the canonical exit
+code. Output uses understandable ASCII text without depending on color or
+Unicode symbols. Human-facing labels remain isolated for later localization.
+
+For example:
+
+```text
+Engineering Toolkit doctor
+
+[OK]    core.runtime - Engineering Toolkit runtime information is available.
+[WARN]  workspace.initialized - The directory is not initialized as an Engineering Toolkit workspace.
+        Next: Review engkit workspace plan-init before approving initialization.
+[N/A]   integrations.ollama - Ollama was not found in PATH.
+
+Overall: OK
+Passed: 1  Warnings: 1  Errors: 0  Unavailable: 1
+```
+
+The example is illustrative presentation text rather than a golden finding
+inventory. Tests must construct synthetic results so they do not depend on the
+host's installed integrations or workspace state.
 
 ## 3. Unified initialization commands
 
@@ -144,6 +195,12 @@ Ollama, MCP, provider-runtime, credential, or network access. Help documents
 the exact selection table and explains that specialized recovery remains
 authoritative.
 
+`engkit doctor -h` and `engkit doctor --help` remain help aliases and never run
+diagnostic probes. They are not aliases for the human summary. Doctor JSON and
+summary modes both write their successful diagnostic result only to standard
+output, keep operational diagnostics on standard error, and select the same
+exit code from the canonical result.
+
 ## 7. Security and side-effect boundary
 
 Planning is read-only. Applying has exactly the side effects already authorized
@@ -171,9 +228,28 @@ remain owned by the selected existing planner and executor.
 - Cross-platform CI and release qualification remain required before
   publication.
 
-## 9. Rollback
+## 9. Planned `v0.5.0B` doctor-summary validation
+
+- Prove the default JSON bytes and `engkit.doctor-result/v1alpha1` decoding are
+  unchanged when no presentation flag is supplied.
+- Cover `--summary` and `-s` equivalence, all four status labels, deterministic
+  ordering, count rendering, optional remediation, and omission of evidence
+  and paths.
+- Prove healthy, optional-unavailable, warning, required-error, invalid-scope,
+  `-h`, and `--help` exit behavior without host-dependent probes.
+- Prove help performs no filesystem, catalog, SQLite, Ollama, MCP, provider,
+  credential, or network discovery.
+- Run focused CLI and doctor tests before formatting, static analysis, the full
+  Go test suite, cross-builds, and release qualification appropriate to the
+  later implementation approval.
+
+## 10. Rollback
 
 Doctor adds no persisted state. Removing its command restores the prior surface.
 Unified init owns no new schema or transaction artifact, so removing the facade
 leaves every specialized command and existing workspace usable. No data
 migration or rollback utility is required.
+
+The planned human summary owns no persisted state or schema. Implementation
+rollback removes only the presentation flag, renderer, and related help/tests;
+the canonical JSON command and all diagnostic probes remain available.

@@ -434,6 +434,20 @@ automation to review; it is never a shell command executed by doctor. The exact
 proposed contract is documented in
 [`doctor-init-v1alpha1.md`](doctor-init-v1alpha1.md).
 
+The canonical doctor result remains versioned JSON owned by the application
+layer. A human summary is a CLI presentation adapter over that same completed
+result: it maps existing statuses to bounded ASCII labels, renders existing
+summaries and optional remediation, and derives the overall label and process
+exit code from the canonical summary. It does not own probes, severity policy,
+health calculation, or remediation behavior. Machine-readable output remains
+the default so existing automation is not silently redirected to prose.
+
+Help and diagnostic execution remain distinct. `-h` and `--help` describe the
+command without constructing the diagnostic read model; `--summary` and `-s`
+select the human renderer after normal inspection. Presentation strings stay
+inside the CLI boundary and are ready for localization, while stable finding
+codes and result schemas remain language-neutral.
+
 ## 21. Unified initialization boundary
 
 The top-level initialization entry point is a facade over existing workspace and

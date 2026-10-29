@@ -903,3 +903,36 @@ SQLite database, provider CLI, credential, or network connection.
   database operation, real-project indexing, model call, dependency operation,
   network access, Git operation, workflow, installation, or publication.
 
+## 29. `v0.5.0A` doctor human-summary acceptance criteria
+
+- The existing `engkit.doctor-result/v1alpha1` result remains the canonical
+  diagnostic contract. Running `engkit doctor` without a presentation flag
+  continues to emit that JSON unchanged for automation compatibility.
+- `engkit doctor --summary` and its exact short alias `engkit doctor -s`
+  request a concise human-readable renderer over the same in-memory result.
+  The renderer does not run different probes, reinterpret health policy, or
+  create a second diagnostic schema.
+- `-h` and `--help` remain reserved for command help. Help succeeds without
+  running probes or accessing a workspace, SQLite, Ollama, MCP, provider
+  runtimes, credentials, or the network.
+- Each rendered finding uses its existing deterministic order, stable code,
+  summary, and status. Status labels map exactly to `[OK]`, `[WARN]`,
+  `[ERROR]`, and `[N/A]`; no terminal color or Unicode symbol is required to
+  understand the result.
+- The renderer omits raw evidence and paths from its default list. A bounded
+  `Next:` line may render the existing remediation text for a non-pass finding;
+  it cannot invent, execute, or approve remediation.
+- The final line is `Overall: OK` when the canonical summary is healthy and
+  `Overall: NEEDS ATTENTION` otherwise, followed by the existing pass,
+  warning, error, and unavailable counts. Optional warnings or unavailable
+  capabilities do not independently change canonical health.
+- Exit behavior remains `0` for a healthy canonical result, `1` for one or
+  more required errors, and `2` for invalid command input. Presentation mode
+  never changes the exit status selected from the canonical result.
+- Human-facing labels remain isolated in the CLI presentation adapter and
+  ready for later localization. Domain probes, finding codes, persisted
+  formats, SQLite, MCP results, and dependencies do not change.
+- `v0.5.0A` changes documentation only. It authorizes no Go change, public
+  schema change, configuration or database operation, dependency change,
+  network access, Git operation, workflow, installation, or publication.
+

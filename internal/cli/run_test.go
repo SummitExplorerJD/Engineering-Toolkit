@@ -73,6 +73,63 @@ func TestDoctorEmitsStructuredResultAndHealthExitCode(t *testing.T) {
 	}
 }
 
+func TestDoctorSummaryFlagsAreEquivalent(t *testing.T) {
+	var longOutput, shortOutput, stderr bytes.Buffer
+	longCode := Run([]string{"doctor", "--scope", "core", "--summary"}, &longOutput, &stderr)
+	if longCode != 0 || stderr.Len() != 0 {
+		t.Fatalf("long summary code = %d, stderr = %q", longCode, stderr.String())
+	}
+
+	stderr.Reset()
+	shortCode := Run([]string{"doctor", "--scope", "core", "-s"}, &shortOutput, &stderr)
+	if shortCode != 0 || stderr.Len() != 0 {
+		t.Fatalf("short summary code = %d, stderr = %q", shortCode, stderr.String())
+	}
+	if longOutput.String() != shortOutput.String() {
+		t.Fatalf("summary outputs differ\n--summary:\n%s\n-s:\n%s", longOutput.String(), shortOutput.String())
+	}
+	if !strings.Contains(longOutput.String(), "Overall: OK") || strings.HasPrefix(strings.TrimSpace(longOutput.String()), "{") {
+		t.Fatalf("summary output = %q", longOutput.String())
+	}
+}
+
+func TestDoctorSummaryPreservesUnhealthyExitCode(t *testing.T) {
+	missing := filepath.Join(t.TempDir(), "missing")
+	var stdout, stderr bytes.Buffer
+	code := Run([]string{"doctor", "--root", missing, "--scope", "workspace", "--summary"}, &stdout, &stderr)
+	if code != 1 || stderr.Len() != 0 {
+		t.Fatalf("Run() code = %d, stderr = %q", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "[ERROR]") || !strings.Contains(stdout.String(), "Overall: NEEDS ATTENTION") {
+		t.Fatalf("unhealthy summary = %q", stdout.String())
+	}
+}
+
+func TestDoctorSummaryInvalidInputRemainsUsageError(t *testing.T) {
+	for _, args := range [][]string{
+		{"doctor", "--unknown"},
+		{"doctor", "--summary", "unexpected"},
+	} {
+		var stdout, stderr bytes.Buffer
+		if code := Run(args, &stdout, &stderr); code != 2 {
+			t.Fatalf("Run(%v) code = %d, stdout = %q, stderr = %q", args, code, stdout.String(), stderr.String())
+		}
+		if stdout.Len() != 0 || stderr.Len() == 0 {
+			t.Fatalf("Run(%v) stdout = %q, stderr = %q", args, stdout.String(), stderr.String())
+		}
+	}
+}
+
+func TestUsageDocumentsDoctorSummary(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	if code := Run([]string{"help"}, &stdout, &stderr); code != 0 {
+		t.Fatalf("Run(help) code = %d, stderr = %q", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "doctor [--root PATH] [--scope core|workspace|integrations|all] [--summary|-s]") {
+		t.Fatalf("usage = %q", stdout.String())
+	}
+}
+
 func TestScopedHelpSucceeds(t *testing.T) {
 	for _, args := range [][]string{
 		{"doctor", "--help"},

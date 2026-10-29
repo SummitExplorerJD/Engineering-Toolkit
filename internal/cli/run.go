@@ -241,6 +241,9 @@ func runDoctor(args []string, stdout, stderr io.Writer) error {
 	flags := newFlagSet("doctor", stderr)
 	root := flags.String("root", ".", "workspace root to inspect")
 	scope := flags.String("scope", doctor.ScopeAll, "diagnostic scope: core, workspace, integrations, or all")
+	var summary bool
+	flags.BoolVar(&summary, "summary", false, "render a concise human-readable summary")
+	flags.BoolVar(&summary, "s", false, "render a concise human-readable summary")
 	if err := flags.Parse(args); err != nil {
 		return &usageError{message: err.Error()}
 	}
@@ -251,8 +254,14 @@ func runDoctor(args []string, stdout, stderr io.Writer) error {
 	if err != nil {
 		return &usageError{message: err.Error()}
 	}
-	if err := writeJSON(stdout, result); err != nil {
-		return err
+	if summary {
+		if err := writeDoctorSummary(stdout, result); err != nil {
+			return err
+		}
+	} else {
+		if err := writeJSON(stdout, result); err != nil {
+			return err
+		}
 	}
 	if !result.Summary.Healthy {
 		return doctor.ErrUnhealthy
@@ -1277,7 +1286,7 @@ func writeJSON(writer io.Writer, value any) error {
 
 var usageLines = []string{
 	"version [--json]",
-	"doctor [--root PATH] [--scope core|workspace|integrations|all]",
+	"doctor [--root PATH] [--scope core|workspace|integrations|all] [--summary|-s]",
 	"init plan --target PATH [--profile PROFILE_ID@VERSION] [--set NAME=VALUE]",
 	"init apply --target PATH [--profile PROFILE_ID@VERSION] [--set NAME=VALUE] --approve PLAN_ID",
 	"mcp serve --transport stdio --root PATH",

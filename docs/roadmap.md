@@ -618,3 +618,43 @@ transport, automatic index rebuild, new dependencies, and provider integration
 remain outside this planning gate. Each later gate requires its own exact file
 inventory, tests, risks, rollback, and explicit approval.
 
+### `v0.5.0`: understandable diagnostics and later minor-release growth
+
+**Status:** `v0.5.0A` doctor human-summary contract and the separately approved
+`v0.5.0B` implementation are complete; no additional `v0.5.0C` scope is
+approved
+
+This minor line begins by making the existing read-only doctor easier for a
+person to scan without weakening its stable JSON automation contract. Further
+features, if any, require independent planning gates rather than sharing the
+doctor implementation approval.
+
+Planned gates:
+
+1. **`v0.5.0A` — doctor human-summary contract:** completed as documentation
+   only. It reserves `-h` and `--help` for help, adds the planned
+   `--summary`/`-s` presentation choice, fixes exact status and overall labels,
+   preserves canonical JSON and exit codes, and keeps presentation policy out
+   of domain probes.
+2. **`v0.5.0B` — doctor human-summary implementation:** completed after
+   separate approval. The CLI now accepts `--summary` and `-s`, renders the
+   existing canonical result through an isolated bounded human presentation,
+   preserves unflagged JSON, help, health policy, and exit behavior, and adds
+   focused compatibility coverage. No probe, finding code, schema,
+   persistence, integration, dependency, or product network behavior changed.
+   Focused and full Go tests, vet, vulnerability analysis, all six CGO-disabled
+   cross-builds, native JSON/summary/help/error smokes, and diff checks passed.
+3. **`v0.5.0C` — additional minor-release scope:** opens only after an
+   independent requirements and risk inventory. Doctor-summary approval does
+   not authorize new MCP tools, provider execution, model behavior, SQLite
+   changes, automatic updates, or catalog expansion.
+4. **`v0.5.0RC` — release qualification and publication:** required after all
+   approved implementation gates close. It must preserve JSON compatibility
+   and exercise the human summary on all six supported platform tuples before
+   a separately approved stable rebuild and publication.
+
+The A gate changes documentation only. It authorizes no Go, schema,
+configuration, SQLite, dependency, network, Git, workflow, installation, tag,
+or release change. Each later gate requires exact scope, validation, risks,
+rollback, and explicit approval.
+
