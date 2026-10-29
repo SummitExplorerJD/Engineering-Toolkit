@@ -537,8 +537,10 @@ approval boundaries.
 **Status:** gates A through C2, the separately approved D1 local real-project
 pilot, and RC qualification are complete. Candidate `v0.4.0-rc.2` passed the
 six-platform workflow and artifact review at commit `1de90e2`; the optional D2
-model-backed harness is skipped. Stable rebuild, Git tag, release publication,
-and local installation remain separately gated
+model-backed harness was skipped. Stable `v0.4.0` was rebuilt from commit
+`a7bb270`, then published on 2026-10-29 as the immutable latest release with all
+12 approved uploaded assets. Fresh public installation remains separately
+gated.
 
 This release is intended to reduce the repository context that an agent must
 consume while making the existing local SQLite and MCP boundaries useful on
@@ -597,6 +599,13 @@ Planned gates:
    provider-conformance, aggregate comparison, and ten v0.4.0 scenarios per
    tuple. Review confirmed all 13 artifact digests, the unchanged 11-file
    package, six bounded qualification records, and six provider records.
+9. **`v0.4.0` — stable publication:** completed after separate approvals.
+   Stable workflow run `40773213540` rebuilt exact version `v0.4.0` from commit
+   `a7bb270569a520628b2b7db3385ebf9b4a007b97`; all six native jobs and the
+   aggregate provider comparison passed. The annotated tag resolves to that
+   commit, and the immutable latest GitHub Release exposes the 12 approved
+   uploaded assets with matching sizes and SHA-256 digests. The published ZIP
+   digest is `1999101eae28d16f70137d69de9c156f6710b750d97fa1d351f512b621821e16`.
 
 Token-efficiency acceptance compares bytes returned by staged MCP retrieval
 with a declared bounded full-file baseline and records the ratio. It does not

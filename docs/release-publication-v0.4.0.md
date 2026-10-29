@@ -2,43 +2,43 @@
 
 ## Status and authority
 
-This packet prepares the stable `v0.4.0` release. It does not authorize a
-commit, push, workflow run, tag, draft release, asset upload, immutable release,
-publication, or local installation. Each external or Git operation requires
-its own explicit approval.
+This packet records the approved stable `v0.4.0` publication completed on
+2026-10-29. Each commit, push, workflow run, tag, draft, upload, and publication
+was separately approved before execution. No local installation was performed
+as part of publication.
 
 Candidate `v0.4.0-rc.2` qualified the implementation at commit
 `1de90e29242ecb6ec5171a8463203b3a20b3d657` in GitHub Actions run
 [`40770854564`](https://github.com/SummitExplorerJD/Engineering-Toolkit/actions/runs/40770854564).
-The stable release commit is not yet selected. It must include the reviewed
-release documentation, and no source or harness change may be introduced
-without repeating candidate qualification under a new `-rc.N` identifier.
+Stable release commit `a7bb270569a520628b2b7db3385ebf9b4a007b97`
+added only the reviewed publication documentation after candidate acceptance.
 
 ## Stable build gate
 
-After the release-documentation commit and push are separately approved:
+The approved stable build gate completed as follows:
 
-1. record the exact full commit SHA and confirm `main` equals `origin/main`;
-2. dispatch `.github/workflows/release-candidate.yml` from that commit with
-   input `version=v0.4.0`;
-3. require the validation/build job, all six native smoke jobs, all ten v0.4.0
+1. `main` and `origin/main` both identified exact commit
+   `a7bb270569a520628b2b7db3385ebf9b4a007b97`;
+2. `.github/workflows/release-candidate.yml` ran as
+   [`40773213540`](https://github.com/SummitExplorerJD/Engineering-Toolkit/actions/runs/40773213540)
+   with input `version=v0.4.0`;
+3. the validation/build job, all six native smoke jobs, all ten v0.4.0
    scenarios per tuple, every installer and provider-conformance check, and the
-   aggregate provider comparison to pass;
-4. download all stable workflow artifacts and independently verify artifact
-   digests, every `SHA256SUMS` entry, manifest size and hash, package inventory,
-   executable format, installer line ending, embedded version, six v0.4.0
-   qualification records, and six provider records; and
-5. retain the exact workflow package as `engkit-v0.4.0.zip` and verify its 11
+   aggregate provider comparison passed;
+4. independent review verified all 13 workflow artifact digests, every
+   `SHA256SUMS` entry, manifest size and hash, package inventory, executable
+   format, installer line ending, embedded version, six v0.4.0 qualification
+   records, and six provider records; and
+5. the exact workflow package was retained as `engkit-v0.4.0.zip`, and its 11
    entries match the 11 individual release assets byte for byte.
 
-The stable run must produce version `v0.4.0`; it must not reuse or rename any
-`v0.4.0-rc.2` binary. A failed stable run blocks publication. A source or
-harness correction requires review and a new candidate identifier before
-another stable attempt.
+The stable run produced version `v0.4.0`; no `v0.4.0-rc.2` binary was renamed
+or reused. The stable package digest is
+`sha256:1999101eaeed1222f0cc7463a59f5e88d4a950f97cadd79dab22bd027a830c18`.
 
 ## Expected release assets
 
-The draft GitHub Release must contain exactly these 12 uploaded assets:
+The published GitHub Release contains exactly these 12 uploaded assets:
 
 1. `engkit-v0.4.0-windows-amd64.exe`
 2. `engkit-v0.4.0-windows-arm64.exe`
@@ -72,34 +72,28 @@ contents of `docs/release-notes/v0.4.0.md`.
 - Make no new model-compatibility claim; the optional D2 model-backed harness
   was skipped.
 
-## Tag and release gate
+## Publication result
 
-After stable artifacts pass independent review, request separate approval for:
-
-- annotated tag `v0.4.0` at the exact stable workflow commit;
-- pushing that tag without moving or replacing an existing ref;
-- creating a draft, non-prerelease GitHub Release targeting the exact tag;
-- uploading the 12 verified assets and confirming their remote hashes;
-- confirming the repository's immutable-release protection applies to the
-  final release; and
-- final publication and latest-release designation.
-
-No approval for one item implies approval for the next.
+After separate approvals, annotated tag `v0.4.0` was created at exact stable
+commit `a7bb270569a520628b2b7db3385ebf9b4a007b97` and pushed without replacing an
+existing ref. The
+[`v0.4.0` GitHub Release](https://github.com/SummitExplorerJD/Engineering-Toolkit/releases/tag/v0.4.0)
+was published as non-draft, non-prerelease, immutable, and latest. Its 12
+uploaded assets have the exact approved names, sizes, and SHA-256 digests.
+GitHub additionally exposes its two generated source archives, which are not
+part of the uploaded-asset inventory.
 
 ## Post-publication verification
 
-After publication:
+Public metadata confirms the exact tag, release commit, immutable status,
+non-draft and non-prerelease state, latest designation, and 12 uploaded assets.
+GitHub reports every uploaded asset in `uploaded` state, with sizes and SHA-256
+digests matching the independently reviewed stable files.
 
-- fetch public release metadata and confirm the tag, target, immutability,
-  non-draft, non-prerelease, latest status, and exact asset inventory;
-- redownload public `SHA256SUMS`, installers, manifest, ZIP, and representative
-  binaries and compare them with the approved stable files;
-- complete a fresh Windows network installation without administrator rights,
-  confirm `engkit version --json` reports exactly `v0.4.0`, rebuild a synthetic
-  context projection, and exercise bounded CLI and MCP retrieval; and
-- record the immutable release URL, stable commit, asset digests, and observed
-  verification in roadmap, milestone context, publication packet, and release
-  notes.
+The distinct public redownload and fresh Windows network-installation check
+remain pending separate approval. No public installer execution, installed
+version claim, context rebuild, or installed-binary MCP exercise is recorded by
+this publication update.
 
 ## Risk and rollback
 

@@ -74,11 +74,31 @@ tuples. The candidate package artifact digest was
 `7c021629ea28d16f70137d69de9c156f6710b750d97fa1d351f512b621821e16`.
 Downloaded review copies were removed after inspection.
 
+## Stable publication evidence
+
+Manual workflow run
+[`40773213540`](https://github.com/SummitExplorerJD/Engineering-Toolkit/actions/runs/40773213540)
+completed successfully for stable version `v0.4.0` from exact commit
+`a7bb270569a520628b2b7db3385ebf9b4a007b97`. The build job, all six native
+smoke jobs, ten v0.4.0 scenarios per tuple, installer and provider checks, and
+aggregate provider comparison passed. Independent review confirmed all 13
+artifact digests, the 11-file package, all 10 package checksums, executable
+formats, six qualification records, and six provider records. The exact stable
+workflow ZIP has digest
+`1999101eae28d16f70137d69de9c156f6710b750d97fa1d351f512b621821e16`.
+
+Annotated tag `v0.4.0` resolves to the exact stable commit. The
+[`v0.4.0` GitHub Release](https://github.com/SummitExplorerJD/Engineering-Toolkit/releases/tag/v0.4.0)
+was published on 2026-10-29 as non-draft, non-prerelease, immutable, and latest.
+Public metadata reports the 12 approved uploaded assets in `uploaded` state
+with matching names, sizes, and SHA-256 digests. GitHub's two generated source
+archives are outside that uploaded-asset inventory.
+
 ## Remaining approvals
 
-Candidate qualification does not authorize a stable workflow run, annotated
-tag, draft or published release, asset upload, or local installation. Each
-remains a separate approval boundary.
+A distinct public redownload and fresh Windows network-installation check
+remain separately gated. No public installer execution, installed version,
+context rebuild, or installed-binary MCP result is claimed here.
 
 ## Rollback
 
