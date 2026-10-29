@@ -4,7 +4,7 @@ param(
     [string]$BinaryPath,
 
     [Parameter(Mandatory = $true)]
-    [ValidatePattern('^v0\.4\.0(?:-rc\.[1-9][0-9]*)?$')]
+    [ValidatePattern('^v(?:0\.4\.0|0\.5\.0)(?:-rc\.[1-9][0-9]*)?$')]
     [string]$Version,
 
     [string]$OutputDirectory

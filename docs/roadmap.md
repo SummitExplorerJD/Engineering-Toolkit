@@ -622,7 +622,8 @@ inventory, tests, risks, rollback, and explicit approval.
 
 **Status:** `v0.5.0A` doctor human-summary contract and the separately approved
 `v0.5.0B` implementation are complete; no additional `v0.5.0C` scope is
-approved
+approved; the exact `v0.5.0RC` preparation is implemented and locally
+validated, but no candidate workflow has been executed
 
 This minor line begins by making the existing read-only doctor easier for a
 person to scan without weakening its stable JSON automation contract. Further
@@ -648,10 +649,15 @@ Planned gates:
    independent requirements and risk inventory. Doctor-summary approval does
    not authorize new MCP tools, provider execution, model behavior, SQLite
    changes, automatic updates, or catalog expansion.
-4. **`v0.5.0RC` — release qualification and publication:** required after all
-   approved implementation gates close. It must preserve JSON compatibility
-   and exercise the human summary on all six supported platform tuples before
-   a separately approved stable rebuild and publication.
+4. **`v0.5.0RC` — release qualification and publication:** preparation is
+   implemented and locally validated. The new wrapper preserves the ten native
+   SQLite/MCP scenarios from `v0.4.0`, adds six bounded doctor-summary
+   scenarios, and is wired into all six supported platform tuples. A disposable
+   Windows AMD64 `v0.5.0-rc.1` package passed all sixteen scenarios, the generic
+   native smoke, installer transaction, provider conformance, manifest and
+   checksum review; the original `v0.4.0` path also passed against the installed
+   stable binary. Candidate workflow execution, artifact review, stable
+   rebuild, tag, and publication remain separate approval gates.
 
 The A gate changes documentation only. It authorizes no Go, schema,
 configuration, SQLite, dependency, network, Git, workflow, installation, tag,
