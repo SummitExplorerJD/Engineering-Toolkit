@@ -3,10 +3,10 @@
 ## Status
 
 This packet defined the exact `v0.5.0RC` qualification boundary and was
-implemented after separate explicit approval. Local package validation is
-complete. Git operations, a GitHub Actions run, artifact download, tagging,
-installation outside the isolated installer test, and publication remain
-unauthorized. Each later action requires separate explicit approval.
+implemented after separate explicit approval. Local package validation,
+candidate and stable workflow qualification, independent artifact review,
+tagging, and immutable publication are complete. Installation outside the
+isolated installer test remains separately gated.
 
 ## Outcome
 
@@ -222,5 +222,34 @@ system-temporary directories were removed. Pre-existing ignored
 `.engkit-test-temp` entries were inspected but not altered. `actionlint` was not
 available locally, so workflow YAML execution remains a GitHub Actions gate.
 
-No user installation, model, Git state, workflow, tag, or release was changed
-by local validation.
+No user installation or model was changed by local validation.
+
+## Observed remote qualification and publication
+
+Candidate `v0.5.0-rc.1` passed GitHub Actions run
+[`40945166094`](https://github.com/SummitExplorerJD/Engineering-Toolkit/actions/runs/40945166094)
+from exact commit `16384272abae8e7006805191d5f269c64330d2ff`. All six native
+jobs passed the generic smoke, installer transaction, provider conformance, the
+ten retained v0.4.0 context/MCP scenarios, and the six v0.5.0 doctor-summary
+scenarios. The aggregate portable provider-evidence comparison also passed.
+Independent review accepted all 13 workflow artifact digests, the 11-file
+package, all 10 package checksums, six bounded qualification records, and six
+provider records.
+
+Stable workflow run
+[`41065556447`](https://github.com/SummitExplorerJD/Engineering-Toolkit/actions/runs/41065556447)
+rebuilt exact version `v0.5.0` from the same commit. All six native jobs and the
+aggregate provider comparison passed. Independent review verified the stable
+package, executable identities, installer transaction, 96 qualification
+scenarios, six provider records, and portable-evidence equivalence. The stable
+ZIP digest is
+`0fc676ac76a806f17d39ad1616adb0277af07bc23b1167c3e86d5a3309a34fae`.
+
+Annotated tag `v0.5.0` has tag-object SHA
+`99ed1f74032a3eece4f6caa73185d182ec81b814` and resolves to the exact release
+commit. The
+[`v0.5.0` GitHub Release](https://github.com/SummitExplorerJD/Engineering-Toolkit/releases/tag/v0.5.0)
+was published on 2026-10-30 as non-draft, non-prerelease, immutable, and latest.
+Its 12 uploaded assets match the independently reviewed names, sizes, and
+SHA-256 digests. GitHub's generated source archives and release attestation are
+outside that uploaded-asset inventory.

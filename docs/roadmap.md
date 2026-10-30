@@ -620,10 +620,12 @@ inventory, tests, risks, rollback, and explicit approval.
 
 ### `v0.5.0`: understandable diagnostics and later minor-release growth
 
-**Status:** `v0.5.0A` doctor human-summary contract and the separately approved
-`v0.5.0B` implementation are complete; no additional `v0.5.0C` scope is
-approved; the exact `v0.5.0RC` preparation is implemented and locally
-validated, but no candidate workflow has been executed
+**Status:** `v0.5.0A` doctor human-summary contract, the separately approved
+`v0.5.0B` implementation, and `v0.5.0RC` qualification are complete. Candidate
+`v0.5.0-rc.1` and the stable exact-version rebuild passed on all six supported
+platform tuples from commit `1638427`; `v0.5.0` was published on 2026-10-30 as
+the immutable latest release with all 12 approved uploaded assets. No
+additional `v0.5.0C` scope was opened.
 
 This minor line begins by making the existing read-only doctor easier for a
 person to scan without weakening its stable JSON automation contract. Further
@@ -649,15 +651,20 @@ Planned gates:
    independent requirements and risk inventory. Doctor-summary approval does
    not authorize new MCP tools, provider execution, model behavior, SQLite
    changes, automatic updates, or catalog expansion.
-4. **`v0.5.0RC` — release qualification and publication:** preparation is
-   implemented and locally validated. The new wrapper preserves the ten native
-   SQLite/MCP scenarios from `v0.4.0`, adds six bounded doctor-summary
-   scenarios, and is wired into all six supported platform tuples. A disposable
-   Windows AMD64 `v0.5.0-rc.1` package passed all sixteen scenarios, the generic
-   native smoke, installer transaction, provider conformance, manifest and
-   checksum review; the original `v0.4.0` path also passed against the installed
-   stable binary. Candidate workflow execution, artifact review, stable
-   rebuild, tag, and publication remain separate approval gates.
+4. **`v0.5.0RC` — release qualification and publication:** completed after
+   separate approvals. The wrapper preserves the ten native SQLite/MCP
+   scenarios from `v0.4.0` and adds six bounded doctor-summary scenarios.
+   Candidate workflow run `40945166094` passed from commit
+   `16384272abae8e7006805191d5f269c64330d2ff` on Windows, Linux, and macOS for
+   AMD64 and ARM64, including installer, provider-conformance, and aggregate
+   provider comparison. Independent review accepted all 13 workflow artifacts,
+   the 11-file package, all 10 package checksums, six qualification records,
+   and six provider records. Stable workflow run `41065556447` rebuilt exact
+   version `v0.5.0` from the same commit and passed the same six-platform gate.
+   The annotated tag resolves to that commit, and the immutable latest GitHub
+   Release exposes the 12 approved uploaded assets with matching names, sizes,
+   and SHA-256 digests. The published ZIP digest is
+   `0fc676ac76a806f17d39ad1616adb0277af07bc23b1167c3e86d5a3309a34fae`.
 
 The A gate changes documentation only. It authorizes no Go, schema,
 configuration, SQLite, dependency, network, Git, workflow, installation, tag,
