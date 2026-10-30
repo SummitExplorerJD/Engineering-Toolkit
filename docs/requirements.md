@@ -936,3 +936,56 @@ SQLite database, provider CLI, credential, or network connection.
   schema change, configuration or database operation, dependency change,
   network access, Git operation, workflow, installation, or publication.
 
+## 30. `v0.5.1A` post-release validation planning acceptance criteria
+
+- `v0.5.1` is a compatibility-preserving maintenance line. It may correct only
+  defects reproduced against published `v0.5.0`; it does not add commands,
+  schemas, MCP tools, providers, models, profiles, persistence formats, or
+  distribution authorities.
+- Validation begins from immutable tag `v0.5.0`, exact release commit
+  `16384272abae8e7006805191d5f269c64330d2ff`, and the 12 published uploaded
+  assets. GitHub-generated source archives and the release attestation are not
+  counted as uploaded release assets.
+- A fresh Windows AMD64 installation uses the public release in an isolated,
+  disposable user-writable directory without administrator rights or PATH
+  mutation. It verifies downloaded hashes, exact reported version, embedded
+  catalog identity, and cleanup without replacing the existing user
+  installation.
+- Installed-binary acceptance uses synthetic workspaces only. Doctor coverage
+  includes canonical JSON, `--summary`, `-s`, `-h`, `--help`, healthy optional
+  states, and required-error exit behavior without exposing evidence paths.
+- Context acceptance covers explicit synthetic source roots, mandatory and
+  user exclusions, SQLite v2 full rebuild, freshness, source inventory,
+  bounded search, exact indexed read, synthesized workspace tree, stale
+  refusal, and removal of the disposable projection.
+- MCP acceptance discovers exactly the 12 approved read-only tools and compares
+  representative context results with application results in both `compact`
+  and `text` response modes. It proves byte and item limits, non-duplication,
+  strict inputs, stale refusal, output isolation, and stdio-only behavior.
+- Unified-init planning and refusal plus disabled, missing-context, and
+  unavailable local-advice fallback are validated without applying a real
+  workspace mutation or making an Ollama request.
+- Installer validation covers fresh installation, explicit upgrade, bounded
+  failure injection, rollback to exact prior bytes, and removal of transaction
+  directories. Destructive cleanup is limited to the exact disposable root and
+  requires separate execution authority.
+- Validation records exact commands, exit status, version, asset and executable
+  digests, catalog identity, scenario results, bounded metrics, and sanitized
+  failure diagnostics. It records no credentials, prompts, model responses,
+  synthetic file contents, environment values, or unrelated absolute paths.
+- Ollama and model-backed smokes remain outside the initial validation run. No
+  model may be installed, pulled, updated, replaced, invoked, or reclassified;
+  existing exact-digest observations and compatibility claims remain
+  unchanged.
+- A failed scenario must be reproduced and classified before a correction is
+  proposed. Any correction requires its own affected-file inventory, tests,
+  risks, rollback, and approval. Passing validation produces no source change
+  and does not justify an empty patch release.
+- New model compatibility, allowlist changes, MCP tools, SQLite schemas,
+  automatic index rebuild, remote MCP transport, profiles, automatic updates,
+  production TUF activation, signing, notarization, marketplaces, and
+  package-manager distribution remain future minor-release work.
+- Planning acceptance does not authorize network access, installation,
+  workspace or database mutation, MCP execution, failure injection, cleanup,
+  code changes, Git operations, workflow execution, tagging, or publication.
+
