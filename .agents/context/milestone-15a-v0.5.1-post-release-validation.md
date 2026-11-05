@@ -548,10 +548,29 @@ no installer-child network access, and Git-state equivalence.
 
 Both B1 and B2 are complete with no reproduced product defect. Under the
 accepted stop condition, C and RC do not open, and no empty `v0.5.1` candidate,
-tag, or release is justified. The stopped B1 root, successful B1-R1 root, and
-successful B2 root remain retained. Their removal is a separate destructive
-approval. This maintenance-line result does not authorize cleanup, a Git
-operation, workflow execution, publication, or work on a later milestone.
+tag, or release is justified. This maintenance-line result does not authorize
+a Git operation, workflow execution, publication, or work on a later
+milestone.
+
+### Observed evidence-root cleanup
+
+On 2026-11-05, separately approved destructive cleanup removed exactly these
+three temporary execution-root basenames:
+
+- `engkit-v0.5.1-b1-public-install-20261030`;
+- `engkit-v0.5.1-b1r1-public-install-20261030`; and
+- `engkit-v0.5.1-b2-installer-rollback-20261030`.
+
+Before removal, cleanup validation resolved each absolute target beneath the
+single approved `C:\Users\julit\AppData\Local\Temp` parent, required the exact
+basename, required the root to exist, and rejected root or nested reparse
+points. Removal used only the three literal validated paths. Final validation
+confirmed all three roots absent, the existing user installation still at
+`v0.5.0` with SHA-256
+`6ed6e32b6060b0a673d3ee66b4f4560b5a50ef6e5139e8a35d48123c07710071`,
+and a clean Git worktree. The temporary binaries, fixtures, and JSON evidence
+are no longer recoverable through this cleanup; their bounded results and
+digests remain recorded in this document.
 
 ## Evidence boundary
 
