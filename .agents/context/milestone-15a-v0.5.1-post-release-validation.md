@@ -236,6 +236,323 @@ After successful evidence review, removal of the exact B1 root is a separate
 destructive approval. Passing B1 does not authorize B2, C, RC, a tag, or a
 release.
 
+## Observed B1 stop and `v0.5.1B1-R1` retry packet
+
+### Observed B1 stop
+
+The separately approved B1 execution reached the supplemental-validation
+boundary and then stopped fail closed. The following completed checks passed:
+
+- public release metadata reported tag `v0.5.0`, non-draft,
+  non-prerelease, immutable, and the exact 12-asset inventory and four bound
+  public digests;
+- the public installer digest matched the bound value and installed the exact
+  Windows AMD64 executable into the isolated root without PATH mutation or
+  transaction residue;
+- the generic native smoke harness passed; and
+- the v0.5.0 harness passed its six doctor scenarios and the nested v0.4.0
+  harness passed its ten context and MCP scenarios, retaining exactly two
+  bounded qualification records.
+
+The supplemental PowerShell command did not parse because one assertion placed
+its diagnostic argument inside the condition parentheses. PowerShell rejected
+the complete command before execution, so `supplemental` remained empty. The
+event is classified as a test defect, not a product defect. The failure evidence
+record has SHA-256
+`96555401baace51b4f27d62077a613b1e39f01351e67dbe870a7cdc662d7b515`.
+It records process exit status `1` and the bounded diagnostic `PowerShell parser
+rejected the supplemental validation command before execution.`
+
+The retained root basename is
+`engkit-v0.5.1-b1-public-install-20261030`. Its final inventory contained five
+files and six directories, including the installer, isolated executable, two
+qualification records, and bounded failure evidence. It contained zero
+supplemental items and zero transaction directories. The existing user
+installation remained at the approved executable digest, Git state remained
+equivalent, PATH was not mutated, and no Ollama request occurred. The retained
+root is out of scope for R1 and must not be inspected, reused, merged, removed,
+or cleaned up without separate approval.
+
+### Exact B1-R1 boundary
+
+This section prepares a single retry of B1 only. It does not authorize network
+access, root creation, installation, harness execution, supplemental execution,
+cleanup, Git mutation, B2, a product change, or a release operation.
+
+The future R1 execution root is exactly:
+
+```text
+C:\Users\julit\AppData\Local\Temp\engkit-v0.5.1-b1r1-public-install-20261030
+```
+
+It was observed absent while this retry packet was prepared. R1 must fail closed
+if the path exists at execution time and must not inspect, reuse, merge, empty,
+or delete a pre-existing path. Its directory layout, evidence filename and
+schema, public endpoints, expected asset inventory, release and harness
+digests, existing-installation boundary, ordered assertions, disclosure limits,
+and stop behavior are identical to the B1 packet above, with only the execution
+root basename changed to
+`engkit-v0.5.1-b1r1-public-install-20261030`.
+
+### Parser gate and exact correction
+
+Before network access or root creation, R1 must assemble the complete reviewed
+PowerShell execution text in memory and parse it without executing it. The
+parser gate must require zero parse errors. Any parser error stops before root
+creation and records nothing outside the calling process.
+
+The failed assertion is corrected from the invalid form:
+
+```powershell
+Assert-True (@(Get-ChildItem -LiteralPath $ambiguousTarget -Recurse -File).Count -eq 1 'Ambiguous refusal mutated the target'
+```
+
+to the syntactically complete form:
+
+```powershell
+Assert-True (@(Get-ChildItem -LiteralPath $ambiguousTarget -Recurse -File).Count -eq 1) 'Ambiguous refusal mutated the target'
+```
+
+The parser gate is an additional preflight assertion; it does not replace or
+weaken any B1 check. After it passes, R1 must repeat the complete B1 sequence
+from public metadata validation onward in the new root. Prior B1 passes are not
+substituted for R1 results. R1 must use only synthetic names, contents, goals,
+and MCP inputs, and no configuration may contain an enabled fresh context
+projection. The disabled and missing-context advice scenarios must remain
+deterministic and must not reach the Ollama request path.
+
+Any R1 mismatch or failure follows the original B1 stop behavior: stop without
+retry, retain the new root if one was created, write only bounded failure
+evidence when possible, and do not clean up, open B2, or propose a product
+change. A successful R1 still requires evidence review and separate approval
+before cleanup or B2.
+
+### Observed B1-R1 result
+
+The separately approved B1-R1 execution completed successfully. Its in-memory
+PowerShell parser gate reported zero errors before network access or root
+creation. The complete retry then passed:
+
+- public metadata identity, immutable state, exact 12-asset inventory,
+  nonzero asset sizes, and the four bound public digests;
+- fresh public installation of the exact `v0.5.0` Windows AMD64 executable
+  without PATH mutation or transaction residue;
+- the generic native smoke harness, six v0.5.0 doctor scenarios, and ten
+  nested v0.4.0 context and MCP scenarios;
+- catalog `engineering-toolkit@0.3.0` and the exact `go-cli@0.1.0`,
+  `go-library@0.1.0`, and `go-service@0.1.0` profile inventory;
+- workspace-init and existing-workspace composition planning without apply,
+  plus refusal of a non-empty uninitialized target with a requested profile;
+- read-only profile recommendation and deterministic disabled and
+  missing-context advice fallback; and
+- integrations doctor with a child-only restricted PATH, reporting Ollama
+  unavailable and the read-only MCP stdio server available.
+
+The bounded success evidence is
+`evidence/v051-b1-validation.json` under execution-root basename
+`engkit-v0.5.1-b1r1-public-install-20261030`. It contains 11 top-level passing
+scenario records, is 3,784 bytes, and has SHA-256
+`131bd1e57db59fc4cc157b85d45fa7c7ec4e8df664dd4376c70413124659ed66`.
+Final inspection found 15 retained files, 15 retained directories, zero SQLite
+files, zero transaction directories, no absolute execution-parent path in the
+evidence, no PATH mutation, no Ollama request, no user-installation change, and
+Git-state equivalence.
+
+B1 is complete with no reproduced product defect. The original stopped B1 root
+and the successful B1-R1 root remain retained. Their cleanup is still a
+separate destructive approval. This result does not authorize B2, C, RC, a Git
+operation, or a release.
+
+## `v0.5.1B2` exact installer-rollback execution packet
+
+This section prepares B2 only. It does not authorize network access, root
+creation, download, installation, failure injection, cleanup, Git mutation, a
+product change, or a release operation. B2 requires separate execution
+approval after this packet is reviewed.
+
+### Bound paths and identities
+
+The future B2 execution root is exactly:
+
+```text
+C:\Users\julit\AppData\Local\Temp\engkit-v0.5.1-b2-installer-rollback-20261030
+```
+
+It was observed absent while this packet was prepared. B2 must fail closed if
+the path exists at execution time and must not inspect, reuse, merge, empty, or
+delete a pre-existing path. The approved layout is:
+
+```text
+engkit-v0.5.1-b2-installer-rollback-20261030/
+  download/
+    prior/
+      engkit-v0.3.0-windows-amd64.exe
+    target/
+      install.ps1
+      engkit-v0.5.0-windows-amd64.exe
+      SHA256SUMS
+  install/
+    engkit.exe
+  evidence/
+    v051-b2-validation.json
+```
+
+The known prior state is the immutable public `v0.3.0` Windows AMD64
+executable. It must report version `v0.3.0` and match SHA-256
+`8775446dce378fe29ca8d19895684208706a169996d738873fd7d3b0174e86ce`.
+The target is the immutable public `v0.5.0` Windows AMD64 executable, which
+must report version `v0.5.0` and match SHA-256
+`6ed6e32b6060b0a673d3ee66b4f4560b5a50ef6e5139e8a35d48123c07710071`.
+The target installer and checksum file retain their approved SHA-256 values:
+
+- `install.ps1`:
+  `ef7bd3c1d425d4514680fdc2ae2ccc39acf448640b7555a24718f96dc091d120`;
+- `SHA256SUMS`:
+  `b794388e672c7d9413a4eb6ac8f7aa095785cbcf9403d7f3fbab897a5519c454`.
+
+The existing installation at
+`C:\Users\julit\AppData\Local\Programs\engkit\engkit.exe` and both retained B1
+roots are outside the B2 boundary. B2 must record the existing installation's
+preflight version and SHA-256 and confirm both remain unchanged. It must not
+inspect, copy, replace, remove, or use that installation or either B1 root as a
+test input.
+
+### Exact network boundary
+
+Only these public GitHub resources are approved for the later B2 network step:
+
+1. `https://github.com/SummitExplorerJD/Engineering-Toolkit/releases/download/v0.3.0/engkit-v0.3.0-windows-amd64.exe`;
+2. `https://github.com/SummitExplorerJD/Engineering-Toolkit/releases/download/v0.5.0/install.ps1`;
+3. `https://github.com/SummitExplorerJD/Engineering-Toolkit/releases/download/v0.5.0/engkit-v0.5.0-windows-amd64.exe`; and
+4. `https://github.com/SummitExplorerJD/Engineering-Toolkit/releases/download/v0.5.0/SHA256SUMS`.
+
+Normal HTTPS redirects from those exact GitHub URLs are allowed. No API
+metadata, credential, cookie, token, alternate mirror, source archive, workflow
+artifact, latest-release alias, package manager, or other endpoint is in scope.
+Every downloaded file must pass its bound digest or B2 stops before seeding the
+isolated installation.
+
+### Parser gate and ordered execution
+
+Before network access or root creation, B2 must assemble the complete reviewed
+PowerShell driver in memory and parse it without execution. The parser gate
+must require zero parse errors. Any parser error stops before root creation and
+records nothing outside the calling process.
+
+After separate execution approval, B2 must proceed in this exact order:
+
+1. Reconfirm the B2 root is absent, the two documentation changes from B1 are
+   the complete expected Git state, the existing user installation has its
+   approved `v0.5.0` identity, and the parent PATH and failure-injection
+   environment value are recorded for later equivalence checks.
+2. Download only the four approved resources into their exact `download`
+   paths. Require all four bound SHA-256 values, canonical version JSON from
+   both executables, and exactly one `SHA256SUMS` entry for
+   `engkit-v0.5.0-windows-amd64.exe` matching the target digest.
+3. Create the isolated prior state by copying the verified `v0.3.0` executable
+   to `install/engkit.exe`. Require byte-for-byte equality with the downloaded
+   prior file, the exact prior digest, and canonical version `v0.3.0`.
+4. Launch the downloaded target installer in a child PowerShell process with
+   `-Version v0.5.0`, the exact isolated `-InstallDir`, the exact target
+   `-AssetDirectory`, and `-Upgrade`. Do not pass `-AddToPath`.
+5. For that child only, set `ENGKIT_INSTALL_TEST_FAIL_AFTER_BACKUP=1`. Require a
+   nonzero exit after backup creation, then restore the parent environment in a
+   `finally` block. Do not retain the raw child output.
+6. After the injected failure, require `install/engkit.exe` to be byte-for-byte
+   equal to the downloaded prior executable, retain the exact prior digest and
+   version, and leave zero `.engkit-install-*` directories. Any mismatch is a
+   B2 failure; do not attempt the successful replay.
+7. Launch the same installer again in a child PowerShell process with the same
+   arguments but without failure injection. Require exit `0`, exact target
+   digest and canonical version `v0.5.0`, catalog schema
+   `engkit.catalog/v1alpha1`, catalog version `0.3.0`, and zero transaction
+   directories.
+8. Run `scripts/test-release-binary.ps1` against only the final isolated
+   executable with version `v0.5.0`. Recompute the harness SHA-256 before use
+   and require
+   `45a88dd8581051e5652ffdd12769dd7e392d5e400bab919aa9d72952f8511a83`.
+9. Confirm the parent PATH, failure-injection environment value, existing user
+   installation version and digest, and Git state are byte-equivalent to their
+   preflight observations. Write bounded evidence, inspect the retained B2
+   root, and stop without cleanup.
+
+The installer receives only the local target asset directory during both
+upgrade attempts, so neither child installer may access the network. B2 does
+not run a model, Ollama, SQLite, MCP, a provider runtime, workspace mutation,
+or any repository content through a prompt or fixture.
+
+### Bounded B2 evidence
+
+`evidence/v051-b2-validation.json` uses planned schema
+`engkit.v051-b2-validation/v1alpha1`. It may contain only:
+
+- prior and target versions, executable digests, installer digest, checksum
+  digest, and generic harness digest;
+- scenario identifiers, expected and observed child exit status, byte counts,
+  bounded classifications, and pass or fail outcomes;
+- booleans confirming byte-exact prior restoration, successful target replay,
+  no PATH mutation, no environment leakage, no user-installation change, no
+  transaction residue, no network during installer children, and Git-state
+  equivalence; and
+- the B2 execution-root basename, never its absolute parent path.
+
+The record contains no raw installer output, exception text, environment
+value, executable bytes, credential, username, unrelated path, prompt, model
+response, workspace content, or B1-root information. A failure record may add
+only the failed scenario identifier, child exit status when available, and one
+sanitized diagnostic limited to 512 UTF-8 bytes.
+
+### Stop and rollback behavior
+
+Any parser or preflight mismatch stops before network access or root creation.
+Any later mismatch stops B2, writes bounded failure evidence when possible,
+preserves the exact B2 root, restores the parent PATH and failure-injection
+environment value, and does not retry, clean up, open C, or propose a product
+change. If failure injection exposes an incomplete installer rollback, B2 must
+not manually repair the isolated target or remove transaction evidence.
+
+Because B2 never targets the user installation, product rollback is not
+expected. The downloaded installer owns automatic restoration inside the
+isolated installation. Removal of the B2 root and either retained B1 root is a
+separate destructive approval after evidence review. Passing B2 does not
+authorize C, RC, a tag, a release, or any Git operation.
+
+### Observed B2 result and maintenance-line disposition
+
+The separately approved B2 execution completed successfully. Its in-memory
+PowerShell parser gate reported zero errors before network access or root
+creation. The complete run then passed:
+
+- exact digest and canonical-version validation of the public `v0.3.0` prior
+  executable and the public `v0.5.0` installer, target executable, and checksum
+  file;
+- byte-exact seeding of the isolated `v0.3.0` prior state;
+- child-only failure injection after backup creation with observed exit status
+  `1`, automatic byte-exact restoration of the prior executable, canonical
+  prior version `v0.3.0`, and zero transaction residue;
+- a second child installer run without failure injection with observed exit
+  status `0`, exact replay to the approved `v0.5.0` executable digest,
+  canonical version `v0.5.0`, catalog version `0.3.0`, and zero transaction
+  residue; and
+- the bound generic native smoke against the final isolated executable.
+
+The bounded success evidence is `evidence/v051-b2-validation.json` under
+execution-root basename
+`engkit-v0.5.1-b2-installer-rollback-20261030`. It contains six passing
+scenario records, is 2,228 bytes, and has SHA-256
+`f6295437dd8f4173bd4288854fd427d7466d4df8babf715b3f032072b8e531ad`.
+Final inspection found six retained files, five retained directories, zero
+transaction directories, no absolute execution-parent path in the evidence,
+no PATH mutation, no failure-environment leakage, no user-installation change,
+no installer-child network access, and Git-state equivalence.
+
+Both B1 and B2 are complete with no reproduced product defect. Under the
+accepted stop condition, C and RC do not open, and no empty `v0.5.1` candidate,
+tag, or release is justified. The stopped B1 root, successful B1-R1 root, and
+successful B2 root remain retained. Their removal is a separate destructive
+approval. This maintenance-line result does not authorize cleanup, a Git
+operation, workflow execution, publication, or work on a later milestone.
+
 ## Evidence boundary
 
 Retained evidence may record only exact commands, expected and observed exit

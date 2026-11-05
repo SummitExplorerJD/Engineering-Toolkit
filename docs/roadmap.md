@@ -673,8 +673,9 @@ rollback, and explicit approval.
 
 ### `v0.5.1`: post-release validation and compatible hardening
 
-**Status:** `v0.5.1A` validation planning is prepared; execution, correction,
-qualification, and publication remain unapproved
+**Status:** `v0.5.1A`, `v0.5.1B1`, and `v0.5.1B2` are complete with no
+reproduced product defect; the maintenance line stops without correction,
+candidate, tag, or release
 
 This maintenance line starts with acceptance testing of the published
 `v0.5.0` release. It produces `v0.5.1` only when a reproducible defect requires
@@ -683,29 +684,28 @@ does not produce an empty patch release.
 
 Planned gates:
 
-1. **`v0.5.1A` — post-release validation planning:** define the immutable
-   public release identity, isolated installation boundary, synthetic
+1. **`v0.5.1A` — post-release validation planning (complete):** define the
+   immutable public release identity, isolated installation boundary, synthetic
    installed-binary scenarios, SQLite v2 and twelve-tool MCP acceptance,
    installer rollback checks, evidence limits, defect triage, and stop
    conditions. This gate changes documentation only.
-2. **`v0.5.1B1` — public-install and synthetic acceptance execution:** after a
-   separate approval, install `v0.5.0` from the public release into an isolated
-   user-writable directory, verify its bytes and catalog, and run bounded
-   synthetic doctor, context, MCP, unified-init, and local-advice fallback
-   scenarios. It must not replace the existing installation, use real
-   repository content, invoke Ollama, or mutate models.
-3. **`v0.5.1B2` — isolated installer rollback execution:** after another
-   approval, exercise explicit upgrade, bounded failure injection, exact prior
-   byte restoration, successful replay, and transaction cleanup only inside a
-   separately bound disposable installation root.
-4. **`v0.5.1C` — defect triage and compatible correction:** open only for a
-   reproduced product defect. Each correction requires a separate design or
-   implementation packet with exact files and focused regression tests. New
+2. **`v0.5.1B1` — public-install and synthetic acceptance execution
+   (complete):** the separately approved retry installed `v0.5.0` from the
+   public release into an isolated user-writable directory, verified its bytes
+   and catalog, and passed bounded synthetic doctor, context, MCP, unified-init,
+   and local-advice fallback scenarios. It did not replace the existing
+   installation, use real repository content, invoke Ollama, or mutate models.
+3. **`v0.5.1B2` — isolated installer rollback execution (complete):** the
+   separately approved run exercised explicit upgrade, bounded failure
+   injection, exact prior byte restoration, successful replay, and transaction
+   cleanup only inside a separately bound disposable installation root.
+4. **`v0.5.1C` — defect triage and compatible correction (not opened):** no
+   product defect was reproduced. Any future correction requires a new
+   maintenance scope with exact files and focused regression tests. New
    features or compatibility claims move to a later minor release.
-5. **`v0.5.1RC` — conditional qualification and publication:** required only if
-   C changes product or release bytes. It rebuilds and qualifies all six
-   supported platform targets under the existing release gates. If B1 and B2
-   pass without a correction, C and RC do not run.
+5. **`v0.5.1RC` — conditional qualification and publication (not opened):** no
+   product or release bytes changed, so no candidate qualification or
+   publication runs.
 
 The maintenance line excludes new model tags or allowlist behavior, new MCP
 tools, remote MCP transport, catalog expansion, schema or SQLite changes,
