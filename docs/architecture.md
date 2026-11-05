@@ -715,3 +715,76 @@ This section is a planning boundary. Exact CLI contracts, configuration
 schemas, host projections, persistence changes, source files, tests, and
 rollback belong to later independently approved packets.
 
+## 27. Codex project-host adoption contract
+
+`v0.6.0B1` selects explicit CLI rebuild and one project-scoped Codex STDIO
+projection. The MCP server and its twelve tools do not change. Host adoption is
+owned by two new application modules rather than the protocol server or the
+skill-provider adapter:
+
+```text
+CLI
+  -> mcp host planner (read-only deterministic plan and exact render)
+  -> approval boundary
+  -> mcp host executor (transaction, ownership, recovery)
+  -> <root>/.codex/config.toml
+  -> Codex starts engkit mcp serve --transport stdio --root <root>
+```
+
+The planner resolves one initialized, explicit workspace root and the current
+`engkit` executable without shell interpolation. It binds both absolute paths,
+the executable digest, the Codex host-contract version, and the rendered file
+digest into `engkit.mcp-host-plan/v1alpha1`. The plan contains observations and
+digests, not rendered TOML bytes. Configure and remove use the same identity
+rules so application can rebuild the current plan and compare the complete
+approved ID immediately before mutation.
+
+The Codex projection is a single `[mcp_servers.engineering_toolkit]` table with
+an absolute `command`, a literal argument array, an explicit `cwd`,
+`enabled = true`, `required = false`, `default_tools_approval_mode = "writes"`,
+and an `enabled_tools` allowlist containing exactly the existing twelve
+read-only Engineering Toolkit tools. TOML strings are rendered directly from
+validated values; no shell command, environment capture, token, provider
+credential, prompt, URL, or model setting is accepted.
+
+Project configuration is intentionally create-only in the initial slice. If
+`.codex/config.toml` already exists, the plan reports an unowned conflict and
+is not executable. This avoids a TOML parser dependency, lossy round trips,
+unknown-field rewriting, and accidental ownership of user settings. A manual
+fragment may be shown as preview output, but Engineering Toolkit never applies
+that fragment to an existing file. Support for structural merge would require
+a later parser, preservation, conflict, and rollback contract.
+
+The executor follows the established transactional pattern without making
+skill synchronization responsible for host state. It stages exact bytes under
+`.engkit/recovery/mcp-host/codex/`, persists plan, journal, and checkpoint
+artifacts under the corresponding canonical `.engkit` stores, creates the
+target atomically, verifies its digest, then publishes an
+`engkit.mcp-host-ownership/v1alpha1` record under
+`.engkit/providers/codex/mcp-host.json`. The ownership record names only the
+target, digest, plan identity, executable identity, and host contract. Remove
+refuses any digest or ownership drift. Recovery operates only on the exact
+persisted approved plan and never invents a new operation.
+
+Host configuration is not contextual source material. `.codex` joins the
+mandatory case-insensitive directory exclusions before source eligibility is
+evaluated, and the context policy identifier advances from
+`engkit.context-policy/v1alpha1` to `engkit.context-policy/v1alpha2`. The policy
+change alters the configuration digest, making every older projection stale
+until the user runs the explicit rebuild; it requires no SQLite schema
+migration. MCP continues to receive only application ports and cannot
+configure a host or refresh the index.
+
+Codex project configuration is supported because the documented host contract
+accepts project-scoped `.codex/config.toml` for trusted projects and STDIO
+entries with `command`, `args`, and `cwd`. This evidence does not establish
+compatibility for Claude Code, OpenCode, ChatGPT web, plugins, remote
+executors, or future Codex formats. Those hosts require independent evidence
+and approval.
+
+The exact public schemas, TOML projection, state paths, conflict rules, B2 file
+inventory, validation, risks, and rollback are fixed in
+[`mcp-host-adoption-v0.6.0-v1alpha1.md`](mcp-host-adoption-v0.6.0-v1alpha1.md).
+This architecture section remains documentation-only until B2 is separately
+approved.
+

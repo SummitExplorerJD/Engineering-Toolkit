@@ -715,9 +715,9 @@ operations, workflows, and publication remain separate approval boundaries.
 
 ### `v0.6.0`: real-workspace MCP adoption and context efficiency
 
-**Status:** `v0.6.0A` planning is prepared; contracts, implementation, real
-workspace execution, model-backed disclosure, qualification, and publication
-remain unapproved
+**Status:** `v0.6.0A` planning and the documentation-only `v0.6.0B1` Codex
+project-host contract are prepared; implementation, real-workspace execution,
+model-backed disclosure, qualification, and publication remain unapproved
 
 This minor line is intended to make the existing SQLite v2 and twelve-tool
 read-only MCP capabilities practical to adopt in explicitly selected real
@@ -731,10 +731,14 @@ Planned gates:
    ownership, disclosure tiers, byte-based efficiency metrics, evidence
    limits, risks, and approval boundaries. This gate changes documentation
    only.
-2. **`v0.6.0B1` — exact onboarding and host-contract packet:** after separate
-   approval, select the accepted lifecycle and define exact commands, schemas,
-   configuration changes, application ports, provider projections, files,
-   tests, compatibility, and rollback. No implementation is implied by A.
+2. **`v0.6.0B1` — exact onboarding and host-contract packet:** completed as a
+   documentation-only contract. It retains explicit CLI rebuild, selects a
+   create-only Codex project projection at `.codex/config.toml`, fixes the
+   plan/apply/recover commands and schemas, binds configuration to the current
+   executable and exact root, requires ownership and digest-safe removal, and
+   excludes `.codex` from future context rebuilds. Existing configuration is
+   never merged or overwritten. No implementation, host execution, database
+   operation, configuration mutation, or provider disclosure was authorized.
 3. **`v0.6.0B2` — bounded implementation and synthetic conformance:** open only
    after B1 acceptance. It may implement only the accepted onboarding and host
    contract and must preserve read-only MCP unless a separate mutation design

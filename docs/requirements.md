@@ -1033,3 +1033,67 @@ SQLite database, provider CLI, credential, or network connection.
   access, dependency change, code change, configuration mutation, Git
   operation, workflow, installation, tagging, or publication.
 
+## 32. `v0.6.0B1` Codex project-host adoption contract acceptance criteria
+
+- The first supported model-backed host projection is Codex project scope.
+  The only destination is `<root>/.codex/config.toml`, and Codex must treat the
+  selected project as trusted before it reads that configuration. User-global
+  `~/.codex/config.toml`, ChatGPT web, Claude Code, OpenCode, plugins, and
+  remote executors remain outside this contract.
+- The accepted freshness strategy remains an explicit
+  `engkit context rebuild --root PATH`. Planning, host configuration, MCP, and
+  provider startup do not rebuild, watch, poll, or refresh the projection.
+  Missing, unsupported, or stale projections continue to fail closed.
+- Host onboarding exposes exactly three command forms:
+  `engkit mcp host plan --host codex --root PATH --operation configure|remove`,
+  `engkit mcp host apply --host codex --root PATH --operation configure|remove
+  --approve PLAN_ID`, and `engkit mcp host recover --host codex --root PATH
+  --approve PLAN_ID`. `--root`, `--host`, and the complete approval identifier
+  are explicit; planning never writes or starts a process.
+- The configuration plan uses schema `engkit.mcp-host-plan/v1alpha1`, binds the
+  normalized root, current executable path and SHA-256 digest, host contract,
+  operation, exact output digest, observations, conflicts, affected paths,
+  risks, approvals, verification, recovery, and deterministic plan identity.
+  Exact rendered bytes remain executor material and are not embedded in the
+  JSON plan.
+- A configure plan renders one `mcp_servers.engineering_toolkit` STDIO entry.
+  It launches the exact current `engkit` executable with arguments `mcp`,
+  `serve`, `--transport`, `stdio`, `--root`, and the exact normalized root;
+  sets the working directory to that root; enables only the existing twelve
+  read-only tools; and uses the host's write-sensitive approval mode. It
+  captures no environment variable, credential, prompt, model, or shell text.
+- Configuration publication is create-only. It is executable only when the
+  target file is absent, every existing ancestor is a real directory beneath
+  the selected root, and no ownership or recovery conflict exists. An existing
+  `.codex/config.toml` is never parsed, appended, merged, replaced, or deleted;
+  planning returns a non-executable conflict and a separately rendered manual
+  fragment may be displayed without granting mutation authority.
+- Approved application rebuilds and compares the complete plan, revalidates
+  executable identity and paths, stages exact bytes, publishes atomically,
+  records an append-only journal and checkpoint, verifies the resulting file,
+  and writes `engkit.mcp-host-ownership/v1alpha1` only for exact bytes it
+  created. Recovery resumes or rolls back only the persisted approved plan.
+- Removal is executable only when the ownership record is valid and both the
+  target path and current digest exactly match the owned output. Modified,
+  missing, linked, unowned, or ambiguous configuration fails closed. Empty
+  directories may be removed only when they were created by the transaction
+  and remain empty.
+- `.codex` becomes a mandatory case-insensitive context-source directory
+  exclusion and the context policy identifier advances exactly from
+  `engkit.context-policy/v1alpha1` to `engkit.context-policy/v1alpha2`. This
+  changes the configuration digest and therefore freshness but not SQLite
+  `user_version = 2`; an explicit rebuild produces the new fingerprint. No
+  `.codex` path or content is stored in SQLite or returned by context tools.
+- B2 may add only the module, CLI, plan-inspection, transaction, exclusion,
+  and tests fixed by the B1 contract. It adds no dependency, SQLite schema,
+  MCP tool, transport, provider invocation, model call, network access,
+  automatic rebuild, user-global configuration, or real-project execution.
+- Synthetic conformance must cover deterministic rendering and escaping on
+  Windows, Linux, and macOS; executable binding; existing-file conflicts;
+  linked-path refusal; approval and stale-plan refusal; interruption and
+  recovery; digest-bound removal; `.codex` exclusion and freshness; exact tool
+  allowlisting; CLI compatibility; and unchanged MCP read-only conformance.
+- B1 changes documentation only. It authorizes no Go or configuration change,
+  database rebuild, MCP or Codex execution, dependency operation, real-project
+  disclosure, Git operation, workflow, installation, tagging, or publication.
+
