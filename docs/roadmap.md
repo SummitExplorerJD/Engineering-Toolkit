@@ -713,3 +713,47 @@ automatic index rebuild, production TUF, signing, notarization, automatic
 updates, marketplaces, and package-manager work. Execution, cleanup, Git
 operations, workflows, and publication remain separate approval boundaries.
 
+### `v0.6.0`: real-workspace MCP adoption and context efficiency
+
+**Status:** `v0.6.0A` planning is prepared; contracts, implementation, real
+workspace execution, model-backed disclosure, qualification, and publication
+remain unapproved
+
+This minor line is intended to make the existing SQLite v2 and twelve-tool
+read-only MCP capabilities practical to adopt in explicitly selected real
+workspaces. It preserves canonical files, staged retrieval, strict freshness,
+and bounded disclosure while defining safe onboarding and host configuration.
+
+Planned gates:
+
+1. **`v0.6.0A` — adoption requirements and architecture planning:** define the
+   explicit-root lifecycle, freshness alternatives, host-configuration
+   ownership, disclosure tiers, byte-based efficiency metrics, evidence
+   limits, risks, and approval boundaries. This gate changes documentation
+   only.
+2. **`v0.6.0B1` — exact onboarding and host-contract packet:** after separate
+   approval, select the accepted lifecycle and define exact commands, schemas,
+   configuration changes, application ports, provider projections, files,
+   tests, compatibility, and rollback. No implementation is implied by A.
+3. **`v0.6.0B2` — bounded implementation and synthetic conformance:** open only
+   after B1 acceptance. It may implement only the accepted onboarding and host
+   contract and must preserve read-only MCP unless a separate mutation design
+   is explicitly approved.
+4. **`v0.6.0C1` — local real-workspace protocol pilot:** use one explicitly
+   named workspace and a local MCP client before any AI host. Retain only
+   sanitized counts, digests, timings, byte budgets, and outcomes.
+5. **`v0.6.0C2` — optional model-backed host pilot:** open only through a
+   separate disclosure approval naming the project, provider, exact host
+   version, authentication and network behavior, allowed queries, evidence,
+   cleanup, and stop conditions.
+6. **`v0.6.0RC` — conditional qualification and publication:** required only
+   after an approved implementation. It preserves the existing six-platform
+   release, installer, doctor, SQLite, MCP, and provider-conformance gates and
+   adds only the accepted v0.6.0 scenarios.
+
+The A gate adds no command, schema, SQLite behavior, MCP mutation, provider
+configuration, dependency, network behavior, model call, automatic rebuild,
+remote transport, production TUF activation, signing, installation, Git
+operation, workflow, tag, or release. Every later gate requires exact scope,
+validation, risks, rollback, and explicit approval.
+

@@ -656,3 +656,62 @@ existing Milestone 5B approval gate and will be scheduled independently so its
 trust roots, endpoints, signing operations, and incident procedures cannot be
 conflated with context-index and protocol changes.
 
+## 26. Real-workspace MCP adoption planning boundary
+
+`v0.6.0A` plans operational adoption of the existing context pipeline without
+changing its accepted trust boundary. One explicitly selected workspace root
+continues to own canonical files and an optional disposable SQLite projection.
+Application ports continue to mediate status, inventory, search, indexed read,
+and tree synthesis. An MCP handler never receives a database connection,
+unrestricted filesystem reader, provider credential, or mutation authority.
+
+The planning baseline keeps three lifecycles separate:
+
+```text
+workspace adoption preview
+  -> explicit configuration approval
+  -> explicit CLI projection rebuild
+  -> local read-only MCP host configuration
+  -> local protocol validation
+  -> separately approved model-backed disclosure, if any
+```
+
+The first implementation proposal must compare these freshness strategies:
+
+1. retain explicit `engkit context rebuild` and fail closed when stale;
+2. add an approval-bound application operation outside MCP; or
+3. add automatic or watched rebuild behavior.
+
+The current architecture selects option 1 as the compatibility baseline while
+the other options remain unresolved proposals. Option 2 would require a new
+plan, approval, transaction, schema, recovery, and application-port contract.
+Option 3 would additionally require process-lifetime, concurrency, resource,
+privacy, cancellation, and failure-policy design. Neither option is implied by
+this planning gate, and MCP remains read-only.
+
+Host adoption is an adapter concern rather than protocol-core policy. A future
+host configuration flow may preview the exact command, root, transport, and
+provider-owned paths required to launch `engkit mcp serve`, but it cannot write
+Codex, Claude Code, or OpenCode configuration until a later packet defines
+ownership, conflict detection, preservation, and rollback. It never starts the
+provider runtime as a side effect of planning or configuration.
+
+Efficiency evidence remains representation-independent. Authoritative metrics
+are UTF-8 request and result bytes, item counts, applied content bytes, result
+ceilings, projection fingerprints, and a declared bounded full-file baseline.
+Approximate token reduction may be derived from byte ratios for communication,
+but it is not a stored product contract. Reuse of an unchanged projection
+fingerprint and chunk identity should avoid repeated excerpt retrieval without
+introducing a hidden cache authority.
+
+Local protocol validation may use real canonical files only after an explicit
+workspace-selection approval and must retain sanitized metrics rather than
+content. A model-backed host creates a separate disclosure boundary because it
+may send MCP results to a provider. That boundary requires a named project,
+provider, host version, authentication and network description, allowed
+queries, evidence limits, cleanup, and stop conditions before execution.
+
+This section is a planning boundary. Exact CLI contracts, configuration
+schemas, host projections, persistence changes, source files, tests, and
+rollback belong to later independently approved packets.
+

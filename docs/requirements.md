@@ -989,3 +989,47 @@ SQLite database, provider CLI, credential, or network connection.
   workspace or database mutation, MCP execution, failure injection, cleanup,
   code changes, Git operations, workflow execution, tagging, or publication.
 
+## 31. `v0.6.0A` real-workspace MCP adoption planning acceptance criteria
+
+- The primary product outcome is safe, explicit adoption of the existing
+  SQLite v2 projection and twelve-tool read-only MCP surface in user-selected
+  real workspaces while reducing unnecessary context disclosure.
+- Adoption begins from one explicit validated workspace root. No command,
+  configuration helper, host adapter, or MCP process may discover unrelated
+  repositories, home-directory content, credentials, or sibling workspaces.
+- Canonical files remain authoritative. SQLite remains local, optional,
+  disposable, and rebuildable. Planning must not make the projection the sole
+  source of workspace facts, approvals, plans, or recovery evidence.
+- The initial implementation proposal must compare explicit CLI rebuild,
+  approval-bound rebuild, and automatic freshness maintenance. Until a later
+  gate accepts another design, MCP remains read-only, stale queries fail
+  closed, and rebuild remains an explicit CLI operation.
+- Host onboarding must separate configuration preview from mutation. Any
+  future Codex, Claude Code, or OpenCode projection requires an exact affected
+  path inventory, ownership rules, conflict behavior, rollback, and explicit
+  approval; provider runtime invocation is not implied.
+- Token-efficiency acceptance uses deterministic UTF-8 bytes, item counts,
+  result ceilings, and declared bounded baselines. It may report approximate
+  reduction ratios but must not claim provider token counts without a reviewed
+  tokenizer and versioned measurement contract.
+- The adoption flow must preserve staged retrieval: content-free status and
+  tree inspection, compact search, then exact bounded indexed read. It must not
+  add full-repository dumps, unrestricted reads, implicit recursive context, or
+  duplicate excerpts across protocol representations.
+- Local protocol validation precedes any model-backed harness. Allowing a host
+  to transmit excerpts from a real workspace requires a separate disclosure
+  gate naming the project, provider, host version, authentication and network
+  behavior, allowed queries, evidence, cleanup, and stop conditions.
+- Retained evidence contains only versions, counts, timings, digests, byte
+  budgets, reduction ratios, sanitized classifications, and outcomes. It
+  contains no source text, snippets, prompts, model responses, credentials,
+  environment values, private paths, raw MCP frames, or unrelated roots.
+- A later implementation packet must define exact commands, schemas,
+  configuration changes, module boundaries, files, tests, compatibility,
+  risks, and rollback before changing Go, YAML, SQLite, MCP, or provider
+  projections.
+- `v0.6.0A` changes documentation only. It authorizes no workspace indexing,
+  database rebuild, MCP execution, model or provider invocation, network
+  access, dependency change, code change, configuration mutation, Git
+  operation, workflow, installation, tagging, or publication.
+
